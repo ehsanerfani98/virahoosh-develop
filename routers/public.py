@@ -1,6 +1,6 @@
 # routers/public.py
 
-from fastapi import APIRouter, Depends, Request, Form
+from fastapi import APIRouter, Depends, Request, Form, HTTPException
 from core.templates import templates
 from fastapi.responses import HTMLResponse, JSONResponse
 from database.session import get_db
@@ -29,6 +29,8 @@ def login_otp_form(request: Request):
 @router_site.get("/assistant/{assistant_id}/robot")
 def view_assistant(request: Request, assistant_id: int, db: Session = Depends(get_db)):
     assistant = db.query(Assistant).filter(Assistant.id == assistant_id).first()
+    if not assistant:
+        raise HTTPException(status_code=404, detail="Assistant not found")
     return templates.TemplateResponse("admin/assistant/assistant.html", {
         "request": request,
         "assistant": assistant
