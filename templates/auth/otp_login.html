@@ -1,0 +1,154 @@
+{% extends "layout.html" %}
+
+{% block title %}ورود با شماره موبایل{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" />
+{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center min-vh-100">
+  <div class="card shadow-lg border-0 p-4 rounded-4" style="width: 100%; max-width: 400px;">
+    <h4 class="text-center mb-4 fw-bold">ورود با شماره موبایل</h4>
+
+    <div id="alert-container" class="position-relative"></div>
+
+    <form id="otp-form" autocomplete="off">
+      <div class="form-floating mb-3">
+        <input type="text" class="form-control" id="phone" name="phone" placeholder="شماره موبایل" required>
+        <label for="phone">شماره موبایل</label>
+      </div>
+
+      <div id="otp-section" style="display: none;">
+        <div class="form-floating mb-4">
+          <input type="text" class="form-control" id="otp_code" name="otp_code" placeholder="کد تایید">
+          <label for="otp_code">کد تایید</label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100 d-flex justify-content-center align-items-center"
+        id="submit-button">
+        <span class="spinner-border spinner-border-sm me-2 d-none" id="loading-spinner" role="status"
+          aria-hidden="true"></span>
+        ارسال کد
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+  function showAlert(type, message) {
+    const alertId = `alert-${Date.now()}`;
+    const icon = type === 'success' ? '✅' : '❌';
+    const alertHtml = `
+      <div id="${alertId}" class="alert alert-${type} shadow-sm alert-dismissible fade show animate__animated animate__fadeInDown" role="alert">
+        <strong>${icon}</strong> ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="بستن"></button>
+      </div>
+    `;
+    const $alert = $(alertHtml);
+    $('#alert-container').append($alert);
+    setTimeout(() => {
+      $alert.fadeOut(500, function () {
+        $(this).remove();
+      });
+    }, 4000);
+  }
+
+  $(document).ready(function () {
+    let step = 1;
+
+    $('#otp-form').submit(function (e) {
+      e.preventDefault();
+
+      const spinner = $('#loading-spinner');
+      const button = $('#submit-button');
+
+      $('#alert-container').html('');
+      spinner.removeClass('d-none');
+      button.attr('disabled', true);
+
+      if (step === 1) {
+        const phone = $('#phone').val().trim();
+
+        if (!phone) {
+          showAlert('danger', 'شماره موبایل را وارد کنید');
+          spinner.addClass('d-none');
+          button.attr('disabled', false);
+          return;
+        }
+
+        $.ajax({
+          url: '/otp/request',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ phone }),
+          success: function (data) {
+            showAlert('success', data.message || 'کد ارسال شد');
+            localStorage.setItem('otp_phone', phone);  // ذخیره شماره
+            $('#otp-section').slideDown();
+            $('#phone').prop('disabled', true); // غیرفعال کردن فیلد
+            $('#submit-button').text('تایید کد');
+            step = 2;
+          },
+          error: function (xhr) {
+            let msg;
+            if (xhr.status === 429) {
+              msg = "تعداد درخواست‌ها بیش از حد مجاز است. لطفاً کمی بعد دوباره تلاش کنید.";
+            } else {
+              msg = xhr.responseJSON?.detail || 'خطا در ارسال کد';
+            }
+            showAlert('danger', msg);
+          },
+          complete: function () {
+            spinner.addClass('d-none');
+            button.attr('disabled', false);
+          }
+        });
+
+      } else if (step === 2) {
+        const code = $('#otp_code').val().trim();
+        const phone = localStorage.getItem('otp_phone');
+
+        if (!code) {
+          showAlert('danger', 'کد تایید را وارد کنید');
+          spinner.addClass('d-none');
+          button.attr('disabled', false);
+          return;
+        }
+
+        $.ajax({
+          url: '/otp/verify',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ phone, code }),
+          success: function (data) {
+            localStorage.removeItem('otp_phone');  // پاک کردن شماره بعد از موفقیت
+            localStorage.setItem('access_token', data.access_token);
+            localStorage.setItem('refresh_token', data.refresh_token);
+            showAlert('success', 'ورود موفق بود');
+            setTimeout(() => {
+              window.location.href = "/admin/dashboard";
+            }, 1000);
+          },
+          error: function (xhr) {
+            let msg;
+            if (xhr.status === 429) {
+              msg = "تعداد درخواست‌ها بیش از حد مجاز است. لطفاً کمی بعد دوباره تلاش کنید.";
+            } else {
+              msg = xhr.responseJSON?.detail || 'خطا در ارسال کد';
+            }
+            showAlert('danger', msg);
+          },
+          complete: function () {
+            spinner.addClass('d-none');
+            button.attr('disabled', false);
+          }
+        });
+      }
+    });
+  });
+</script>
+{% endblock %}

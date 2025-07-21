@@ -1,0 +1,190 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}ایجاد دستیار هوش مصنوعی{% endblock %}
+{% block page_title %}ایجاد دستیار هوش مصنوعی{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <form method="post" class="card shadow-sm rounded-4 p-4" id="aiModelForm">
+            <div class="mb-3">
+                <label for="icon" class="form-label">آیکن دستیار</label>
+                <input type="text" class="form-control" id="icon" name="icon" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="title" class="form-label">عنوان دستیار</label>
+                <input type="text" class="form-control" id="title" name="title" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">توضیحات</label>
+                <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">انتخاب سرویس هوش مصنوعی</label>
+                <select name="provider" class="form-select" required>
+                    <option value="openai" selected>OpenAI</option>
+                    <option value="deepseek">DeepSeek</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">انتخاب مدل</label>
+                <select name="model" class="form-select" required>
+                    <optgroup label="مدل های اصلی">
+                        <option value="gpt-4o" selected>GPT-4o</option>
+                        <option value="gpt-4o-mini">GPT-4o Mini</option>
+                        <option value="gpt-4.1">GPT-4.1</option>
+                        <option value="gpt-4.1-mini">GPT-4.1 Mini</option>
+                        <option value="gpt-4.1-nano">GPT-4.1 Nano</option>
+                        <option value="gpt-4">GPT-4</option>
+                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                        <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                        <option value="o3">O3</option>
+                        <option value="o4-mini">O4 Mini</option>
+                    </optgroup>
+                    <optgroup label="مدل تولید صدا">
+                        <option value="tts-1">tts-1	</option>
+                        <option value="tts-1-hd">tts-1-hd</option>
+                        <option value="gpt-4o-mini-tts">gpt-4o-mini-tts</option>
+                    </optgroup>
+                    <optgroup label="نسخه‌های Preview">
+                        <option value="gpt-4-1106-preview">GPT-4 1106 Preview</option>
+                        <option value="gpt-4-turbo-preview">GPT-4 Turbo Preview</option>
+                        <option value="gpt-4-vision-preview">GPT-4 Vision Preview</option>
+                        <option value="o1-preview">O1 Preview</option>
+                        <option value="o3-mini-preview">O3 Mini Preview</option>
+                        <option value="gpt-4o-realtime-preview">gpt-4o-realtime-preview</option>
+                        <option value="gpt-4o-mini-realtime-preview">gpt-4o-mini-realtime-preview</option>
+                    </optgroup>
+                    <optgroup label="سایر مدل ها">
+                        <option value="deepseek-chat">DeepSeek Chat</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            
+            <div class="d-flex gap-4 align-items-center mb-3">
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" id="type_text" name="type" value="text" checked>
+                    <label class="form-check-label" for="type_text">تولید متن</label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" id="type_image" name="type" value="image">
+                    <label class="form-check-label" for="type_image">تولید تصویر</label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" id="type_video" name="type" value="video">
+                    <label class="form-check-label" for="type_video">تولید ویدیو</label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" id="type_audio" name="type" value="audio">
+                    <label class="form-check-label" for="type_audio">تولید صدا</label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" id="type_vision" name="type" value="vision">
+                    <label class="form-check-label" for="type_vision">بینایی ماشین</label>
+                </div>
+                <!-- <div class="form-check">
+                    <input type="radio" class="form-check-input" id="type_speech_audio" name="type" value="speech_audio">
+                    <label class="form-check-label" for="type_speech_audio">گفتگوی صوتی</label>
+                </div> -->
+            </div>
+
+            <div class="mb-3">
+                <label for="system_prompt" class="form-label">سیستم پرامپت</label>
+                <textarea class="form-control" id="system_prompt" name="system_prompt" rows="5" placeholder="متن سیستم پرامپت را وارد کنید"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="prompt" class="form-label">کانتنت پرامپت</label>
+                <textarea class="form-control" id="prompt" name="prompt" rows="5" placeholder="متن پرامپت را وارد کنید"></textarea>
+                <small class="text-muted">برای جایگذاری ورودی‌ها از کلیدهای {name} استفاده کنید. مثال: مقاله‌ای درباره {subject} بنویسید.</small>
+            </div>
+
+            <div class="mb-3 row">
+                <div class="col-md-12">
+                    <label for="max_tokens" class="form-label">حداکثر توکن</label>
+                    <input type="number" id="max_tokens" name="max_tokens" class="form-control" value="500">
+                </div>
+            </div>
+
+            <hr>
+            <h5>ورودی‌ها</h5>
+            <div id="inputs-container" class="mb-3"></div>
+
+            <button type="button" class="btn btn-sm btn-outline-primary mb-3" id="addInputBtn">+ افزودن ورودی جدید</button>
+
+            <div class="text-end">
+                <button type="submit" class="btn btn-sm btn-success px-4">ایجاد دستیار</button>
+                <a href="{{ url_for('admin_ais') }}" class="btn btn-sm btn-outline-secondary">انصراف</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    $(function () {
+        function createInputItem(title = '', name = '', type = 'text', options = '') {
+            const types = ['text', 'textarea', 'number', 'select', 'checkbox', 'radiobutton'];
+            let optionsHtml = types.map(t => `<option value="${t}" ${t === type ? 'selected' : ''}>${t}</option>`).join('');
+
+            return $(
+                `<div class="input-item card p-3 mb-2 position-relative">
+                    <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-input" title="حذف ورودی"></button>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">عنوان ورودی</label>
+                            <input type="text" class="form-control input-title" name="input_title" value="${title}" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">نام ورودی (name)</label>
+                            <input type="text" class="form-control input-name" name="input_name" value="${name}" required pattern="^[a-zA-Z0-9_]+$" title="فقط حروف، اعداد و زیرخط">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">نوع ورودی</label>
+                            <select class="form-select input-type" name="input_type" required>
+                                ${optionsHtml}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">گزینه‌ها (برای سلکشن، جدا شده با کاما)</label>
+                            <input type="text" class="form-control input-options" name="input_options" value="${options}" placeholder="مثلاً: مقاله, تحقیق, خلاصه">
+                        </div>
+                    </div>
+                </div>`
+            );
+        }
+
+        $('#addInputBtn').on('click', function () {
+            $('#inputs-container').append(createInputItem());
+        });
+
+        $('#inputs-container').on('click', '.remove-input', function () {
+            $(this).closest('.input-item').remove();
+        });
+
+        $('#aiModelForm').on('submit', function () {
+            $('input[name="inputs"]').remove();
+
+            $('#inputs-container .input-item').each(function () {
+                const title = $(this).find('.input-title').val();
+                const name = $(this).find('.input-name').val();
+                const input_type = $(this).find('.input-type').val();
+                const rawOptions = $(this).find('.input-options').val();
+                const options = rawOptions ? rawOptions.split(',').map(o => o.trim()).filter(Boolean) : [];
+
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: 'inputs',
+                    value: JSON.stringify({ title, name, input_type, options })
+                }).appendTo('#aiModelForm');
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,151 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}لیست کاربران{% endblock %}
+{% block page_title %}لیست کاربران{% endblock %}
+
+{% block action_button %}
+<a href="{{ url_for('admin_users_create') }}" class="btn btn-sm btn-success px-4">+ کاربر جدید</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12 mb-4">
+        <div class="card shadow-sm rounded-4">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-blue">
+                            <tr>
+                                <th>ایمیل / موبایل</th>
+                                <th>نقش‌ها</th>
+                                <th class="text-center">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in users %}
+                            <tr>
+                                <td>{{ u.email or u.phone }}</td>
+                                <td>{{ u.roles | map(attribute='title') | join(', ') }}</td>
+                                <td class="text-center">
+                                    {% if can('edit_user') %}
+                                    <a href="{{ url_for('admin_users_edit', user_id=u.id) }}"
+                                        class="btn btn-sm btn-outline-primary rounded-pill px-3">ویرایش</a>
+                                    {% endif %}
+
+                                    {% if can('delete_user') %}
+                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 delete-user-btn"
+                                        data-user-id="{{ u.id }}">حذف</button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center">کاربری یافت نشد.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4">
+            <ul class="pagination justify-content-center">
+
+                {# دکمه قبلی #}
+                <li class="page-item {% if page == 1 %}disabled{% endif %}">
+                    <a class="page-link"
+                        href="{{ url_for('admin_users') }}?page={{ page - 1 if page > 1 else 1 }}&per_page={{ per_page }}"
+                        tabindex="-1">قبلی</a>
+                </li>
+
+                {# شماره صفحات #}
+                {% for p in range(1, total_pages + 1) %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin_users') }}?page={{ p }}&per_page={{ per_page }}">{{ p
+                        }}</a>
+                </li>
+                {% endfor %}
+
+                {# دکمه بعدی #}
+                <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+                    <a class="page-link"
+                        href="{{ url_for('admin_users') }}?page={{ page + 1 if page < total_pages else total_pages }}&per_page={{ per_page }}">بعدی</a>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    $(document).ready(function () {
+        // نمایش پیام موفقیت حذف پس از reload با پارامتر success=1
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("success") === "1") {
+            iziToast.success({
+                title: 'تبریک',
+                message: 'کاربر با موفقیت حذف شد.',
+                position: 'bottomLeft',
+                rtl: true,
+                timeout: 3000
+            });
+
+            // حذف پارامتر success از آدرس بدون reload مجدد
+            const newUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
+        }
+
+        // حذف کاربر با SweetAlert2 + redirect با query
+        $('.delete-user-btn').on('click', function () {
+            const user_id = $(this).data('user-id');
+            Swal.fire({
+                title: 'حذف کاربر',
+                text: 'آیا مطمئن هستید که می‌خواهید این کاربر را حذف کنید؟',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'بله، حذف شود',
+                cancelButtonText: 'لغو',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                reverseButtons: true
+            }).then(result => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/admin/users/${user_id}/delete`,
+                        type: "POST",
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest"
+                        },
+                        success: function () {
+                            // پس از حذف موفق، رفرش همراه با success=1
+                            window.location.href = window.location.pathname + "?success=1";
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 403) {
+                                iziToast.error({
+                                    title: 'دسترسی غیرمجاز',
+                                    message: 'شما اجازه حذف این کاربر را ندارید.',
+                                    position: 'bottomLeft',
+                                    rtl: true,
+                                    timeout: 4000
+                                });
+                            } else {
+                                iziToast.error({
+                                    title: 'خطا',
+                                    message: xhr.responseJSON?.message || 'خطا در حذف کاربر',
+                                    position: 'bottomLeft',
+                                    rtl: true,
+                                    timeout: 4000
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}

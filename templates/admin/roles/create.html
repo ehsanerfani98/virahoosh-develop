@@ -1,0 +1,48 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}ایجاد نقش جدید{% endblock %}
+{% block page_title %}ایجاد نقش جدید{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12 mx-auto">
+        <form method="post" class="card shadow-sm rounded-4 p-4">
+            <div class="mb-3">
+                <label for="name" class="form-label">نام (سیستمی)</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <div class="mb-3">
+                <label for="title" class="form-label">عنوان نقش</label>
+                <input type="text" class="form-control" id="title" name="title" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">مجوزها</label>
+                <div class="row">
+                    {% for permission in permissions %}
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                name="permission_ids"
+                                id="perm_{{ permission.id }}"
+                                value="{{ permission.id }}"
+                            >
+                            <label class="form-check-label" for="perm_{{ permission.id }}">
+                                {{ permission.title }}
+                            </label>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="text-end">
+                <button type="submit" class="btn btn-sm btn-success px-4">ایجاد نقش</button>
+                <a href="{{ url_for('admin_roles') }}" class="btn btn-sm btn-outline-secondary">انصراف</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends "layout.html" %}
+
+{% block title %}ورود{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" />
+{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center min-vh-100">
+  <div class="card shadow-lg border-0 p-4 rounded-4" style="width: 100%; max-width: 400px;">
+    <h4 class="text-center mb-4 fw-bold">ورود به سامانه</h4>
+
+    <div id="alert-container" class="position-relative"></div>
+
+    <form id="login-form" autocomplete="off">
+      <div class="form-floating mb-3">
+        <input type="email" class="form-control" id="email" name="email" placeholder="ایمیل" required>
+        <label for="email">ایمیل</label>
+      </div>
+
+      <div class="form-floating mb-4">
+        <input type="password" class="form-control" id="password" name="password" placeholder="رمز عبور" required>
+        <label for="password">رمز عبور</label>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100 d-flex justify-content-center align-items-center"
+        id="submit-btn">
+        <span class="spinner-border spinner-border-sm me-2 d-none" id="loading-spinner" role="status"
+          aria-hidden="true"></span>
+        ورود
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+  function showAlert(type, message) {
+    const alertId = `alert-${Date.now()}`;
+    const icon = type === 'success' ? '✅' : '❌';
+
+    const alertHtml = `
+      <div id="${alertId}" class="alert alert-${type} shadow-sm alert-dismissible fade show animate__animated animate__fadeInDown" role="alert">
+        <strong>${icon}</strong> ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="بستن"></button>
+      </div>
+    `;
+
+    const $alert = $(alertHtml);
+    $('#alert-container').append($alert);
+
+    // انیمیشن محو بعد از چند ثانیه
+    setTimeout(() => {
+      $alert.fadeOut(500, function () {
+        $(this).remove();
+      });
+    }, 4000);
+  }
+
+  $(document).ready(function () {
+    $('#login-form').submit(function (e) {
+      e.preventDefault();
+
+      const email = $('#email').val().trim();
+      const password = $('#password').val();
+      const btn = $('#submit-btn');
+      const spinner = $('#loading-spinner');
+
+      $('#alert-container').html('');
+      spinner.removeClass('d-none');
+      btn.attr('disabled', true);
+
+      $.ajax({
+        url: '/auth/login',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ email, password }),
+        success: function (data) {
+          if (data.access_token) {
+            localStorage.setItem('access_token', data.access_token);
+            localStorage.setItem('refresh_token', data.refresh_token);
+            showAlert('success', 'ورود موفقیت‌آمیز بود');
+            setTimeout(() => {
+              window.location.href = "/admin/dashboard";
+            }, 1000);
+          } else {
+            showAlert('danger', data.error || 'ورود ناموفق بود');
+          }
+        },
+        error: function (xhr) {
+          let msg;
+          if (xhr.status === 401) {
+            msg = "اطلاعات نادرست است";
+          } else if (xhr.status === 429) {
+            msg = "تعداد درخواست‌ها بیش از حد مجاز است. لطفاً کمی بعد دوباره تلاش کنید.";
+          } else {
+            msg = xhr.responseJSON?.detail || 'خطا در اتصال به سرور';
+          }
+          showAlert('danger', msg);
+        },
+        complete: function () {
+          spinner.addClass('d-none');
+          btn.attr('disabled', false);
+        }
+      });
+    });
+  });
+
+</script>
+{% endblock %}

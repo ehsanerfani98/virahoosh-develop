@@ -1,0 +1,41 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}ویرایش مجوز{% endblock %}
+{% block page_title %}ویرایش مجوز{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <form method="post" class="card shadow-sm rounded-4 p-4">
+            <div class="mb-3">
+                <label for="name" class="form-label">نام (سیستمی)</label>
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    class="form-control"
+                    required
+                    value="{{ permission.name }}"
+                >
+            </div>
+
+            <div class="mb-3">
+                <label for="title" class="form-label">عنوان مجوز</label>
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    class="form-control"
+                    required
+                    value="{{ permission.title }}"
+                >
+            </div>
+
+            <div class="text-end">
+                <button type="submit" class="btn btn-sm btn-primary px-4">ذخیره تغییرات</button>
+                <a href="{{ url_for('admin_permissions') }}" class="btn btn-sm btn-outline-secondary">بازگشت</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

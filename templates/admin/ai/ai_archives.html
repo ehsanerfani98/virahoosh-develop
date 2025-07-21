@@ -1,0 +1,226 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}آرشیو درخواست‌ها{% endblock %}
+{% block page_title %}آرشیو درخواست‌ها{% endblock %}
+
+{% block css %}
+<style>
+    .markdown-content {
+        white-space: normal;
+    }
+
+    .markdown-content h1,
+    .markdown-content h2 {
+        font-size: 1rem;
+    }
+
+    .markdown-content pre {
+        background-color: #f8f9fa;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        overflow-x: auto;
+    }
+
+    .markdown-content code {
+        background-color: #e9ecef;
+        padding: 2px 4px;
+        border-radius: 4px;
+        font-family: Consolas, monospace;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12 mb-4">
+        <div class="card shadow-sm rounded-4 p-4">
+            {% if archives %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ایمیل / موبایل</th>
+                            <th>عنوان مدل</th>
+                            <th>عنوان آرشیو</th>
+                            <th>خروجی</th>
+                            <th>پرامپت</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in archives %}
+                        <tr>
+                            <td style="width: 150px;font-size: 15px;">
+                                <div class="small text-muted">
+                                    {{ item.user.email or item.user.phone or "-" }}
+                                </div>
+                            </td>
+                            <td style="width: 200px;font-size: 13px;">{{ item.ai_model.title }}</td>
+                            <td style="width: 200px;font-size: 13px;">{{ item.title }}</td>
+                            <td>
+                                {% if item.type == "image" and item.url %}
+                                <div class="d-flex flex-column align-items-start">
+                                    <img src="/{{ item.url }}" alt="AI Image" class="img-thumbnail mb-2"
+                                        style="max-height: 100px;">
+                                    <a href="/{{ item.url }}" target="_blank" download
+                                        class="btn btn-sm btn-outline-primary">
+                                        دانلود تصویر
+                                    </a>
+                                </div>
+
+                                {% elif item.type == "vision" and item.url %}
+                                <div class="d-flex flex-column align-items-start">
+                                    <img src="/{{ item.url }}" alt="Vision Image" class="img-thumbnail mb-2"
+                                        style="max-height: 100px;">
+                                    <a href="/{{ item.url }}" target="_blank" download
+                                        class="btn btn-sm btn-outline-success">
+                                        دانلود تصویر بینایی
+                                    </a>
+                                    {% if item.response %}
+                                    <div class="markdown-content small mt-2 border rounded p-2"
+                                        style="max-height: 120px; overflow-y: auto;">
+                                        {{ item.response | markdown }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                {% elif item.type == "audio" and item.url %}
+                                <div class="d-flex flex-column align-items-start">
+                                    <audio controls style="width: 200px;">
+                                        <source src="/{{ item.url }}" type="audio/mpeg">
+                                        مرورگر شما پشتیبانی نمی‌کند.
+                                    </audio>
+                                    <a href="/{{ item.url }}" target="_blank" download
+                                        class="btn btn-sm btn-outline-primary mt-2">
+                                        دانلود صدا
+                                    </a>
+                                </div>
+
+                                {% else %}
+                                <div class="markdown-content small" style="max-height: 120px; overflow-y: auto;">
+                                    {{ item.response | markdown }}
+                                </div>
+                                {% endif %}
+                            </td>
+
+
+                            <!-- <td class="text-nowrap">{{ item.created_at.strftime("%Y-%m-%d %H:%M") }}</td> -->
+                            <td style="width: 300px;font-size: 13px;">{{ item.prompt }}</td>
+
+                            <td class="text-center" style="width: 100px;font-size: 13px;">
+                                {% if can('delete_archive') %}
+                                <button class="btn btn-sm btn-outline-danger rounded-pill px-3 delete-archive-btn"
+                                    data-archive-id="{{ item.id }}" data-archive-title="{{ item.title }}">
+                                    حذف
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">هیچ آرشیوی ثبت نشده است.</div>
+            {% endif %}
+        </div>
+
+        <div class="mt-4">
+            <ul class="pagination justify-content-center">
+
+                {# دکمه قبلی #}
+                <li class="page-item {% if page == 1 %}disabled{% endif %}">
+                    <a class="page-link"
+                        href="{{ url_for('admin_ai_archives') }}?page={{ page - 1 if page > 1 else 1 }}&per_page={{ per_page }}"
+                        tabindex="-1">قبلی</a>
+                </li>
+
+                {# شماره صفحات #}
+                {% for p in range(1, total_pages + 1) %}
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a class="page-link"
+                        href="{{ url_for('admin_ai_archives') }}?page={{ p }}&per_page={{ per_page }}">{{ p
+                        }}</a>
+                </li>
+                {% endfor %}
+
+                {# دکمه بعدی #}
+                <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+                    <a class="page-link"
+                        href="{{ url_for('admin_ai_archives') }}?page={{ page + 1 if page < total_pages else total_pages }}&per_page={{ per_page }}">بعدی</a>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block js %}
+<script>
+    $(document).ready(function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("success") === "1") {
+            iziToast.success({
+                title: 'تبریک',
+                message: 'آرشیو با موفقیت حذف شد.',
+                position: 'bottomLeft',
+                rtl: true,
+                timeout: 3000
+            });
+
+            const newUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
+        }
+
+        $('.delete-archive-btn').on('click', function () {
+            const archive_id = $(this).data('archive-id');
+            const archive_title = $(this).data('archive-title');
+
+            Swal.fire({
+                title: 'حذف آرشیو',
+                text: `آیا از حذف «${archive_title}» مطمئن هستید؟`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'بله، حذف شود',
+                cancelButtonText: 'لغو',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                reverseButtons: true
+            }).then(result => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/admin/ais/archive/${archive_id}/delete`,
+                        type: "POST",
+                        headers: { "X-Requested-With": "XMLHttpRequest" },
+                        success: function () {
+                            window.location.href = window.location.pathname + "?success=1";
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 403) {
+                                iziToast.error({
+                                    title: 'خطای دسترسی',
+                                    message: 'شما اجازه حذف این آرشیو را ندارید.',
+                                    position: 'bottomLeft',
+                                    rtl: true,
+                                    timeout: 4000
+                                });
+                            } else {
+                                iziToast.error({
+                                    title: 'خطا',
+                                    message: xhr.responseJSON?.message || 'حذف با خطا مواجه شد.',
+                                    position: 'bottomLeft',
+                                    rtl: true,
+                                    timeout: 4000
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل مدیریت | {% block title %}{% endblock %}</title>
+    <!-- Bootstrap 5 RTL -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/css/iziToast.min.css" />
+
+    <link rel="stylesheet" href="/static/css/admin-style.css">
+    {% block css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Mobile Overlay -->
+    <div class="overlay"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header text-center">
+            <h4>پنل مدیریت</h4>
+        </div>
+        <ul class="nav flex-column px-3">
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ url_for('admin_dashboard') }}">
+                    <i class="fas fa-home"></i>
+                    داشبورد
+                </a>
+            </li>
+            {% if can('menu_user') %}
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#usersMenu">
+                    <i class="fas fa-users"></i>
+                    کاربران
+                    <i class="fas fa-angle-down me-auto"></i>
+                </a>
+                <div class="collapse" id="usersMenu">
+                    <ul class="nav flex-column me-4">
+                        {% if can('list_user') %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin_users') }}">مدیریت کاربران</a>
+                        </li>
+                        {% endif %}
+                        {% if can('list_role') %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin_roles') }}">مدیریت نقش ها</a>
+                        </li>
+                        {% endif %}
+                        {% if can('list_permission') %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin_permissions') }}">مدیریت مجوزها</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </li>
+            {% endif %}
+            {% if can('menu_ai') %}
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#aisMenu">
+                    <i class="fas fa-robot"></i>
+                    دستیارها
+                    <i class="fas fa-angle-down me-auto"></i>
+                </a>
+                <div class="collapse" id="aisMenu">
+                    <ul class="nav flex-column me-4">
+                        {% if can('list_ai') %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin_ais') }}">مدیریت دستیارها</a>
+                        </li>
+                        {% endif %}
+                        {% if can('list_assistants') %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin_assistants') }}">دستیارهای اختصاصی</a>
+                        </li>
+                        {% endif %}
+                </div>
+              
+            </li>
+            {% endif %}
+
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_ais_carts') }}">
+                    <i class="fas fa-robot"></i>
+                    دستیارها
+                </a>
+            </li>
+
+            {% if can('archive_ai') %}
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_ai_archives') }}">
+                    <i class="fas fa-archive"></i>
+                    بایگانی
+                </a>
+            </li>
+            {% endif %}
+
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-cog"></i>
+                    تنظیمات
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-white">
+
+
+            <div class="container-fluid">
+                <button class="btn btn-link d-lg-none" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <div class="d-flex align-items-center ms-auto gap-3">
+
+                    <!-- اعلان‌ها -->
+                    <div class="dropdown">
+                        <button class="btn btn-icon position-relative" type="button" id="notificationDropdown"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-bell fs-5"></i>
+                            <span
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                3
+                                <span class="visually-hidden">اعلان‌های جدید</span>
+                            </span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm animate__animated animate__fadeIn"
+                            aria-labelledby="notificationDropdown">
+                            <li>
+                                <h6 class="dropdown-header text-muted">اعلان‌ها</h6>
+                            </li>
+                            <li><a class="dropdown-item d-flex align-items-center gap-2" href="#"><i
+                                        class="fas fa-envelope text-primary"></i> پیام جدید</a></li>
+                            <li><a class="dropdown-item d-flex align-items-center gap-2" href="#"><i
+                                        class="fas fa-box text-success"></i> سفارش جدید</a></li>
+                            <li><a class="dropdown-item d-flex align-items-center gap-2" href="#"><i
+                                        class="fas fa-sync-alt text-warning"></i> بروزرسانی سیستم</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- کاربر -->
+                    <div class="dropdown">
+                        <button class="btn btn-light d-flex align-items-center gap-2 rounded-pill px-3 py-1"
+                            type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle fa-lg text-secondary"></i>
+                            <span class="fw-semibold">مدیر سیستم</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm animate__animated animate__fadeIn"
+                            aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> پروفایل</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> تنظیمات</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item text-danger" href="#" onclick="handleLogout()"><i
+                                        class="fas fa-sign-out-alt me-2"></i>
+                                    خروج</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+
+            </div>
+        </nav>
+
+        <!-- Page Content -->
+        <div class="container-fluid p-4">
+            <div class="row">
+                <div class="col-6">
+                    <h4 class="mb-4">{% block page_title %}{% endblock %}</h4>
+                </div>
+                <div class="col-6">
+                    <h4 class="mb-4 text-end">{% block action_button %}{% endblock %}</h4>
+                </div>
+            </div>
+
+
+
+            {% block content %}{% endblock %}
+
+
+
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/izitoast@1.4.0/dist/js/iziToast.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        async function handleLogout() {
+            try {
+                // مستقیماً درخواست ارسال می‌شود، چون توکن‌ها در کوکی ذخیره شده‌اند
+                await fetch("/auth/logout", {
+                    method: "POST",
+                    credentials: "include" // حتماً برای ارسال کوکی لازم است
+                });
+
+                // پس از خروج موفق، هدایت به صفحه ورود
+                window.location.href = "/login";
+            } catch (error) {
+                console.error("خطا در خروج:", error);
+            }
+        }
+        $(document).ready(function () {
+            // افکت hover برای کارت‌ها
+            $('.modern-card').hover(
+                function () {
+                    $(this).css('transform', 'translateY(-5px)');
+                },
+                function () {
+                    $(this).css('transform', 'translateY(0)');
+                }
+            );
+        });
+        $(document).ready(function () {
+            // Toggle sidebar on mobile
+            $('#sidebarToggle').click(function () {
+                $('#sidebar').toggleClass('active');
+                $('.overlay').toggle();
+            });
+
+            // Close sidebar when clicking on overlay
+            $('.overlay').click(function () {
+                $('#sidebar').removeClass('active');
+                $('.overlay').hide();
+            });
+
+            // Auto close other dropdown menus when opening one
+            $('.nav-link[data-bs-toggle="collapse"]').on('click', function () {
+                var target = $(this).attr('data-bs-target');
+                $('.collapse').not(target).collapse('hide');
+            });
+        });
+    </script>
+
+    {% block js %}{% endblock %}
+
+
+</body>
+
+</html>

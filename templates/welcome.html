@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>هوش مصنوعی آینده | سرویس‌های پیشرفته دستیار هوش مصنوعی</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --secondary: #8b5cf6;
+        --dark: #1e293b;
+        --light: #f8fafc;
+        --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Vazirmatn", sans-serif;
+      }
+
+      body {
+        background-color: #f0f4f8;
+        color: var(--dark);
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+
+      /* Header Styles */
+      header {
+        background-color: white;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 1000;
+      }
+
+      nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 0;
+      }
+
+      .logo {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+      }
+
+      .logo i {
+        margin-left: 10px;
+        color: var(--secondary);
+      }
+
+      .nav-links {
+        display: flex;
+        list-style: none;
+      }
+
+      .nav-links li {
+        margin-left: 30px;
+      }
+
+      .nav-links a {
+        text-decoration: none;
+        color: var(--dark);
+        font-weight: 500;
+        transition: color 0.3s;
+      }
+
+      .nav-links a:hover {
+        color: var(--primary);
+      }
+
+      .nav-buttons {
+        display: flex;
+        gap: 15px;
+      }
+
+      .btn {
+        padding: 10px 25px;
+        border-radius: 30px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+        border: none;
+        font-size: 1rem;
+      }
+
+      .btn-outline {
+        background: transparent;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+      }
+
+      .btn-primary {
+        background: var(--gradient);
+        color: white;
+      }
+
+      .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Hero Section */
+      .hero {
+        padding: 180px 0 100px;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%232563eb" fill-opacity="0.1" d="M0,160L48,149.3C96,139,192,117,288,128C384,139,480,181,576,186.7C672,192,768,160,864,138.7C960,117,1056,107,1152,117.3C1248,128,1344,160,1392,176L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')
+          no-repeat bottom;
+        background-size: contain;
+      }
+
+      .hero-content {
+        display: flex;
+        align-items: center;
+        gap: 50px;
+      }
+
+      .hero-text {
+        flex: 1;
+      }
+
+      .hero-image {
+        flex: 1;
+        text-align: center;
+      }
+
+      .hero h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 20px;
+        line-height: 1.2;
+        background: var(--gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .hero p {
+        font-size: 1.2rem;
+        margin-bottom: 30px;
+        color: #475569;
+      }
+
+      .hero-buttons {
+        display: flex;
+        gap: 20px;
+        margin-top: 30px;
+      }
+
+      .hero-image img {
+        max-width: 100%;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        animation: float 6s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-20px);
+        }
+        100% {
+          transform: translateY(0px);
+        }
+      }
+
+      /* Features Section */
+      .features {
+        padding: 100px 0;
+        background-color: white;
+      }
+
+      .section-title {
+        text-align: center;
+        margin-bottom: 60px;
+      }
+
+      .section-title h2 {
+        font-size: 2.5rem;
+        color: var(--dark);
+        margin-bottom: 15px;
+        position: relative;
+        display: inline-block;
+      }
+
+      .section-title h2::after {
+        content: "";
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: var(--gradient);
+        border-radius: 2px;
+      }
+
+      .section-title p {
+        color: #64748b;
+        max-width: 700px;
+        margin: 20px auto 0;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+      }
+
+      .feature-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s, box-shadow 0.3s;
+        border: 1px solid #e2e8f0;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+      }
+
+      .feature-icon {
+        width: 70px;
+        height: 70px;
+        background: var(--gradient);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 25px;
+      }
+
+      .feature-icon i {
+        font-size: 30px;
+        color: white;
+      }
+
+      .feature-card h3 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+        color: var(--dark);
+      }
+
+      .feature-card p {
+        color: #64748b;
+      }
+
+      /* About Section */
+      .about {
+        padding: 100px 0;
+        background-color: #f0f4f8;
+      }
+
+      .about-content {
+        display: flex;
+        align-items: center;
+        gap: 50px;
+      }
+
+      .about-image {
+        flex: 1;
+        text-align: center;
+      }
+
+      .about-image img {
+        max-width: 100%;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      }
+
+      .about-text {
+        flex: 1;
+      }
+
+      .about-text h2 {
+        font-size: 2.5rem;
+        margin-bottom: 25px;
+        color: var(--dark);
+      }
+
+      .about-text p {
+        margin-bottom: 20px;
+        color: #475569;
+      }
+
+      /* Testimonials */
+      .testimonials {
+        padding: 100px 0;
+        background: var(--gradient);
+        color: white;
+      }
+
+      .testimonials .section-title h2 {
+        color: white;
+      }
+
+      .testimonials .section-title p {
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .testimonial-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-top: 50px;
+      }
+
+      .testimonial-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .testimonial-card p {
+        font-style: italic;
+        margin-bottom: 20px;
+        line-height: 1.8;
+      }
+
+      .client-info {
+        display: flex;
+        align-items: center;
+      }
+
+      .client-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 15px;
+        color: var(--primary);
+        font-weight: bold;
+      }
+
+      .client-details h4 {
+        font-size: 1.1rem;
+      }
+
+      .client-details p {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        margin: 0;
+        font-style: normal;
+      }
+
+      /* CTA Section */
+      .cta {
+        padding: 100px 0;
+        text-align: center;
+        background-color: white;
+      }
+
+      .cta-content {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .cta h2 {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+      }
+
+      .cta p {
+        color: #64748b;
+        margin-bottom: 40px;
+        font-size: 1.1rem;
+      }
+
+      .cta-form {
+        display: flex;
+        max-width: 500px;
+        margin: 0 auto;
+      }
+
+      .cta-form input {
+        flex: 1;
+        padding: 15px 20px;
+        border: 2px solid #e2e8f0;
+        border-radius: 0 50px 50px 0;
+        font-size: 1rem;
+        outline: none;
+      }
+
+      .cta-form button {
+        background: var(--gradient);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 50px 0 0 50px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .cta-form button:hover {
+        transform: scale(1.05);
+      }
+
+      /* Footer */
+      footer {
+        background-color: var(--dark);
+        color: white;
+        padding: 80px 0 30px;
+      }
+
+      .footer-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 40px;
+        margin-bottom: 50px;
+      }
+
+      .footer-col h3 {
+        font-size: 1.3rem;
+        margin-bottom: 25px;
+        position: relative;
+        padding-bottom: 10px;
+      }
+
+      .footer-col h3::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 50px;
+        height: 3px;
+        background: var(--gradient);
+      }
+
+      .footer-links {
+        list-style: none;
+      }
+
+      .footer-links li {
+        margin-bottom: 15px;
+      }
+
+      .footer-links a {
+        text-decoration: none;
+        color: #cbd5e1;
+        transition: color 0.3s;
+        display: block;
+      }
+
+      .footer-links a:hover {
+        color: white;
+      }
+
+      .social-links {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .social-links a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        color: white;
+        transition: all 0.3s;
+      }
+
+      .social-links a:hover {
+        background: var(--gradient);
+        transform: translateY(-3px);
+      }
+
+      .copyright {
+        text-align: center;
+        padding-top: 30px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        color: #94a3b8;
+        font-size: 0.9rem;
+      }
+
+      /* Responsive Styles */
+      @media (max-width: 992px) {
+        .hero-content,
+        .about-content {
+          flex-direction: column;
+        }
+
+        .hero,
+        .about {
+          padding: 120px 0 80px;
+        }
+
+        .hero-text,
+        .about-text {
+          text-align: center;
+        }
+
+        .hero-buttons {
+          justify-content: center;
+        }
+
+        .nav-links {
+          display: none;
+        }
+
+        .mobile-menu-btn {
+          display: block;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .hero h1 {
+          font-size: 2.5rem;
+        }
+
+        .section-title h2 {
+          font-size: 2rem;
+        }
+
+        .hero-buttons {
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        .btn {
+          width: 100%;
+          text-align: center;
+        }
+
+        .cta-form {
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        .cta-form input,
+        .cta-form button {
+          border-radius: 50px;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header>
+      <div class="container">
+        <nav>
+          <a href="#" class="logo">
+            <i class="fas fa-brain"></i>
+            هوش آینده
+          </a>
+          <ul class="nav-links">
+            <li><a href="#features">امکانات</a></li>
+            <li><a href="#about">درباره ما</a></li>
+            <li><a href="#testimonials">نظرات</a></li>
+            <li><a href="#contact">تماس با ما</a></li>
+          </ul>
+          <div class="nav-buttons">
+            <a href="/login" class="btn btn-outline">ورود</a>
+            <a href="#" class="btn btn-primary">شروع رایگان</a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-content">
+          <div class="hero-text">
+            <h1>دستیار هوش مصنوعی نسل بعدی برای کسب و کار شما</h1>
+            <p>
+              پلتفرم پیشرفته هوش مصنوعی ما با قابلیت‌های منحصر به فرد، تجربه‌ای
+              بی‌نظیر از تعامل با ماشین‌های هوشمند را برای شما فراهم می‌کند.
+            </p>
+            <div class="hero-buttons">
+              <a href="#" class="btn btn-primary">شروع کنید</a>
+              <a href="#" class="btn btn-outline"
+                >نمایش دمو <i class="fas fa-play-circle"></i
+              ></a>
+            </div>
+          </div>
+          <div class="hero-image">
+            <img
+              src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='500' height='400' viewBox='0 0 500 400'><rect width='500' height='400' fill='%232563eb' opacity='0.1' rx='20'/><circle cx='250' cy='150' r='70' fill='%238b5cf6' opacity='0.3'/><rect x='150' y='250' width='200' height='20' rx='10' fill='%238b5cf6' opacity='0.3'/><rect x='180' y='280' width='140' height='15' rx='7.5' fill='%238b5cf6' opacity='0.3'/></svg>"
+              alt="هوش مصنوعی"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+      <div class="container">
+        <div class="section-title">
+          <h2>قابلیت‌های پیشرفته</h2>
+          <p>
+            با استفاده از تکنولوژی‌های نوین هوش مصنوعی، راه‌حل‌های هوشمند برای
+            چالش‌های کسب‌وکار شما ارائه می‌دهیم
+          </p>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-robot"></i>
+            </div>
+            <h3>دستیار هوشمند</h3>
+            <p>
+              دستیار مجهز به هوش مصنوعی که به سوالات شما پاسخ داده و کارهای
+              روزمره را مدیریت می‌کند
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-comments"></i>
+            </div>
+            <h3>چت‌بات پیشرفته</h3>
+            <p>
+              چت‌بات‌های هوشمند با قابلیت درک عمیق مکالمه برای تعامل طبیعی با
+              مشتریان
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-language"></i>
+            </div>
+            <h3>پردازش زبان طبیعی</h3>
+            <p>
+              تکنولوژی پیشرفته NLP برای درک و پردازش زبان فارسی و انگلیسی با دقت
+              بالا
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <h3>تحلیل داده‌ها</h3>
+            <p>
+              تحلیل هوشمند داده‌های کسب‌وکار و ارائه بینش‌های ارزشمند برای
+              تصمیم‌گیری
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-cogs"></i>
+            </div>
+            <h3>یکپارچه‌سازی آسان</h3>
+            <p>
+              یکپارچه‌سازی ساده با سیستم‌های موجود از طریق APIهای قدرتمند و
+              مستندات کامل
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <h3>امنیت پیشرفته</h3>
+            <p>
+              امنیت داده‌ها با استفاده از آخرین استانداردهای رمزنگاری و حفاظت
+              اطلاعات
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+      <div class="container">
+        <div class="about-content">
+          <div class="about-image">
+            <img
+              src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='500' height='400' viewBox='0 0 500 400'><rect width='500' height='400' fill='%232563eb' opacity='0.1' rx='20'/><path d='M150,150 L350,150 L350,300 L150,300 Z' fill='%238b5cf6' opacity='0.3'/><circle cx='250' cy='200' r='50' fill='%232563eb' opacity='0.3'/><rect x='200' y='260' width='100' height='20' rx='10' fill='%238b5cf6' opacity='0.3'/></svg>"
+              alt="درباره ما"
+            />
+          </div>
+          <div class="about-text">
+            <h2>تکنولوژی هوش مصنوعی نسل جدید</h2>
+            <p>
+              شرکت هوش آینده با تکیه بر سال‌ها تجربه در زمینه توسعه سیستم‌های
+              هوش مصنوعی، پلتفرم جامعی را طراحی کرده است که نیازهای متنوع
+              کسب‌وکارها را پاسخگو است.
+            </p>
+            <p>
+              تیم متخصص ما متشکل از پژوهشگران و مهندسان برجسته هوش مصنوعی،
+              دائماً در حال توسعه و بهبود سیستم‌های ما هستند تا بهترین تجربه را
+              برای کاربران فراهم کنند.
+            </p>
+            <p>
+              ما باور داریم هوش مصنوعی باید در دسترس همه باشد و به همین دلیل
+              راه‌حل‌های مقرون‌به‌صرفه و کارآمدی برای سازمان‌ها و استارتاپ‌ها
+              ارائه می‌دهیم.
+            </p>
+            <div class="hero-buttons" style="margin-top: 30px">
+              <a href="#" class="btn btn-primary">بیشتر بدانید</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials" id="testimonials">
+      <div class="container">
+        <div class="section-title">
+          <h2>نظرات مشتریان</h2>
+          <p>آنچه مشتریان ما درباره سرویس‌های ما می‌گویند</p>
+        </div>
+        <div class="testimonial-grid">
+          <div class="testimonial-card">
+            <p>
+              "دستیار هوش مصنوعی هوش آینده تحول بزرگی در خدمات مشتریان ما ایجاد
+              کرده است. پاسخگویی ۲۴ ساعته و دقت بالا باعث افزایش رضایت مشتریان
+              شده است."
+            </p>
+            <div class="client-info">
+              <div class="client-avatar">ف</div>
+              <div class="client-details">
+                <h4>فرزاد محمدی</h4>
+                <p>مدیر عامل شرکت فن‌آوران</p>
+              </div>
+            </div>
+          </div>
+          <div class="testimonial-card">
+            <p>
+              "یکپارچه‌سازی سرویس‌های هوش مصنوعی با سیستم‌های موجود ما بسیار
+              ساده بود. تیم پشتیبانی حرفه‌ای و پاسخگو، تجربه بی‌نظیری برای ما
+              ایجاد کردند."
+            </p>
+            <div class="client-info">
+              <div class="client-avatar">س</div>
+              <div class="client-details">
+                <h4>سارا احمدی</h4>
+                <p>مدیر فناوری اطلاعات، بانک ملت</p>
+              </div>
+            </div>
+          </div>
+          <div class="testimonial-card">
+            <p>
+              "تحلیل داده‌های هوشمند این پلتفرم به ما کمک کرد تا الگوهای جدیدی
+              در رفتار مشتریان کشف کنیم که منجر به افزایش ۳۰ درصدی فروش شده
+              است."
+            </p>
+            <div class="client-info">
+              <div class="client-avatar">م</div>
+              <div class="client-details">
+                <h4>محمد حسینی</h4>
+                <p>مدیر بازاریابی، دیجی‌کالا</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta" id="contact">
+      <div class="container">
+        <div class="cta-content">
+          <h2>آماده تحول در کسب‌وکار خود هستید؟</h2>
+          <p>
+            همین حالا به جمع بیش از ۵۰۰ شرکت استفاده کننده از خدمات ما بپیوندید
+          </p>
+          <form class="cta-form">
+            <input type="email" placeholder="آدرس ایمیل خود را وارد کنید" />
+            <button type="submit">شروع رایگان</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-col">
+            <h3>هوش آینده</h3>
+            <p>
+              ارائه‌دهنده پیشرو راه‌حل‌های هوش مصنوعی برای کسب‌وکارها و
+              سازمان‌ها در ایران و خاورمیانه
+            </p>
+            <div class="social-links">
+              <a href="#"><i class="fab fa-instagram"></i></a>
+              <a href="#"><i class="fab fa-telegram"></i></a>
+              <a href="#"><i class="fab fa-linkedin"></i></a>
+              <a href="#"><i class="fab fa-twitter"></i></a>
+            </div>
+          </div>
+          <div class="footer-col">
+            <h3>لینک‌های مفید</h3>
+            <ul class="footer-links">
+              <li><a href="#">صفحه اصلی</a></li>
+              <li><a href="#features">امکانات</a></li>
+              <li><a href="#about">درباره ما</a></li>
+              <li><a href="#testimonials">نظرات</a></li>
+              <li><a href="#">وبلاگ</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h3>خدمات ما</h3>
+            <ul class="footer-links">
+              <li><a href="#">دستیار هوش مصنوعی</a></li>
+              <li><a href="#">چت‌بات‌های هوشمند</a></li>
+              <li><a href="#">تحلیل داده‌ها</a></li>
+              <li><a href="#">پردازش زبان طبیعی</a></li>
+              <li><a href="#">راه‌حل‌های سفارشی</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h3>تماس با ما</h3>
+            <ul class="footer-links">
+              <li>
+                <i class="fas fa-map-marker-alt"></i> تهران، خیابان ولیعصر، پلاک
+                ۱۲۳۴
+              </li>
+              <li><i class="fas fa-phone"></i> ۰۲۱-۱۲۳۴۵۶۷۸</li>
+              <li><i class="fas fa-envelope"></i> info@hoosheayandeh.ir</li>
+            </ul>
+          </div>
+        </div>
+        <div class="copyright">
+          <p>تمامی حقوق برای شرکت هوش آینده محفوظ است. © ۱۴۰۲</p>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // Smooth scrolling for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+          document.querySelector(this.getAttribute("href")).scrollIntoView({
+            behavior: "smooth",
+          });
+        });
+      });
+
+      // Sticky header
+      window.addEventListener("scroll", function () {
+        const header = document.querySelector("header");
+        header.classList.toggle("sticky", window.scrollY > 0);
+      });
+
+      // Form submission
+      const form = document.querySelector(".cta-form");
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const email = form.querySelector('input[type="email"]').value;
+        if (email) {
+          alert(
+            `ایمیل ${email} با موفقیت ثبت شد! به زودی با شما تماس خواهیم گرفت.`
+          );
+          form.reset();
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>چت هوشمند فارسی</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap');
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        
+        .chat-container {
+            height: calc(100vh - 120px);
+        }
+        
+        .message-enter {
+            animation: enter 0.3s ease-out;
+        }
+        
+        @keyframes enter {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .typing-indicator::after {
+            content: "...";
+            animation: typing 1.5s infinite;
+        }
+        
+        @keyframes typing {
+            0% { content: "."; }
+            33% { content: ".."; }
+            66% { content: "..."; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-4xl mx-auto p-4">
+        <!-- Header -->
+        <header class="bg-indigo-600 text-white rounded-t-xl p-4 shadow-lg">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3 space-x-reverse">
+                    <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center">
+                        <i class="fas fa-robot text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">چت هوشمند فارسی</h1>
+                        <p class="text-xs text-indigo-200">همراه هوشمند شما</p>
+                    </div>
+                </div>
+                <div class="flex space-x-2 space-x-reverse">
+                    <button class="p-2 rounded-full hover:bg-indigo-500 transition">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <button class="p-2 rounded-full hover:bg-indigo-500 transition">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Chat Area -->
+        <div class="chat-container bg-white shadow-lg overflow-y-auto p-4 space-y-4" id="chatArea">
+            <!-- Welcome Message -->
+            <div class="flex space-x-3 space-x-reverse message-enter">
+                <div class="w-10 h-10 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center">
+                    <i class="fas fa-robot text-indigo-600"></i>
+                </div>
+                <div class="bg-indigo-50 rounded-xl p-3 max-w-xs md:max-w-md lg:max-w-lg">
+                    <p class="text-gray-800">سلام! من یک دستیار هوشمند فارسی هستم. چطور می‌توانم به شما کمک کنم؟</p>
+                    <p class="text-xs text-gray-500 mt-2">امروز</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Input Area -->
+        <div class="bg-white rounded-b-xl shadow-lg p-4">
+            <div class="flex items-center space-x-2 space-x-reverse">
+                <button class="p-2 text-gray-500 hover:text-indigo-600 transition">
+                    <i class="fas fa-paperclip"></i>
+                </button>
+                <button class="p-2 text-gray-500 hover:text-indigo-600 transition">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <div class="flex-1 relative">
+                    <input 
+                        type="text" 
+                        id="messageInput" 
+                        placeholder="پیام خود را بنویسید..." 
+                        class="w-full bg-gray-100 rounded-full py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-300 transition"
+                        dir="rtl"
+                    >
+                    <button class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-indigo-600 transition">
+                        <i class="far fa-smile"></i>
+                    </button>
+                </div>
+                <button 
+                    id="sendButton" 
+                    class="p-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition"
+                >
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatArea = document.getElementById('chatArea');
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            
+            // Sample responses in Persian
+            const responses = [
+                "بله، می‌توانم در این مورد به شما کمک کنم.",
+                "این یک سوال جالب است! اجازه دهید توضیح دهم...",
+                "متأسفانه اطلاعات کافی در این زمینه ندارم.",
+                "برای پاسخ به این سوال، به چند دقیقه زمان نیاز دارم.",
+                "به نظر می‌رسد به دنبال اطلاعات در مورد این موضوع هستید.",
+                "آیا می‌خواهید جزئیات بیشتری در این باره بدانید؟",
+                "این موضوع بسیار پیچیده است. بهتر است آن را به بخش‌های کوچکتر تقسیم کنیم.",
+                "من می‌توانم منابع مفیدی در این زمینه به شما معرفی کنم."
+            ];
+            
+            // Send message function
+            function sendMessage() {
+                const message = messageInput.value.trim();
+                if (message === '') return;
+                
+                // Add user message
+                addMessage(message, 'user');
+                messageInput.value = '';
+                
+                // Show typing indicator
+                showTypingIndicator();
+                
+                // Simulate AI response after a delay
+                setTimeout(() => {
+                    removeTypingIndicator();
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    addMessage(randomResponse, 'ai');
+                }, 1500);
+            }
+            
+            // Add message to chat
+            function addMessage(text, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('flex', 'space-x-3', 'space-x-reverse', 'message-enter');
+                
+                if (sender === 'user') {
+                    messageDiv.innerHTML = `
+                        <div class="flex-1"></div>
+                        <div class="flex items-end space-x-3 space-x-reverse">
+                            <div class="bg-indigo-600 text-white rounded-xl p-3 max-w-xs md:max-w-md lg:max-w-lg">
+                                <p>${text}</p>
+                                <p class="text-xs text-indigo-200 mt-2">همین حالا</p>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-indigo-600 flex-shrink-0 flex items-center justify-center">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    messageDiv.innerHTML = `
+                        <div class="w-10 h-10 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center">
+                            <i class="fas fa-robot text-indigo-600"></i>
+                        </div>
+                        <div class="bg-indigo-50 rounded-xl p-3 max-w-xs md:max-w-md lg:max-w-lg">
+                            <p class="text-gray-800">${text}</p>
+                            <p class="text-xs text-gray-500 mt-2">همین حالا</p>
+                        </div>
+                    `;
+                }
+                
+                chatArea.appendChild(messageDiv);
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }
+            
+            // Show typing indicator
+            function showTypingIndicator() {
+                const typingDiv = document.createElement('div');
+                typingDiv.classList.add('flex', 'space-x-3', 'space-x-reverse', 'message-enter');
+                typingDiv.id = 'typingIndicator';
+                typingDiv.innerHTML = `
+                    <div class="w-10 h-10 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center">
+                        <i class="fas fa-robot text-indigo-600"></i>
+                    </div>
+                    <div class="bg-indigo-50 rounded-xl p-3 max-w-xs md:max-w-md lg:max-w-lg">
+                        <p class="text-gray-800 typing-indicator">در حال تایپ</p>
+                    </div>
+                `;
+                
+                chatArea.appendChild(typingDiv);
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }
+            
+            // Remove typing indicator
+            function removeTypingIndicator() {
+                const typingIndicator = document.getElementById('typingIndicator');
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+            }
+            
+            // Event listeners
+            sendButton.addEventListener('click', sendMessage);
+            
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // Add some sample messages for demo
+            setTimeout(() => {
+                addMessage("چطور می‌توانم در برنامه‌نویسی پیشرفت کنم؟", 'user');
+                setTimeout(() => {
+                    addMessage("برای پیشرفت در برنامه‌نویسی، تمرین مداوم و کار روی پروژه‌های واقعی بسیار مهم است. همچنین مطالعه مستندات و مشارکت در پروژه‌های متن‌باز می‌تواند کمک زیادی بکند.", 'ai');
+                }, 1500);
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

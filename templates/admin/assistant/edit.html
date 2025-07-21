@@ -1,0 +1,27 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}ویرایش دستیار{% endblock %}
+{% block page_title %}ویرایش دستیار{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <form method="post" class="card shadow-sm rounded-4 p-4">
+            <div class="mb-3">
+                <label for="title" class="form-label">عنوان دستیار</label>
+                <input type="text" class="form-control" id="title" name="title" value="{{ assistant.title }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">توضیحات</label>
+                <textarea class="form-control" id="description" name="description" rows="3">{{ assistant.description }}</textarea>
+            </div>
+
+            <div class="text-end">
+                <button type="submit" class="btn btn-sm btn-success px-4">ذخیره تغییرات</button>
+                <a href="{{ url_for('admin_assistants') }}" class="btn btn-sm btn-outline-secondary">بازگشت</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

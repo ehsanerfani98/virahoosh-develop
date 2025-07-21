@@ -1,0 +1,31 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap'); */
+
+@font-face {
+    font-family: "Vazirmatn";
+    src: url("../fonts/Vazir-Medium-FD-WOL.ttf") format("tryetype"),
+    url("../fonts/Vazir-Medium-FD-WOL.woff") format("woff"),
+    url("../fonts/Vazir-Medium-FD-WOL.woff2") format("woff2");
+}
+
+* {
+    font-family: "Vazirmatn", sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+li,
+ol,
+ul,
+label,
+input,
+::placeholder,
+a,
+textarea {
+    font-family: "Vazirmatn", sans-serif;
+}
