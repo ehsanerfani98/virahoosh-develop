@@ -7,6 +7,7 @@ from database.session import get_db
 from starlette.concurrency import run_in_threadpool
 from services.assistant import load_vectorstore_for_assistant
 from sqlalchemy.orm import Session
+from models.assistant import Assistant
 
 router_site = APIRouter(prefix="")
 
@@ -26,10 +27,11 @@ def login_otp_form(request: Request):
     return templates.TemplateResponse("auth/otp_login.html", {"request": request})
 
 @router_site.get("/assistant/{assistant_id}/robot")
-def view_assistant(request: Request, assistant_id: int):
+def view_assistant(request: Request, assistant_id: int, db: Session = Depends(get_db)):
+    assistant = db.query(Assistant).filter(Assistant.id == assistant_id).first()
     return templates.TemplateResponse("admin/assistant/assistant.html", {
         "request": request,
-        "assistant_id": assistant_id
+        "assistant": assistant
     })
 
 @router_site.post("/assistants/{assistant_id}/ask")

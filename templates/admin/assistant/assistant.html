@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ title }}</title>
+    <title>{{ assistant.title }}</title>
     <!-- فونت وزیر -->
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet" type="text/css" />
     <!-- فونت آیکون‌ها (Font Awesome) -->
@@ -449,8 +449,8 @@
             <div class="logo">
                 <i class="fas fa-robot"></i>
             </div>
-            <h1>دستیار هوشمند هوش مصنوعی</h1>
-            <p class="subtitle">پاسخ به تمام سوالات شما با استفاده از پیشرفته‌ترین فناوری‌های یادگیری ماشین و پردازش زبان طبیعی</p>
+            <h1>{{ assistant.title }}</h1>
+            <p class="subtitle">{{ assistant.description }}</p>
         </div>
 
         <!-- فرم اصلی با حفظ کدهای Blade -->
@@ -527,7 +527,7 @@
             formData.append('question', question);
 
             try {
-                const response = await fetch('/assistants/{{assistant_id}}/ask', {
+                const response = await fetch('/assistants/{{assistant.id}}/ask', {
                     method: 'POST',
                     body: formData,
                 });
