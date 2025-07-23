@@ -14,7 +14,14 @@
 
             <div class="mb-3">
                 <label for="description" class="form-label">توضیحات</label>
-                <textarea class="form-control" id="description" name="description" rows="3">{{ assistant.description }}</textarea>
+                <textarea class="form-control" id="description" name="description"
+                    rows="3">{{ assistant.description }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="domain" class="form-label">دامنه دارای مجوز</label>
+                <input type="text" class="form-control" id="domain" name="domain" value="{{ assistant.domain }}" required
+                    placeholder="مثال : google.com">
             </div>
 
             <div class="text-end">
