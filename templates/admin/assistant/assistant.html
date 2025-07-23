@@ -1,13 +1,11 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ assistant.title }}</title>
-    <!-- فونت وزیر -->
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet" type="text/css" />
-    <!-- فونت آیکون‌ها (Font Awesome) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
         @keyframes float {
@@ -438,11 +436,662 @@
 </head>
 
 <body>
+    <i class="ai-bg-element fas fa-robot"></i>
+    <i class="ai-bg-element fas fa-brain"></i>
+    <i class="ai-bg-element fas fa-microchip"></i>
+    <i class="ai-bg-element fas fa-network-wired"></i>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h1>{{ assistant.title }}</h1>
+            <p class="subtitle">{{ assistant.description }}</p>
+        </div>
+
+        <form id="askForm" class="ask-form" autocomplete="off" novalidate>
+            <input type="text" id="questionInput" name="question" class="question-input"
+                placeholder="هر سوالی دارید بپرسید..." required aria-label="سوال خود را وارد کنید" />
+            <button id="submitBtn" type="submit" class="submit-btn">
+                <span id="submitText">بپرسید</span>
+                <i class="fas fa-paper-plane"></i>
+                <span id="loadingSpinner" class="spinner"></span>
+            </button>
+        </form>
+
+        <div class="ai-features">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3 class="feature-title">پاسخ سریع</h3>
+                <p class="feature-desc">دریافت پاسخ در کمترین زمان ممکن با استفاده از الگوریتم‌های بهینه‌شده</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-language"></i>
+                </div>
+                <h3 class="feature-title">پشتیبانی از زبان فارسی</h3>
+                <p class="feature-desc">درک کامل سوالات به زبان فارسی و پاسخ‌دهی روان</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h3 class="feature-title">یادگیری مداوم</h3>
+                <p class="feature-desc">بهبود مستمر دانش سیستم با یادگیری از تعاملات کاربران</p>
+            </div>
+        </div>
+
+        <div id="answerSection" class="answer-section" style="display:none;">
+            <div class="answer mb-4">
+                <h4><i class="fas fa-comment-dots"></i> پاسخ:</h4>
+                <p id="answerText" class="fs-5"></p>
+            </div>
+            <div class="related">
+                <h5><i class="fas fa-link"></i> سوالات مشابه:</h5>
+                <ul id="relatedList" class="list-group list-group-flush"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('askForm');
+        const questionInput = document.getElementById('questionInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitText = document.getElementById('submitText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const answerSection = document.getElementById('answerSection');
+        const answerText = document.getElementById('answerText');
+        const relatedList = document.getElementById('relatedList');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const question = questionInput.value.trim();
+            if (!question) return;
+
+            submitBtn.disabled = true;
+            submitText.textContent = 'در حال پردازش...';
+            loadingSpinner.style.display = 'block';
+            answerSection.style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('question', question);
+
+            try {
+                const response = await fetch('/assistants/{{assistant.id}}/ask', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    alert('خطا در دریافت پاسخ. لطفاً بعداً تلاش کنید.');
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert('سیستم هنوز آماده نیست، لطفا کمی صبر کنید.');
+                    return;
+                }
+
+                answerText.innerHTML = '';
+                const cursorSpan = document.createElement('span');
+                cursorSpan.className = 'typing-cursor';
+                answerText.appendChild(cursorSpan);
+                
+                let i = 0;
+                const typingInterval = setInterval(() => {
+                    if (i < data.answer.length) {
+                        answerText.insertBefore(document.createTextNode(data.answer[i]), cursorSpan);
+                        i++;
+                        answerText.scrollTop = answerText.scrollHeight;
+                    } else {
+                        clearInterval(typingInterval);
+                        cursorSpan.remove();
+                    }
+                }, 20);
+
+                relatedList.innerHTML = '';
+                data.related.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item';
+                    li.textContent = item;
+                    relatedList.appendChild(li);
+                });
+
+                answerSection.style.display = 'block';
+
+            } catch (error) {
+                alert('خطا در ارتباط با سرور.');
+                console.error(error);
+            } finally {
+                submitBtn.disabled = false;
+                submitText.textContent = 'بپرسید';
+                loadingSpinner.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ assistant.title }}</title>
+    <!-- فونت وزیر -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet" type="text/css" />
+    <!-- فونت آیکون‌ها (Font Awesome) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Vazir', Tahoma, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(101, 78, 163, 0.05) 0%, rgba(234, 67, 53, 0.05) 50%, rgba(251, 188, 5, 0.05) 100%);
+            z-index: -1;
+        }
+
+        /* استایل جدید برای باکس iframe */
+        .iframe-container {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 300px;
+            height: 400px;
+            z-index: 1000;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid #ddd;
+            background: white;
+        }
+
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .iframe-header {
+            background: linear-gradient(135deg, #4285F4, #34A853);
+            color: white;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .iframe-header h3 {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .iframe-header i {
+            cursor: pointer;
+        }
+
+        .iframe-container.minimized {
+            height: 40px;
+            width: 200px;
+        }
+
+        .ai-bg-element {
+            position: fixed;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .ai-bg-element:nth-child(1) {
+            top: 10%;
+            left: 5%;
+            font-size: 8rem;
+            color: #4285F4;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .ai-bg-element:nth-child(2) {
+            top: 70%;
+            right: 10%;
+            font-size: 6rem;
+            color: #EA4335;
+            animation: pulse 6s ease-in-out infinite;
+        }
+
+        .ai-bg-element:nth-child(3) {
+            bottom: 20%;
+            left: 15%;
+            font-size: 10rem;
+            color: #34A853;
+            animation: float 10s ease-in-out infinite;
+        }
+
+        .ai-bg-element:nth-child(4) {
+            top: 30%;
+            right: 20%;
+            font-size: 7rem;
+            color: #FBBC05;
+            animation: pulse 7s ease-in-out infinite;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #4285F4, #34A853);
+            border-radius: 50%;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 25px rgba(66, 133, 244, 0.3);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #4285F4, #EA4335);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+            display: inline-block;
+        }
+
+        h1::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            right: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #4285F4, #EA4335);
+            border-radius: 3px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .ask-form {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            width: 100%;
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .ask-form {
+                flex-direction: column;
+            }
+            
+            /* responsive style for iframe */
+            .iframe-container {
+                width: 250px;
+                height: 350px;
+                bottom: 10px;
+                left: 10px;
+            }
+            
+            .iframe-container.minimized {
+                width: 180px;
+            }
+        }
+
+        .question-input {
+            flex: 1;
+            border-radius: 15px;
+            padding: 1.2rem 1.5rem;
+            border: none;
+            background-color: white;
+            color: #333;
+            font-family: 'Vazir', Tahoma, sans-serif;
+            font-size: 1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #eee;
+        }
+
+        .question-input:focus {
+            outline: none;
+            box-shadow: 0 5px 20px rgba(66, 133, 244, 0.2);
+            border-color: #4285F4;
+        }
+
+        .question-input::placeholder {
+            color: #aaa;
+        }
+
+        .submit-btn {
+            border-radius: 15px;
+            padding: 0 2rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #4285F4, #34A853);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-family: 'Vazir', Tahoma, sans-serif;
+            font-size: 1rem;
+            box-shadow: 0 5px 15px rgba(66, 133, 244, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 120px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(66, 133, 244, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .submit-btn i {
+            margin-left: 0.5rem;
+        }
+
+        .spinner {
+            width: 1.2rem;
+            height: 1.2rem;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 0.5rem;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .answer-section {
+            margin-top: 2rem;
+            display: none;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .answer, .related {
+            background-color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+
+        .answer::before, .related::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, #4285F4, #34A853);
+        }
+
+        .answer h4, .related h5 {
+            color: #4285F4;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .answer h4 i, .related h5 i {
+            margin-left: 0.5rem;
+        }
+
+        #answerText {
+            white-space: pre-wrap;
+            min-height: 4rem;
+            line-height: 1.8;
+            color: #555;
+            font-size: 1.05rem;
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1.3em;
+            background-color: #4285F4;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+            margin-left: 2px;
+            border-radius: 2px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .related-list {
+            list-style: none;
+        }
+
+        .related-list li {
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #eee;
+            color: #666;
+            transition: all 0.3s ease;
+            position: relative;
+            padding-right: 2rem;
+            font-size: 1rem;
+        }
+
+        .related-list li:last-child {
+            border-bottom: none;
+        }
+
+        .related-list li::before {
+            content: "\f054";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #EA4335;
+            transition: all 0.3s ease;
+        }
+
+        .related-list li:hover {
+            color: #4285F4;
+            transform: translateX(-5px);
+        }
+
+        .related-list li:hover::before {
+            right: -5px;
+            color: #4285F4;
+        }
+
+        .ai-features {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+            transition: all 0.3s ease;
+            border: 1px solid #eee;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(66, 133, 244, 0.1);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, rgba(66, 133, 244, 0.1), rgba(52, 168, 83, 0.1));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            color: #4285F4;
+        }
+
+        .feature-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .feature-desc {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .answer, .related {
+                padding: 1.5rem;
+            }
+            
+            .ai-features {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
     <!-- المان‌های پس‌زمینه هوش مصنوعی -->
     <i class="ai-bg-element fas fa-robot"></i>
     <i class="ai-bg-element fas fa-brain"></i>
     <i class="ai-bg-element fas fa-microchip"></i>
     <i class="ai-bg-element fas fa-network-wired"></i>
+
+    <!-- باکس iframe جدید -->
+    <div class="iframe-container">
+        <div class="iframe-header">
+            <h3>دستیار هوشمند</h3>
+            <i class="fas fa-minus minimize-btn"></i>
+        </div>
+        <iframe src="https://example.com" frameborder="0"></iframe>
+    </div>
 
     <div class="container">
         <div class="header">
@@ -511,6 +1160,21 @@
         const answerSection = document.getElementById('answerSection');
         const answerText = document.getElementById('answerText');
         const relatedList = document.getElementById('relatedList');
+
+        // اسکریپت جدید برای مدیریت iframe
+        const iframeContainer = document.querySelector('.iframe-container');
+        const minimizeBtn = document.querySelector('.minimize-btn');
+        
+        minimizeBtn.addEventListener('click', function() {
+            iframeContainer.classList.toggle('minimized');
+            if (iframeContainer.classList.contains('minimized')) {
+                minimizeBtn.classList.remove('fa-minus');
+                minimizeBtn.classList.add('fa-plus');
+            } else {
+                minimizeBtn.classList.remove('fa-plus');
+                minimizeBtn.classList.add('fa-minus');
+            }
+        });
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
