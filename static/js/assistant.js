@@ -60,7 +60,7 @@
     tooltip.innerHTML = 'دستیار هوش مصنوعی';
     tooltip.style.position = 'absolute';
     tooltip.style.bottom = 'calc(100% + 10px)';
-    tooltip.style.right = '50%';
+    tooltip.style.right = '120%';
     tooltip.style.transform = 'translateX(50%)';
     tooltip.style.backgroundColor = '#fff';
     tooltip.style.color = '#333';
@@ -78,7 +78,7 @@
     const tooltipArrow = document.createElement('div');
     tooltipArrow.style.position = 'absolute';
     tooltipArrow.style.top = '100%';
-    tooltipArrow.style.left = '50%';
+    tooltipArrow.style.left = '78%';
     tooltipArrow.style.transform = 'translateX(-50%)';
     tooltipArrow.style.width = '0';
     tooltipArrow.style.height = '0';
