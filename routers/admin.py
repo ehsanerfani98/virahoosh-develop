@@ -1011,9 +1011,38 @@ async def create_assistant(
     db: Session = Depends(get_db)
 ):
     
+    form = await request.form()
+
+    user = auth(request, db)
+    file: UploadFile = form.get("file")
     
-    return JSONResponse(status_code=400, content={"message": f"تست"})
-  
+     # آپلود فایل 
+    try:
+        saved_file_path = await upload_file(
+            file=file,
+            user_id=user.id,
+            db=db,
+            save_to_db=False,
+        )
+    except Exception as e:
+        return JSONResponse(status_code=400, content={"message": f"خطا در آپلود فایل: {str(e)}"})
+    
+    assistant = Assistant(
+        title=title,
+        description=description,
+        faiss_url=None,
+        pkl_url=None,
+        excel_url=saved_file_path,
+        slug=str(uuid.uuid4())
+    )
+    db.add(assistant)
+    db.commit()
+    db.refresh(assistant)
+
+    # ارسال تسک به صف
+    process_excel_file.delay(assistant.id, saved_file_path, user.id)
+
+    return RedirectResponse(url=request.url_for("admin_assistants"), status_code=302)
 
 
 @router.get("/assistants/{assistant_id}/edit", response_class=HTMLResponse, name="admin_assistant_edit")
