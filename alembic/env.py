@@ -15,7 +15,7 @@ from core.config import DATABASE_URL
 config = context.config
 
 # 👇 این خط باعث می‌شه URL از .env بیاد نه alembic.ini
-config.set_main_option("sqlalchemy.url", DATABASE_URL)
+# config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
 # Logging
 if config.config_file_name is not None:
