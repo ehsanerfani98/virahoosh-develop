@@ -9,3 +9,10 @@ celery_app = Celery(
     include=["services.tasks"]
 )
 
+celery_app.conf.update(
+    task_serializer='json',
+    result_serializer='json',
+    accept_content=['json'],
+    timezone='Asia/Tehran',
+    enable_utc=True,
+)
