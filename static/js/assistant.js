@@ -13,7 +13,7 @@
     widgetContainer.id = 'chatWidgetContainer';
     widgetContainer.style.position = 'fixed';
     widgetContainer.style.bottom = '20px';
-    widgetContainer.style.right = '20px';
+    widgetContainer.style.right = '54px';
     widgetContainer.style.zIndex = '9999';
     widgetContainer.style.transition = 'all 0.3s ease';
 
