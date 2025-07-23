@@ -27,7 +27,7 @@
     toggleBtn.style.justifyContent = 'center';
     toggleBtn.style.cursor = 'pointer';
     toggleBtn.style.boxShadow = '0 4px 10px rgba(0,0,0,0.2)';
-    toggleBtn.innerHTML = '<span style="color: white; font-size: 20px;">💬</span>';
+    toggleBtn.innerHTML = '<span id="chatIcon" style="color: white; font-size: 20px;">💬</span>';
 
     const iframe = document.createElement('iframe');
     iframe.id = 'chatIframe';
@@ -40,9 +40,16 @@
     iframe.style.marginTop = '10px';
     iframe.style.borderRadius = '12px';
     iframe.style.boxShadow = '0 0 15px rgba(0,0,0,0.1)';
+    iframe.style.border = 'none';
 
+    // کنترل باز و بسته شدن چت
     toggleBtn.addEventListener('click', () => {
-        iframe.style.display = iframe.style.display === 'block' ? 'none' : 'block';
+        const isOpen = iframe.style.display === 'block';
+        iframe.style.display = isOpen ? 'none' : 'block';
+
+        // تغییر آیکن
+        const icon = document.getElementById('chatIcon');
+        icon.textContent = isOpen ? '💬' : '❌';
     });
 
     widgetContainer.appendChild(toggleBtn);
