@@ -26,15 +26,16 @@ def login_form(request: Request):
 def login_otp_form(request: Request):
     return templates.TemplateResponse("auth/otp_login.html", {"request": request})
 
-@router_site.get("/assistant/{assistant_id}/robot")
-def view_assistant(request: Request, assistant_id: int, db: Session = Depends(get_db)):
-    assistant = db.query(Assistant).filter(Assistant.id == assistant_id).first()
+@router_site.get("/assistant/{slug}/robot")
+def view_assistant(request: Request, slug: str, db: Session = Depends(get_db)):
+    assistant = db.query(Assistant).filter(Assistant.slug == slug).first()
     if not assistant:
         raise HTTPException(status_code=404, detail="Assistant not found")
     return templates.TemplateResponse("admin/assistant/assistant.html", {
         "request": request,
         "assistant": assistant
     })
+
 
 @router_site.post("/assistants/{assistant_id}/ask")
 async def ask_for_assistant(

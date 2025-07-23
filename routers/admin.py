@@ -35,6 +35,7 @@ from starlette.websockets import WebSocketState
 import logging
 from services.tasks import process_excel_file
 import shutil
+import uuid
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -1031,7 +1032,8 @@ async def create_assistant(
         description=description,
         faiss_url=None,
         pkl_url=None,
-        excel_url=saved_file_path
+        excel_url=saved_file_path,
+        slug=str(uuid.uuid4())
     )
     db.add(assistant)
     db.commit()
