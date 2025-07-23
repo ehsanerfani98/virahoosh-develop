@@ -1011,6 +1011,8 @@ async def create_assistant(
     db: Session = Depends(get_db)
 ):
     
+    
+    return JSONResponse(status_code=400, content={"message": f"تست"})
     form = await request.form()
 
     user = auth(request, db)
