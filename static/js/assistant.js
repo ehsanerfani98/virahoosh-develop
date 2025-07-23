@@ -12,8 +12,8 @@
     const widgetContainer = document.createElement('div');
     widgetContainer.id = 'chatWidgetContainer';
     widgetContainer.style.position = 'fixed';
-    widgetContainer.style.bottom = '20px';
-    widgetContainer.style.right = '20px';
+    widgetContainer.style.bottom = '30px';
+    widgetContainer.style.right = '30px';
     widgetContainer.style.zIndex = '9999';
     widgetContainer.style.transition = 'all 0.3s ease';
 
