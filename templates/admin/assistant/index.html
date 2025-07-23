@@ -100,8 +100,7 @@
                                         value="{{ request.base_url }}assistant/{{ a.slug }}" onclick="this.select()" />
                                 </td>
                                 <td>
-                                    <textarea>
-                                        <iframe
+                                    <textarea><iframe
     src="{{ request.base_url }}iframe/assistant/{{ a.slug }}"  
     width="300"
     height="500"
@@ -109,8 +108,7 @@
     scrolling="auto"
     style="border-radius: 8px; overflow: hidden; position: fixed; z-index: 9999; right: 30px; bottom: 30px;"
     allowfullscreen>
-</iframe>
-                                    </textarea>
+</iframe></textarea>
                                 </td>
                                 <td class="text-center">
                                     <a href="{{ url_for('admin_assistant_edit', assistant_id=a.id) }}"
