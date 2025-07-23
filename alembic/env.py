@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from database.session import Base
 from models import user, token, otp, role, permission, user_role, refreshtoken, ratelimit, ai, aiinput, ai_archive, file_upload, assistant
-from core.config import DATABASE_URL  # ← آدرس DB از config.py
+from core.config import DATABASE_URL
 
 config = context.config
 
