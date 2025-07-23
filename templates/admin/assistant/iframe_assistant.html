@@ -34,8 +34,7 @@
         body::before {
             content: "";
             position: fixed;
-            top: 0;
-            left: 0;
+            top: 0; left: 0;
             width: 100%;
             height: 100%;
             background: linear-gradient(135deg, rgba(101, 78, 163, 0.05), rgba(234, 67, 53, 0.05) 50%, rgba(251, 188, 5, 0.05));
@@ -168,8 +167,7 @@
             animation: fadeIn 0.8s ease-out;
         }
 
-        .answer,
-        .related {
+        .answer, .related {
             background-color: white;
             border-radius: 12px;
             padding: 12px;
@@ -181,8 +179,7 @@
             overflow-wrap: break-word;
         }
 
-        .answer::before,
-        .related::before {
+        .answer::before, .related::before {
             content: "";
             position: absolute;
             top: 0;
@@ -193,8 +190,7 @@
             border-radius: 0 12px 12px 0;
         }
 
-        .answer h4,
-        .related h5 {
+        .answer h4, .related h5 {
             color: #4285F4;
             margin-bottom: 8px;
             font-size: 14px;
@@ -202,8 +198,7 @@
             align-items: center;
         }
 
-        .answer h4 i,
-        .related h5 i {
+        .answer h4 i, .related h5 i {
             margin-left: 5px;
             font-size: 14px;
         }
@@ -239,33 +234,17 @@
 
         /* انیمیشن ها */
         @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.5;
-            }
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
         @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+            to { transform: rotate(360deg); }
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* حذف انیمیشن‌های سنگین برای سبک بودن */
@@ -276,46 +255,39 @@
 </head>
 
 <body>
-
-    <button id="toggleChatBtn"
-        style="position: fixed; bottom: 10px; left: 10px; z-index: 999; padding: 10px 15px; border-radius: 10px; background: linear-gradient(135deg, #4285F4, #34A853); color: white; border: none; cursor: pointer;">
-        باز/بسته چت
-    </button>
-
-
     <!-- حذف آیکون های پس زمینه برای سبک بودن و فضای کمتر -->
-    <div id="chatBox" style="display: block;">
+<div id="chatBox" style="display: block;">
 
-        <div class="container">
-            <div class="header">
-                <div class="logo">
-                    <i class="fas fa-robot"></i>
-                </div>
-                <h1>{{ assistant.title }}</h1>
-                <p class="subtitle">{{ assistant.description }}</p>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-robot"></i>
             </div>
+            <h1>{{ assistant.title }}</h1>
+            <p class="subtitle">{{ assistant.description }}</p>
+        </div>
 
-            <form id="askForm" class="ask-form" autocomplete="off" novalidate>
-                <input type="text" id="questionInput" name="question" class="question-input"
-                    placeholder="هر سوالی دارید بپرسید..." required aria-label="سوال خود را وارد کنید" />
-                <button id="submitBtn" type="submit" class="submit-btn">
-                    <span id="submitText">بپرسید</span>
-                    <span id="loadingSpinner"></span>
-                </button>
-            </form>
+        <form id="askForm" class="ask-form" autocomplete="off" novalidate>
+            <input type="text" id="questionInput" name="question" class="question-input"
+                placeholder="هر سوالی دارید بپرسید..." required aria-label="سوال خود را وارد کنید" />
+            <button id="submitBtn" type="submit" class="submit-btn">
+                <span id="submitText">بپرسید</span>
+                <span id="loadingSpinner"></span>
+            </button>
+        </form>
 
-            <div id="answerSection" class="answer-section">
-                <div class="answer mb-4">
-                    <h4><i class="fas fa-comment-dots"></i> پاسخ:</h4>
-                    <p id="answerText" class="fs-5"></p>
-                </div>
-                <div class="related">
-                    <h5><i class="fas fa-link"></i> سوالات مشابه:</h5>
-                    <ul id="relatedList" class="related-list"></ul>
-                </div>
+        <div id="answerSection" class="answer-section">
+            <div class="answer mb-4">
+                <h4><i class="fas fa-comment-dots"></i> پاسخ:</h4>
+                <p id="answerText" class="fs-5"></p>
+            </div>
+            <div class="related">
+                <h5><i class="fas fa-link"></i> سوالات مشابه:</h5>
+                <ul id="relatedList" class="related-list"></ul>
             </div>
         </div>
     </div>
+</div>
     <script>
         // کد JS اصلی شما بدون تغییر (همان کد قبلی)
         const form = document.getElementById('askForm');
@@ -393,17 +365,6 @@
                 submitBtn.disabled = false;
                 submitText.textContent = 'بپرسید';
                 loadingSpinner.style.display = 'none';
-            }
-        });
-
-        const toggleBtn = document.getElementById("toggleChatBtn");
-        const chatBox = document.getElementById("chatBox");
-
-        toggleBtn.addEventListener("click", () => {
-            if (chatBox.style.display === "none") {
-                chatBox.style.display = "block";
-            } else {
-                chatBox.style.display = "none";
             }
         });
     </script>

@@ -191,7 +191,7 @@
         </div>
     </div>
 
-<iframe
+<!-- <iframe
     src="https://shetabito.ir/iframe/assistant/14283c5c-f05f-438c-93ad-6f75a6294247"  
     width="400"
     height="500"
@@ -199,7 +199,44 @@
     scrolling="auto"
     style="border-radius: 8px; overflow: hidden; position: fixed; z-index: 9999; right: 30px; bottom: 30px;"
     allowfullscreen>
-</iframe>
+</iframe> -->
+
+
+
+
+
+
+<!-- ویجت چت -->
+<div id="chatWidgetContainer" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
+    <div id="chatToggleBtn" style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #4285F4, #34A853); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+        <span style="color: white; font-size: 20px;">💬</span>
+    </div>
+    <iframe
+        id="chatIframe"
+        src="https://shetabito.ir/iframe/assistant/14283c5c-f05f-438c-93ad-6f75a6294247"
+        width="400"
+        height="500"
+        frameborder="0"
+        scrolling="auto"
+        allowfullscreen
+        style="display: none; margin-top: 10px; border-radius: 12px; box-shadow: 0 0 15px rgba(0,0,0,0.1);">
+    </iframe>
+</div>
+
+<script>
+    const chatBtn = document.getElementById('chatToggleBtn');
+    const chatFrame = document.getElementById('chatIframe');
+
+    chatBtn.addEventListener('click', () => {
+        const isVisible = chatFrame.style.display === 'block';
+        chatFrame.style.display = isVisible ? 'none' : 'block';
+    });
+</script>
+
+
+
+
+
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
