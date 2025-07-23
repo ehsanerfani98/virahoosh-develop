@@ -26,7 +26,7 @@ def login_form(request: Request):
 def login_otp_form(request: Request):
     return templates.TemplateResponse("auth/otp_login.html", {"request": request})
 
-@router_site.get("/assistant/{slug}/robot")
+@router_site.get("/assistant/{slug}")
 def view_assistant(request: Request, slug: str, db: Session = Depends(get_db)):
     assistant = db.query(Assistant).filter(Assistant.slug == slug).first()
     if not assistant:
