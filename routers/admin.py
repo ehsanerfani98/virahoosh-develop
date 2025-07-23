@@ -1008,6 +1008,7 @@ async def create_assistant(
     request: Request,
     title: str = Form(...),
     description: str = Form(""),
+    domain: str = Form(""),
     db: Session = Depends(get_db)
 ):
     
@@ -1030,6 +1031,7 @@ async def create_assistant(
     assistant = Assistant(
         title=title,
         description=description,
+        domain=domain,
         faiss_url=None,
         pkl_url=None,
         excel_url=saved_file_path,
@@ -1064,6 +1066,7 @@ def update_assistant(
     request: Request,
     title: str = Form(...),
     description: str = Form(""),
+    domain: str = Form(""),
     db: Session = Depends(get_db),
     _: bool = Depends(has_permission("edit_assistants"))
 ):
@@ -1074,6 +1077,7 @@ def update_assistant(
 
     assistant.title = title
     assistant.description = description
+    assistant.domain = domain
 
     db.commit()
     return RedirectResponse(url=request.url_for("admin_assistants"), status_code=302)
