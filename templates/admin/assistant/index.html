@@ -100,7 +100,7 @@
                                         value="{{ request.base_url }}assistant/{{ a.slug }}" onclick="this.select()" />
                                 </td>
                                 <td>
-                                    <textarea onclick="this.select()" class="form-control" style="font-family: math; font-size: 9px; width: 100%; height: 110px; text-align: left;"><iframe src="{{ request.base_url }}iframe/assistant/{{ a.slug }}" width="400" height="500" frameborder="0" scrolling="auto" style="border-radius: 8px; overflow: hidden; position: fixed; z-index: 9999; right: 30px; bottom: 30px;" allowfullscreen> </iframe></textarea>
+                                    <textarea onclick="this.select()" class="form-control" style="font-family: math; font-size: 9px; width: 100%; height: 110px; text-align: left;"><script src="{{ request.base_url }}static/js/assistant.js?assistant_id={{ a.slug }}" defer></script></textarea>
                                 </td>
                                 <td class="text-center">
                                     <a href="{{ url_for('admin_assistant_edit', assistant_id=a.id) }}"
