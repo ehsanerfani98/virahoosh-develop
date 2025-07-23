@@ -97,12 +97,12 @@
                                 <td>
                                     <input type="text" style="font-family: math;" readonly
                                         class="form-control form-control-sm"
-                                        value="{{ url('/') }}/assistant/{{ a.slug }}" onclick="this.select()" />
+                                        value="{{ request.base_url }}assistant/{{ a.slug }}" onclick="this.select()" />
                                 </td>
                                 <td>
                                     <textarea>
                                         <iframe
-    src="{{ url('/') }}/iframe/assistant/{{ a.slug }}"  
+    src="{{ request.base_url }}iframe/assistant/{{ a.slug }}"  
     width="300"
     height="500"
     frameborder="0"
