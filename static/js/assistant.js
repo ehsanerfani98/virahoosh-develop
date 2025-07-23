@@ -59,7 +59,7 @@
     tooltip.id = 'chatTooltip';
     tooltip.innerHTML = 'دستیار هوش مصنوعی';
     tooltip.style.position = 'absolute';
-    tooltip.style.bottom = 'calc(100% + 10px)';
+    tooltip.style.bottom = 'calc(100% + 15px)';
     tooltip.style.right = '120%';
     tooltip.style.transform = 'translateX(50%)';
     tooltip.style.backgroundColor = '#fff';
