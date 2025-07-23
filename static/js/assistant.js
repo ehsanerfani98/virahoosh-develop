@@ -31,7 +31,7 @@
     toggleBtn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
     toggleBtn.style.transition = 'all 0.3s ease, transform 0.2s ease';
     toggleBtn.style.position = 'relative';
-    toggleBtn.style.overflow = 'hidden';
+    toggleBtn.style.overflow = 'visible';
 
     // افکت هاله نور هنگام هاور
     const haloEffect = document.createElement('div');
@@ -54,6 +54,41 @@
     chatIcon.style.zIndex = '1';
     chatIcon.innerHTML = '💬';
 
+    // بالن توضیحات
+    const tooltip = document.createElement('div');
+    tooltip.id = 'chatTooltip';
+    tooltip.innerHTML = 'دستیار هوش مصنوعی';
+    tooltip.style.position = 'absolute';
+    tooltip.style.bottom = 'calc(100% + 10px)';
+    tooltip.style.right = '50%';
+    tooltip.style.transform = 'translateX(50%)';
+    tooltip.style.backgroundColor = '#fff';
+    tooltip.style.color = '#333';
+    tooltip.style.padding = '8px 12px';
+    tooltip.style.borderRadius = '12px';
+    tooltip.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+    tooltip.style.fontSize = '14px';
+    tooltip.style.fontWeight = '500';
+    tooltip.style.whiteSpace = 'nowrap';
+    tooltip.style.opacity = '1';
+    tooltip.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+    tooltip.style.pointerEvents = 'none';
+    
+    // پیکان بالن
+    const tooltipArrow = document.createElement('div');
+    tooltipArrow.style.position = 'absolute';
+    tooltipArrow.style.top = '100%';
+    tooltipArrow.style.left = '50%';
+    tooltipArrow.style.transform = 'translateX(-50%)';
+    tooltipArrow.style.width = '0';
+    tooltipArrow.style.height = '0';
+    tooltipArrow.style.borderLeft = '8px solid transparent';
+    tooltipArrow.style.borderRight = '8px solid transparent';
+    tooltipArrow.style.borderTop = '8px solid #fff';
+    
+    tooltip.appendChild(tooltipArrow);
+    toggleBtn.appendChild(tooltip);
+
     toggleBtn.appendChild(haloEffect);
     toggleBtn.appendChild(chatIcon);
 
@@ -63,6 +98,12 @@
         haloEffect.style.transform = 'scale(1.2)';
         toggleBtn.style.transform = 'translateY(-3px)';
         toggleBtn.style.boxShadow = '0 6px 20px rgba(0,0,0,0.25)';
+        
+        // نمایش بالن هنگام هاور (اگر چت بسته است)
+        if (!isOpen) {
+            tooltip.style.opacity = '1';
+            tooltip.style.transform = 'translateX(50%) translateY(0)';
+        }
     });
 
     toggleBtn.addEventListener('mouseleave', () => {
@@ -70,6 +111,12 @@
         haloEffect.style.transform = 'scale(0.8)';
         toggleBtn.style.transform = 'translateY(0)';
         toggleBtn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
+        
+        // مخفی کردن بالن هنگام خروج هاور (اگر چت بسته است)
+        if (!isOpen) {
+            tooltip.style.opacity = '0';
+            tooltip.style.transform = 'translateX(50%) translateY(5px)';
+        }
     });
 
     // iframe چت
@@ -112,6 +159,11 @@
             
             // بزرگ کردن دکمه هنگام باز بودن
             toggleBtn.style.transform = 'scale(1.05)';
+            
+            // مخفی کردن بالن
+            tooltip.style.opacity = '0';
+            tooltip.style.transform = 'translateX(50%) translateY(5px)';
+            tooltip.style.pointerEvents = 'none';
         } else {
             iframe.style.opacity = '0';
             iframe.style.transform = 'translateY(20px) scale(0.95)';
@@ -127,12 +179,24 @@
             // بازگرداندن اندازه دکمه
             toggleBtn.style.transform = 'scale(1)';
             
+            // نمایش مجدد بالن
+            setTimeout(() => {
+                tooltip.style.opacity = '1';
+                tooltip.style.transform = 'translateX(50%) translateY(0)';
+            }, 300);
+            
             // مخفی کردن iframe پس از اتمام انیمیشن
             setTimeout(() => {
                 iframe.style.display = 'none';
             }, 300);
         }
     });
+
+    // نمایش اولیه بالن با انیمیشن
+    setTimeout(() => {
+        tooltip.style.opacity = '1';
+        tooltip.style.transform = 'translateX(50%) translateY(0)';
+    }, 1000);
 
     widgetContainer.appendChild(toggleBtn);
     widgetContainer.appendChild(iframe);
