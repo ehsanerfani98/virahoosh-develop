@@ -35,6 +35,16 @@ def view_assistant(request: Request, slug: str, db: Session = Depends(get_db)):
         "request": request,
         "assistant": assistant
     })
+    
+@router_site.get("/iframe/assistant/{slug}")
+def view_assistant(request: Request, slug: str, db: Session = Depends(get_db)):
+    assistant = db.query(Assistant).filter(Assistant.slug == slug).first()
+    if not assistant:
+        raise HTTPException(status_code=404, detail="Assistant not found")
+    return templates.TemplateResponse("admin/assistant/iframe_assistant.html", {
+        "request": request,
+        "assistant": assistant
+    })
 
 
 @router_site.post("/assistants/{assistant_id}/ask")
