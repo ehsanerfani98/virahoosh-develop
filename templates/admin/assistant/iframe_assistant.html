@@ -256,15 +256,12 @@
 
 <body>
     <!-- حذف آیکون های پس زمینه برای سبک بودن و فضای کمتر -->
-<div id="chatBox" style="display: block;">
-
     <div class="container">
         <div class="header">
             <div class="logo">
                 <i class="fas fa-robot"></i>
             </div>
             <h1>{{ assistant.title }}</h1>
-            <p class="subtitle">{{ assistant.description }}</p>
         </div>
 
         <form id="askForm" class="ask-form" autocomplete="off" novalidate>
@@ -287,7 +284,7 @@
             </div>
         </div>
     </div>
-</div>
+
     <script>
         // کد JS اصلی شما بدون تغییر (همان کد قبلی)
         const form = document.getElementById('askForm');
