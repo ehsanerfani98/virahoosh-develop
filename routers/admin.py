@@ -928,7 +928,7 @@ async def generate_text_image(
     )
 
     # ---- تولید تصویر ----
-    image_title = form_data.get("image_title", "").strip()
+    image_title = form_data.get("topic", "").strip()
     if not image_title:
         return JSONResponse(status_code=400, content={"message": "عنوان تصویر ارسال نشده"})
 

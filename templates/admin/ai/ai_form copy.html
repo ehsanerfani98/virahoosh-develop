@@ -78,10 +78,10 @@ endblock %} {% block css %}
       {{ ai_model.description }}
     </div>
     <form id="ai-form" data-model-id="{{ ai_model.id }}" method="post" class="card p-4 shadow-sm rounded-4 mb-4">
-      <div class="mb-3">
+      <!-- <div class="mb-3">
         <label class="form-label">توضیحات تصویر</label>
         <textarea name="image_title" id="image_title" class="form-control" rows="5"></textarea>
-      </div>
+      </div> -->
 
       {% for input in ai_model.inputs %}
       <fieldset>
