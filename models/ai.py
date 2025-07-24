@@ -7,6 +7,7 @@ import enum
 class AiModelType(enum.Enum):
     image = "image"
     text = "text"
+    text_image = "text_image"
     video = "video"
     audio = "audio"
     vision = "vision"
