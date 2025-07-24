@@ -643,15 +643,15 @@ endblock %} {% block css %}
       <fieldset>
         <legend>{{ input.title }}</legend>
 
-        {% if input.input_type in ['text', 'number'] %}
+        {% if input.input_type in ['text', 'number'] %} {% if input.name !=
+        "topic" %}
         <input
           type="{{ input.input_type }}"
           name="{{ input.name }}"
           class="form-control"
           required
         />
-
-        {% elif input.input_type == 'textarea' %}
+        {% endif %} {% elif input.input_type == 'textarea' %}
         <textarea
           name="{{ input.name }}"
           class="form-control"
