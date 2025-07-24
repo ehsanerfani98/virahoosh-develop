@@ -1,76 +1,73 @@
 {% extends "admin/layout.html" %} {% block title %}{{ ai_model.title }}{%
-  endblock %} {% block css %}
-  <style>
-    /* استایل اسپینر ساده */
-    #loading-spinner,
-    #loading-spinner-img {
-      display: inline-block;
-      width: 24px;
-      height: 24px;
-      border: 3px solid rgba(13, 110, 253, 0.3);
-      border-top-color: #0d6efd;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      vertical-align: middle;
-      margin-left: 10px;
-    }
-  
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-  
-    /* Optional: استایل بهتر برای لینک‌ها، کدها و هدینگ‌های رندر شده */
-    #ai-response-html a {
-      color: #0d6efd;
-      text-decoration: underline;
-    }
-  
-    #ai-response-html pre {
-      background: #f8f9fa;
-      padding: 10px;
-      border-radius: 5px;
-      overflow-x: auto;
-    }
-  
-    #ai-response-html code {
-      background: #f1f3f5;
-      padding: 2px 4px;
-      border-radius: 4px;
-      font-family: monospace;
-    }
-  
-    #ai-response-html h1,
-    #ai-response-html h2,
-    #ai-response-html h3 {
-      margin-top: 1rem;
-      margin-bottom: 0.5rem;
-    }
-  
-    /* استایل دکمه دانلود در لایت باکس */
-    .lb-download {
-      display: block;
-      position: absolute;
-      right: 40px;
-      top: 0;
-      height: 40px;
-      line-height: 40px;
-      width: 40px;
-      text-align: center;
-      color: white;
-      font-size: 20px;
-      text-decoration: none;
-    }
-  
-    .lb-download:hover {
-      color: #0d6efd;
-    }
-  </style>
-  {% endblock %} {% block content %}
+endblock %} {% block css %}
+<style>
+  /* استایل اسپینر ساده */
+  #loading-spinner,
+  #loading-spinner-img {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(13, 110, 253, 0.3);
+    border-top-color: #0d6efd;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    vertical-align: middle;
+    margin-left: 10px;
+  }
 
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
 
-  {% if ai_model.type.value == "text_image" %}
+  /* Optional: استایل بهتر برای لینک‌ها، کدها و هدینگ‌های رندر شده */
+  #ai-response-html a {
+    color: #0d6efd;
+    text-decoration: underline;
+  }
+
+  #ai-response-html pre {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+  }
+
+  #ai-response-html code {
+    background: #f1f3f5;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: monospace;
+  }
+
+  #ai-response-html h1,
+  #ai-response-html h2,
+  #ai-response-html h3 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* استایل دکمه دانلود در لایت باکس */
+  .lb-download {
+    display: block;
+    position: absolute;
+    right: 40px;
+    top: 0;
+    height: 40px;
+    line-height: 40px;
+    width: 40px;
+    text-align: center;
+    color: white;
+    font-size: 20px;
+    text-decoration: none;
+  }
+
+  .lb-download:hover {
+    color: #0d6efd;
+  }
+</style>
+{% endblock %} {% block content %} {% if ai_model.type.value == "image" %}
 <div class="row">
   <div class="col-lg-12">
     <div class="d-flex align-items-center mb-3 gap-2">
@@ -80,27 +77,36 @@
     <div class="alert alert-info" role="alert" style="line-height: 2">
       {{ ai_model.description }}
     </div>
-
-    <form id="ai-form" data-model-id="{{ ai_model.id }}" method="post" class="card p-4 shadow-sm rounded-4 mb-4">
+    <form
+      id="ai-form"
+      data-model-id="{{ ai_model.id }}"
+      method="post"
+      class="card p-4 shadow-sm rounded-4 mb-4"
+    >
       <!-- <div class="mb-3">
-        <label class="form-label">موضوع محتوا</label>
-        <textarea name="image_title" id="image_title" class="form-control" rows="3"></textarea>
+        <label class="form-label">توضیحات تصویر</label>
+        <textarea name="image_title" id="image_title" class="form-control" rows="5"></textarea>
       </div> -->
-
-      <fieldset>
-        <legend>موضوع محتوا</legend>
-        <textarea name="topic" class="form-control" rows="4" required></textarea>
-      </fieldset>
 
       {% for input in ai_model.inputs %}
       <fieldset>
         <legend>{{ input.title }}</legend>
 
         {% if input.input_type in ['text', 'number'] %}
-        <input type="{{ input.input_type }}" name="{{ input.name }}" class="form-control" required />
+        <input
+          type="{{ input.input_type }}"
+          name="{{ input.name }}"
+          class="form-control"
+          required
+        />
 
         {% elif input.input_type == 'textarea' %}
-        <textarea name="{{ input.name }}" class="form-control" rows="4" required></textarea>
+        <textarea
+          name="{{ input.name }}"
+          class="form-control"
+          rows="4"
+          required
+        ></textarea>
 
         {% elif input.input_type == 'select' %} {% set options = input.options |
         default('[]') | loads %}
@@ -115,9 +121,18 @@
         <div>
           {% for option in options %}
           <div class="form-check form-check-inline">
-            <input class="form-check-input" type="checkbox" name="{{ input.name }}"
-              id="{{ input.name }}_{{ loop.index }}" value="{{ option }}" />
-            <label class="form-check-label" for="{{ input.name }}_{{ loop.index }}">{{ option }}</label>
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="{{ input.name }}"
+              id="{{ input.name }}_{{ loop.index }}"
+              value="{{ option }}"
+            />
+            <label
+              class="form-check-label"
+              for="{{ input.name }}_{{ loop.index }}"
+              >{{ option }}</label
+            >
           </div>
           {% endfor %}
         </div>
@@ -127,9 +142,19 @@
         <div>
           {% for option in options %}
           <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="{{ input.name }}" id="{{ input.name }}_{{ loop.index }}"
-              value="{{ option }}" required />
-            <label class="form-check-label" for="{{ input.name }}_{{ loop.index }}">{{ option }}</label>
+            <input
+              class="form-check-input"
+              type="radio"
+              name="{{ input.name }}"
+              id="{{ input.name }}_{{ loop.index }}"
+              value="{{ option }}"
+              required
+            />
+            <label
+              class="form-check-label"
+              for="{{ input.name }}_{{ loop.index }}"
+              >{{ option }}</label
+            >
           </div>
           {% endfor %}
         </div>
@@ -138,24 +163,596 @@
       </fieldset>
       {% endfor %}
 
-      <button type="submit" class="btn btn-primary px-4">تولید متن و تصویر</button>
+      <div class="">
+        <button
+          type="submit"
+          class="btn btn-primary px-4"
+          style="margin-left: 10px"
+        >
+          ارسال
+        </button>
+      </div>
+    </form>
+    <div id="ai-response-box" style="display: none">
+      <div class="card shadow-sm rounded-4 p-4 bg-light">
+        <div id="ai-image-box" class="text-center mb-3" style="display: none">
+          <div id="image-loading-spinner" style="display: none">
+            <span id="loading-spinner-img" style="display: none"></span>
+            <div class="small text-muted mt-2">در حال بارگذاری تصویر...</div>
+          </div>
+          <a
+            href=""
+            id="image-lightbox-link"
+            data-lightbox="generated-image"
+            data-title="تصویر تولید شده"
+          >
+            <img
+              id="generated-image"
+              src=""
+              alt="تصویر تولید شده"
+              class="img-fluid rounded mt-3"
+              style="max-height: 300px; display: none"
+            />
+          </a>
+          <div class="mt-2">
+            <a
+              href="#"
+              target="_blank"
+              id="download-btn"
+              class="btn btn-sm btn-outline-primary"
+              style="display: none"
+            >
+              <i class="fas fa-download"></i> دانلود تصویر
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %} {% if ai_model.type.value == "text" %}
+<div class="row">
+  <div class="col-lg-12">
+    <div class="d-flex align-items-center mb-3 gap-2">
+      <div class="ai-icon">{{ ai_model.icon | safe }}</div>
+      <h3 class="">{{ ai_model.title }}</h3>
+    </div>
+    <div class="alert alert-info" role="alert" style="line-height: 2">
+      {{ ai_model.description }}
+    </div>
+    <form
+      id="ai-form"
+      data-model-id="{{ ai_model.id }}"
+      method="post"
+      class="card p-4 shadow-sm rounded-4 mb-4"
+    >
+      {% for input in ai_model.inputs %}
+      <fieldset>
+        <legend>{{ input.title }}</legend>
+
+        {% if input.input_type in ['text', 'number'] %}
+        <input
+          type="{{ input.input_type }}"
+          name="{{ input.name }}"
+          class="form-control"
+          required
+        />
+
+        {% elif input.input_type == 'textarea' %}
+        <textarea
+          name="{{ input.name }}"
+          class="form-control"
+          rows="4"
+          required
+        ></textarea>
+
+        {% elif input.input_type == 'select' %} {% set options = input.options |
+        default('[]') | loads %}
+        <select name="{{ input.name }}" class="form-select" required>
+          {% for option in options %}
+          <option value="{{ option }}">{{ option }}</option>
+          {% endfor %}
+        </select>
+
+        {% elif input.input_type == 'checkbox' %} {% set options = input.options
+        | default('[]') | loads %}
+        <div>
+          {% for option in options %}
+          <div class="form-check form-check-inline">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="{{ input.name }}"
+              id="{{ input.name }}_{{ loop.index }}"
+              value="{{ option }}"
+            />
+            <label
+              class="form-check-label"
+              for="{{ input.name }}_{{ loop.index }}"
+              >{{ option }}</label
+            >
+          </div>
+          {% endfor %}
+        </div>
+
+        {% elif input.input_type == 'radiobutton' %} {% set options =
+        input.options | default('[]') | loads %}
+        <div>
+          {% for option in options %}
+          <div class="form-check form-check-inline">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="{{ input.name }}"
+              id="{{ input.name }}_{{ loop.index }}"
+              value="{{ option }}"
+              required
+            />
+            <label
+              class="form-check-label"
+              for="{{ input.name }}_{{ loop.index }}"
+              >{{ option }}</label
+            >
+          </div>
+          {% endfor %}
+        </div>
+
+        {% endif %}
+      </fieldset>
+      {% endfor %}
+      <div class="">
+        <button
+          type="submit"
+          class="btn btn-primary px-4"
+          style="margin-left: 10px"
+        >
+          ارسال
+        </button>
+      </div>
+    </form>
+    <div id="ai-response-box" style="display: none">
+      <div class="card shadow-sm rounded-4 p-4 bg-light">
+        <h5 class="mb-3">پاسخ :</h5>
+
+        <div
+          id="ai-response-html"
+          class="mb-3"
+          style="
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            background: white;
+          "
+        ></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %} {% if ai_model.type.value == "audio" %}
+<div class="row">
+  <div class="col-lg-12">
+    <div class="d-flex align-items-center mb-3 gap-2">
+      <div class="ai-icon">{{ ai_model.icon | safe }}</div>
+      <h3 class="">{{ ai_model.title }}</h3>
+    </div>
+    <div class="alert alert-info" role="alert" style="line-height: 2">
+      {{ ai_model.description }}
+    </div>
+
+    <form
+      id="ai-form"
+      data-model-id="{{ ai_model.id }}"
+      method="post"
+      class="card p-4 shadow-sm rounded-4 mb-4"
+    >
+      <div class="mb-3">
+        <label class="form-label">متن</label>
+        <textarea
+          name="text_title"
+          id="text_title"
+          class="form-control"
+          rows="5"
+        ></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">گوینده</label>
+        <select name="text_voice" id="text_voice" class="form-control">
+          <option value="alloy">alloy</option>
+          <option value="ash">ash</option>
+          <option value="ballad">ballad</option>
+          <option value="coral">coral</option>
+          <option value="echo">echo</option>
+          <option value="fable">fable</option>
+          <option value="onyx">onyx</option>
+          <option value="nova">nova</option>
+          <option value="sage">sage</option>
+          <option value="shimmer">shimmer</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">با چه لحنی صدا تولید شود؟</label>
+        <textarea
+          placeholder="مثال : با لحنی عصبانی و خشن صحبت کن"
+          name="text_instructions"
+          id="text_instructions"
+          class="form-control"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">فرمت خروجی صدا را تعیین کنید</label>
+        <select
+          name="text_response_format"
+          id="text_response_format"
+          class="form-control"
+        >
+          <option value="mp3">mp3</option>
+          <option value="opus">opus</option>
+          <option value="aac">aac</option>
+          <option value="flac">flac</option>
+          <option value="wav">wav</option>
+          <option value="pcm">pcm</option>
+        </select>
+      </div>
+
+      {% for input in ai_model.inputs %}
+      <fieldset>
+        <legend>{{ input.title }}</legend>
+
+        {% if input.input_type in ['text', 'number'] %}
+        <input
+          type="{{ input.input_type }}"
+          name="{{ input.name }}"
+          class="form-control"
+          required
+        />
+
+        {% elif input.input_type == 'textarea' %}
+        <textarea
+          name="{{ input.name }}"
+          class="form-control"
+          rows="4"
+          required
+        ></textarea>
+
+        {% elif input.input_type == 'select' %} {% set options = input.options |
+        default('[]') | loads %}
+        <select name="{{ input.name }}" class="form-select" required>
+          {% for option in options %}
+          <option value="{{ option }}">{{ option }}</option>
+          {% endfor %}
+        </select>
+
+        {% elif input.input_type == 'checkbox' %} {% set options = input.options
+        | default('[]') | loads %}
+        <div>
+          {% for option in options %}
+          <div class="form-check form-check-inline">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="{{ input.name }}"
+              id="{{ input.name }}_{{ loop.index }}"
+              value="{{ option }}"
+            />
+            <label
+              class="form-check-label"
+              for="{{ input.name }}_{{ loop.index }}"
+              >{{ option }}</label
+            >
+          </div>
+          {% endfor %}
+        </div>
+
+        {% elif input.input_type == 'radiobutton' %} {% set options =
+        input.options | default('[]') | loads %}
+        <div>
+          {% for option in options %}
+          <div class="form-check form-check-inline">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="{{ input.name }}"
+              id="{{ input.name }}_{{ loop.index }}"
+              value="{{ option }}"
+              required
+            />
+            <label
+              class="form-check-label"
+              for="{{ input.name }}_{{ loop.index }}"
+              >{{ option }}</label
+            >
+          </div>
+          {% endfor %}
+        </div>
+
+        {% endif %}
+      </fieldset>
+      {% endfor %}
+
+      <div>
+        <button
+          type="submit"
+          class="btn btn-primary px-4"
+          style="margin-left: 10px"
+        >
+          ارسال
+        </button>
+      </div>
+    </form>
+
+    <div id="ai-response-box" style="display: none">
+      <div class="card shadow-sm rounded-4 p-4 bg-light text-center">
+        <div id="audio-loading-spinner" style="display: none">
+          <span id="loading-spinner-img" style="display: none"></span>
+          <div class="small text-muted mt-2">در حال تولید صدا...</div>
+        </div>
+
+        <div id="ai-audio-box" style="display: none">
+          <h6 class="mb-3">🔊 پخش صدا:</h6>
+          <audio
+            id="generated-audio"
+            controls
+            style="width: 100%; max-width: 600px"
+          ></audio>
+
+          <div class="mt-3">
+            <a
+              href="#"
+              target="_blank"
+              id="download-audio-btn"
+              class="btn btn-sm btn-outline-primary"
+              style="display: none"
+            >
+              <i class="fas fa-download"></i> دانلود فایل صوتی
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %} {% if ai_model.type.value == "vision" %}
+<div class="row">
+  <div class="col-lg-12">
+    <div class="d-flex align-items-center mb-3 gap-2">
+      <div class="ai-icon">{{ ai_model.icon | safe }}</div>
+      <h3 class="">{{ ai_model.title }}</h3>
+    </div>
+    <div class="alert alert-info" role="alert" style="line-height: 2">
+      {{ ai_model.description }}
+    </div>
+
+    <form
+      id="ai-form"
+      data-model-id="{{ ai_model.id }}"
+      method="post"
+      enctype="multipart/form-data"
+      class="card p-4 shadow-sm rounded-4 mb-4"
+    >
+      <div class="mb-3">
+        <label class="form-label">توضیح یا سوال درباره تصویر</label>
+        <textarea
+          name="vision_title"
+          class="form-control"
+          rows="4"
+          required
+        ></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">آپلود تصویر</label>
+        <input
+          type="file"
+          name="file"
+          accept="image/*"
+          class="form-control"
+          required
+        />
+      </div>
+
+      <div>
+        <button
+          type="submit"
+          class="btn btn-primary px-4"
+          style="margin-left: 10px"
+        >
+          ارسال
+        </button>
+      </div>
+    </form>
+
+    <div id="ai-response-box" style="display: none">
+      <div class="card shadow-sm rounded-4 p-4 bg-light">
+        <div class="row">
+          <!-- پیشنمایش تصویر سمت چپ -->
+          <div class="col-md-5 d-flex flex-column align-items-center">
+            <div
+              style="
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 10px;
+                max-width: 100%;
+              "
+            >
+              <img
+                id="preview-img"
+                src=""
+                alt="پیشنمایش تصویر"
+                style="max-width: 100%; max-height: 300px; border-radius: 8px"
+              />
+            </div>
+          </div>
+          <!-- متن پاسخ سمت راست -->
+          <div class="col-md-7">
+            <div
+              id="ai-response-html"
+              style="
+                max-height: 300px;
+                overflow-y: auto;
+                border: 1px solid #ddd;
+                padding: 15px;
+                border-radius: 8px;
+                background: white;
+              "
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %} {% if ai_model.type.value == "text_image" %}
+<div class="row">
+  <div class="col-lg-12">
+    <div class="d-flex align-items-center mb-3 gap-2">
+      <div class="ai-icon">{{ ai_model.icon | safe }}</div>
+      <h3 class="">{{ ai_model.title }}</h3>
+    </div>
+    <div class="alert alert-info" role="alert" style="line-height: 2">
+      {{ ai_model.description }}
+    </div>
+
+    <form
+      id="ai-form"
+      data-model-id="{{ ai_model.id }}"
+      method="post"
+      class="card p-4 shadow-sm rounded-4 mb-4"
+    >
+      <!-- <div class="mb-3">
+        <label class="form-label">موضوع محتوا</label>
+        <textarea name="image_title" id="image_title" class="form-control" rows="3"></textarea>
+      </div> -->
+
+      <fieldset>
+        <legend>موضوع محتوا</legend>
+        <textarea
+          name="topic"
+          class="form-control"
+          rows="4"
+          required
+        ></textarea>
+      </fieldset>
+
+      {% for input in ai_model.inputs %}
+      <fieldset>
+        <legend>{{ input.title }}</legend>
+
+        {% if input.input_type in ['text', 'number'] %}
+        <input
+          type="{{ input.input_type }}"
+          name="{{ input.name }}"
+          class="form-control"
+          required
+        />
+
+        {% elif input.input_type == 'textarea' %}
+        <textarea
+          name="{{ input.name }}"
+          class="form-control"
+          rows="4"
+          required
+        ></textarea>
+
+        {% elif input.input_type == 'select' %} {% set options = input.options |
+        default('[]') | loads %}
+        <select name="{{ input.name }}" class="form-select" required>
+          {% for option in options %}
+          <option value="{{ option }}">{{ option }}</option>
+          {% endfor %}
+        </select>
+
+        {% elif input.input_type == 'checkbox' %} {% set options = input.options
+        | default('[]') | loads %}
+        <div>
+          {% for option in options %}
+          <div class="form-check form-check-inline">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="{{ input.name }}"
+              id="{{ input.name }}_{{ loop.index }}"
+              value="{{ option }}"
+            />
+            <label
+              class="form-check-label"
+              for="{{ input.name }}_{{ loop.index }}"
+              >{{ option }}</label
+            >
+          </div>
+          {% endfor %}
+        </div>
+
+        {% elif input.input_type == 'radiobutton' %} {% set options =
+        input.options | default('[]') | loads %}
+        <div>
+          {% for option in options %}
+          <div class="form-check form-check-inline">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="{{ input.name }}"
+              id="{{ input.name }}_{{ loop.index }}"
+              value="{{ option }}"
+              required
+            />
+            <label
+              class="form-check-label"
+              for="{{ input.name }}_{{ loop.index }}"
+              >{{ option }}</label
+            >
+          </div>
+          {% endfor %}
+        </div>
+
+        {% endif %}
+      </fieldset>
+      {% endfor %}
+
+      <button type="submit" class="btn btn-primary px-4">
+        تولید متن و تصویر
+      </button>
     </form>
 
     <!-- نمایش نتیجه -->
     <div id="ai-response-box" style="display: none">
       <div class="card shadow-sm rounded-4 p-4 bg-light">
         <h5 class="mb-3">متن تولید شده:</h5>
-        <div id="ai-response-html"
-             style="max-height: 300px; overflow-y: auto; border:1px solid #ddd; padding:15px; border-radius:8px; background:white;"></div>
+        <div
+          id="ai-response-html"
+          style="
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            background: white;
+          "
+        ></div>
 
         <h5 class="mt-4 mb-3">تصویر تولید شده:</h5>
         <div class="text-center">
           <a href="" id="image-lightbox-link" data-lightbox="generated-image">
-            <img id="generated-image" src="" alt="تصویر تولید شده"
-                 class="img-fluid rounded" style="max-height: 300px;">
+            <img
+              id="generated-image"
+              src=""
+              alt="تصویر تولید شده"
+              class="img-fluid rounded"
+              style="max-height: 300px"
+            />
           </a>
-          <br>
-          <a href="#" target="_blank" id="download-btn" class="btn btn-sm btn-outline-primary mt-2">
+          <br />
+          <a
+            href="#"
+            target="_blank"
+            id="download-btn"
+            class="btn btn-sm btn-outline-primary mt-2"
+          >
             <i class="fas fa-download"></i> دانلود تصویر
           </a>
         </div>
@@ -163,63 +760,894 @@
     </div>
   </div>
 </div>
-{% endif %}
+{% endif %} {% if ai_model.type.value == "speech_audio" %}
+<!-- <div class="mb-3">
+  <button id="start-btn" class="btn btn-success">شروع گفت‌وگو</button>
+  <button id="stop-btn" class="btn btn-danger" disabled>پایان</button>
+  <div id="audio-status" class="small text-muted">وضعیت: قطع</div>
+  <input type="hidden" name="model-id" id="model-id" value="{{ ai_model.id }}">
+  <input type="hidden" name="token" id="token" value="{{ token }}">
+</div> -->
+<style>
+  body {
+    font-family: "Vazir", Arial, sans-serif;
+    margin: 20px;
+    background-color: #f5f5f5;
+  }
 
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
 
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+  }
 
+  .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
 
-{% endblock %}
+  .btn-success {
+    background-color: #28a745;
+    color: white;
+  }
 
-{% block js %}
+  .btn-success:hover {
+    background-color: #218838;
+  }
+
+  .btn-danger {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background-color: #c82333;
+  }
+
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .status {
+    text-align: center;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    font-weight: bold;
+  }
+
+  .status.connected {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  .status.disconnected {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+
+  .status.listening {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+
+  .status.processing {
+    background-color: #cce5ff;
+    color: #004085;
+  }
+
+  .transcript {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 10px;
+    min-height: 100px;
+    border: 1px solid #dee2e6;
+  }
+
+  .transcript h4 {
+    margin-top: 0;
+    color: #495057;
+  }
+
+  .error {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+  }
+
+  .recording {
+    animation: pulse 1s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+
+    50% {
+      transform: scale(1.05);
+    }
+
+    100% {
+      transform: scale(1);
+    }
+  }
+</style>
+<div class="container">
+  <h1>گفت‌وگوی صوتی هوشمند</h1>
+
+  <div class="controls">
+    <button id="start-btn" class="btn btn-success">شروع گفت‌وگو</button>
+    <button id="stop-btn" class="btn btn-danger" disabled>پایان</button>
+  </div>
+
+  <div id="audio-status" class="status disconnected">وضعیت: قطع</div>
+
+  <div class="transcript">
+    <h4>متن گفت‌وگو:</h4>
+    <div id="transcript-content"></div>
+  </div>
+
+  <div id="error-container"></div>
+
+  <!-- Hidden inputs for configuration -->
+  <input type="hidden" id="model-id" value="4" />
+  <input type="hidden" id="token" value="{{ token }}" />
+</div>
+{% endif %} {% endblock %} {% block js %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet" />
+<link
+  href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css"
+  rel="stylesheet"
+/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
 
-
-{% if ai_model.type.value == "text_image" %}
+{% if ai_model.type.value == "image" %}
 <script>
-$(document).ready(function () {
-  const ai_id = $("#ai-form").data("model-id");
-  const $form = $("#ai-form");
-  const $submitBtn = $form.find('button[type="submit"]');
-  const $loading = $('<span id="loading-spinner" style="display:none;"></span>');
-  $submitBtn.after($loading);
+  lightbox.option({
+    wrapAround: true,
+    positionFromTop: 100,
+    alwaysShowNavOnTouchDevices: true,
+    albumLabel: "تصویر %1 از %2",
+  });
 
-  $form.on("submit", function (e) {
-    e.preventDefault();
-    $submitBtn.prop("disabled", true);
-    $loading.show();
+  $(document).ready(function () {
+    const ai_id = $("#ai-form").data("model-id");
+    const $form = $("#ai-form");
+    const $submitBtn = $form.find('button[type="submit"]');
 
-    const formData = $form.serialize();
-    $.ajax({
-      url: `/admin/ais/${ai_id}/generate-text-image`,
-      type: "POST",
-      data: formData,
-      beforeSend: function () {
-        $("#ai-response-box").hide();
-      },
-      success: function (res) {
-        $("#ai-response-html").html(marked.parse(res.text_response));
-        $("#generated-image").attr("src", res.image_url);
-        $("#image-lightbox-link").attr("href", res.image_url);
-        $("#download-btn").attr("href", res.image_url).attr("download", "image-" + Date.now() + ".jpg");
-        $("#ai-response-box").fadeIn();
-      },
-      error: function (xhr) {
-        let msg = "خطا در پردازش";
-        try { msg = JSON.parse(xhr.responseText).message || msg; } catch (_) {}
-        Swal.fire({ icon: 'error', title: 'خطا', text: msg });
-      },
-      complete: function () {
-        $submitBtn.prop("disabled", false);
-        $loading.hide();
-      }
+    const $loading = $(
+      '<span id="loading-spinner" style="display:none;"></span>'
+    );
+    $submitBtn.after($loading);
+
+    $form.on("submit", function (e) {
+      e.preventDefault();
+      $submitBtn.prop("disabled", true);
+      $loading.show();
+
+      const formData = $form.serialize();
+
+      $.ajax({
+        url: `/admin/ais/${ai_id}/generate-image`,
+        type: "POST",
+        data: formData,
+        beforeSend: function () {
+          $("#ai-image-box").show();
+          $("#image-loading-spinner").show();
+          $("#loading-spinner-img").show();
+          $("#generated-image").hide();
+          $("#download-btn").hide();
+        },
+        success: function (imageRes) {
+          if (imageRes.image_url) {
+            $loading.hide();
+            $submitBtn.prop("disabled", false);
+            $("#ai-response-box").fadeIn();
+            const img = $("#generated-image");
+            const imgLink = $("#image-lightbox-link");
+            img.attr("src", imageRes.image_url);
+            imgLink.attr("href", imageRes.image_url);
+
+            // تنظیم لینک دانلود
+            $("#download-btn")
+              .attr("href", imageRes.image_url)
+              .attr("download", "generated-image-" + Date.now() + ".jpg")
+              .show();
+
+            img.off("load").on("load", function () {
+              $("#image-loading-spinner").hide();
+              $("#loading-spinner-img").hide();
+              img.fadeIn();
+            });
+          } else {
+            $("#ai-image-box").hide();
+          }
+        },
+        error: function (xhr) {
+          let res = {};
+          try {
+            res = JSON.parse(xhr.responseText);
+          } catch (e) {
+            // اگر خطایی در پارس بود اینجا میاد
+          }
+          if (xhr.status === 403) {
+            if (res.image_url) {
+              $loading.hide();
+              $submitBtn.prop("disabled", false);
+              $("#ai-response-box").fadeIn();
+              const img = $("#generated-image");
+              const imgLink = $("#image-lightbox-link");
+              img.attr("src", res.image_url);
+              imgLink.attr("href", res.image_url);
+
+              // تنظیم لینک دانلود
+              $("#download-btn")
+                .attr("href", res.image_url)
+                .attr("download", "generated-image-" + Date.now() + ".jpg")
+                .show();
+
+              img.off("load").on("load", function () {
+                $("#image-loading-spinner").hide();
+                $("#loading-spinner-img").hide();
+                img.fadeIn();
+              });
+            } else {
+              $("#ai-image-box").hide();
+            }
+            let msg = "شما اجازه دسترسی به این بخش را ندارید.";
+            try {
+              let res = JSON.parse(xhr.responseText);
+              if (res.message) {
+                msg = res.message;
+              }
+            } catch (e) {}
+            Swal.fire({
+              icon: "info",
+              title: "توجه!",
+              text: msg,
+            });
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "خطا",
+              text: "خطا در پردازش تصویر",
+            });
+            $("#ai-image-box").hide();
+          }
+        },
+      });
     });
   });
-});
 </script>
-{% endif %}
+{% endif %} {% if ai_model.type.value == "text" %}
+<script>
+  lightbox.option({
+    wrapAround: true,
+    positionFromTop: 100,
+    alwaysShowNavOnTouchDevices: true,
+    albumLabel: "تصویر %1 از %2",
+  });
 
+  $(document).ready(function () {
+    const ai_id = $("#ai-form").data("model-id");
+    const $form = $("#ai-form");
+    const $submitBtn = $form.find('button[type="submit"]');
 
+    const $loading = $(
+      '<span id="loading-spinner" style="display:none;"></span>'
+    );
+    $submitBtn.after($loading);
 
-{% endblock %}
+    $form.on("submit", function (e) {
+      e.preventDefault();
+      $submitBtn.prop("disabled", true);
+      $loading.show();
+
+      const formData = $form.serialize();
+      $.ajax({
+        url: `/admin/ais/${ai_id}/generate-text`,
+        type: "POST",
+        data: formData,
+        success: function (res) {
+          const htmlContent = marked.parse(res.response);
+          $("#ai-response-html").html(htmlContent);
+          const aititle = $("#ai-title").val();
+
+          $("#ai-response-box").fadeIn();
+        },
+        error: function (xhr) {
+          $("#ai-response-box").hide();
+          if (xhr.status === 403) {
+            let msg = "شما اجازه دسترسی به این بخش را ندارید.";
+            try {
+              let res = JSON.parse(xhr.responseText);
+              if (res.message) {
+                msg = res.message;
+              }
+            } catch (e) {}
+            Swal.fire({
+              icon: "error",
+              title: "خطا",
+              text: msg,
+            });
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "خطا",
+              text: "خطا در پردازش درخواست تولید متن",
+            });
+          }
+        },
+        complete: function () {
+          $submitBtn.prop("disabled", false);
+          $loading.hide();
+        },
+      });
+    });
+  });
+</script>
+{% endif %} {% if ai_model.type.value == "audio" %}
+<script>
+  $(document).ready(function () {
+    const ai_id = $("#ai-form").data("model-id");
+    const $form = $("#ai-form");
+    const $submitBtn = $form.find('button[type="submit"]');
+
+    const $loading = $(
+      '<span id="loading-spinner" style="display:none;"></span>'
+    );
+    $submitBtn.after($loading);
+
+    $form.on("submit", function (e) {
+      e.preventDefault();
+      $submitBtn.prop("disabled", true);
+      $loading.show();
+
+      const formData = $form.serialize();
+
+      $.ajax({
+        url: `/admin/ais/${ai_id}/generate-text-audio`,
+        type: "POST",
+        data: formData,
+        beforeSend: function () {
+          $("#ai-response-box").show();
+          $("#ai-audio-box").hide();
+          $("#audio-loading-spinner").show();
+          $("#loading-spinner-img").show();
+          $("#generated-audio").hide();
+          $("#download-audio-btn").hide();
+        },
+        success: function (res) {
+          if (res.audio_url) {
+            $("#audio-loading-spinner").hide();
+            $("#loading-spinner-img").hide();
+
+            $("#ai-audio-box").fadeIn();
+
+            const audio = $("#generated-audio");
+            audio.attr("src", res.audio_url).show();
+
+            // لینک دانلود
+            $("#download-audio-btn")
+              .attr("href", res.audio_url)
+              .attr("download", "generated-audio-" + Date.now() + ".mp3")
+              .show();
+          } else {
+            $("#ai-audio-box").hide();
+          }
+        },
+        error: function (xhr) {
+          $("#ai-response-box").hide();
+          if (xhr.status === 403) {
+            let msg = "شما اجازه دسترسی به این بخش را ندارید.";
+            try {
+              let res = JSON.parse(xhr.responseText);
+              if (res.message) {
+                msg = res.message;
+              }
+            } catch (e) {}
+            Swal.fire({
+              icon: "error",
+              title: "خطا",
+              text: msg,
+            });
+          } else {
+            $("#ai-audio-box").hide();
+          }
+        },
+        complete: function () {
+          $submitBtn.prop("disabled", false);
+          $loading.hide();
+        },
+      });
+    });
+  });
+</script>
+{% endif %} {% if ai_model.type.value == "text_image" %}
+<script>
+  $(document).ready(function () {
+    const ai_id = $("#ai-form").data("model-id");
+    const $form = $("#ai-form");
+    const $submitBtn = $form.find('button[type="submit"]');
+    const $loading = $(
+      '<span id="loading-spinner" style="display:none;"></span>'
+    );
+    $submitBtn.after($loading);
+
+    $form.on("submit", function (e) {
+      e.preventDefault();
+      $submitBtn.prop("disabled", true);
+      $loading.show();
+
+      const formData = $form.serialize();
+      $.ajax({
+        url: `/admin/ais/${ai_id}/generate-text-image`,
+        type: "POST",
+        data: formData,
+        beforeSend: function () {
+          $("#ai-response-box").hide();
+        },
+        success: function (res) {
+          $("#ai-response-html").html(marked.parse(res.text_response));
+          $("#generated-image").attr("src", res.image_url);
+          $("#image-lightbox-link").attr("href", res.image_url);
+          $("#download-btn")
+            .attr("href", res.image_url)
+            .attr("download", "image-" + Date.now() + ".jpg");
+          $("#ai-response-box").fadeIn();
+        },
+        error: function (xhr) {
+          let msg = "خطا در پردازش";
+          try {
+            msg = JSON.parse(xhr.responseText).message || msg;
+          } catch (_) {}
+          Swal.fire({ icon: "error", title: "خطا", text: msg });
+        },
+        complete: function () {
+          $submitBtn.prop("disabled", false);
+          $loading.hide();
+        },
+      });
+    });
+  });
+</script>
+{% endif %} {% if ai_model.type.value == "vision" %}
+<script>
+  $(document).ready(function () {
+    const ai_id = $("#ai-form").data("model-id");
+    const $form = $("#ai-form");
+    const $submitBtn = $form.find('button[type="submit"]');
+
+    const $loading = $(
+      '<span id="loading-spinner" style="display:none;"></span>'
+    );
+    $submitBtn.after($loading);
+
+    $form.on("submit", function (e) {
+      e.preventDefault();
+      $submitBtn.prop("disabled", true);
+      $loading.show();
+
+      const formData = new FormData(this);
+
+      $.ajax({
+        url: `/admin/ais/${ai_id}/vision-image`,
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (res) {
+          if (res.result) {
+            const htmlContent = marked.parse(res.result);
+            $("#ai-response-html").html(htmlContent);
+            $("#ai-response-box").fadeIn();
+          }
+          if (res.image_url) {
+            $("#preview-img").attr("src", res.image_url);
+            $("#vision-image-preview").show();
+          } else {
+            $("#vision-image-preview").hide();
+          }
+        },
+        error: function (xhr) {
+          $("#ai-response-box").hide();
+          if (xhr.status === 403) {
+            let msg = "شما اجازه دسترسی به این بخش را ندارید.";
+            try {
+              let res = JSON.parse(xhr.responseText);
+              if (res.message) {
+                msg = res.message;
+              }
+            } catch (e) {}
+            Swal.fire({
+              icon: "error",
+              title: "خطا",
+              text: msg,
+            });
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "خطا",
+              text: "خطا در پردازش تصویر",
+            });
+          }
+        },
+        complete: function () {
+          $submitBtn.prop("disabled", false);
+          $loading.hide();
+        },
+      });
+    });
+  });
+</script>
+{% endif %} {% if ai_model.type.value == "speech_audio" %}
+<!-- <script>
+  const ai_id = $("#model-id").val();
+  const token = $("#token").val();
+  const ws = new WebSocket(`ws://${location.host}/admin/ws/ais/${ai_id}/audio-chat?token=${token}`);
+  ws.binaryType = "arraybuffer";
+
+  let rec;
+  let chunks = [];
+
+  ws.onopen = () => {
+    document.getElementById("audio-status").innerText = "وضعیت: فعال";
+
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+      rec = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+
+      rec.ondataavailable = e => {
+        chunks.push(e.data);
+      };
+
+      rec.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/webm' });
+        chunks = [];
+        blob.arrayBuffer().then(buffer => {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(buffer);
+          }
+          ws.close();
+        });
+
+        document.getElementById("audio-status").innerText = "وضعیت: قطع";
+      };
+
+      document.getElementById("start-btn").onclick = () => {
+        chunks = [];
+        rec.start();
+        document.getElementById("start-btn").disabled = true;
+        document.getElementById("stop-btn").disabled = false;
+      };
+
+      document.getElementById("stop-btn").onclick = () => {
+        rec.stop();
+        document.getElementById("start-btn").disabled = false;
+        document.getElementById("stop-btn").disabled = true;
+      };
+    });
+  };
+
+  ws.onmessage = ev => {
+    if (typeof ev.data === "string") {
+      const json = JSON.parse(ev.data);
+      document.getElementById("audio-status").innerText = json.transcript;
+    } else {
+      const blob = new Blob([ev.data], { type: "audio/wav" });
+      new Audio(URL.createObjectURL(blob)).play();
+    }
+  };
+
+  ws.onclose = () => {
+    console.log("WebSocket بسته شد");
+    document.getElementById("audio-status").innerText = "وضعیت: قطع";
+  };
+
+  ws.onerror = (err) => {
+    console.error("WebSocket error:", err);
+    document.getElementById("audio-status").innerText = "خطا در اتصال";
+  };
+
+</script> -->
+
+<script src="https://cdn.jsdelivr.net/gh/mattdiamond/Recorderjs@master/dist/recorder.js"></script>
+
+<script>
+  class ResamplerRecorder {
+    constructor(sourceNode, options = {}) {
+      this.context = sourceNode.context;
+      this.source = sourceNode;
+      this.bufferSize = options.bufferSize || 4096;
+      this.inputSampleRate = this.context.sampleRate;
+      this.targetSampleRate = options.targetSampleRate || 24000;
+      this.numChannels = options.numChannels || 1;
+
+      this.processor = this.context.createScriptProcessor(
+        this.bufferSize,
+        this.numChannels,
+        this.numChannels
+      );
+      this.audioBuffer = [];
+      this.recording = false;
+
+      this.processor.onaudioprocess = (e) => {
+        if (!this.recording) return;
+        const inputData = e.inputBuffer.getChannelData(0);
+        this.audioBuffer.push(new Float32Array(inputData));
+      };
+      sourceNode.connect(this.processor);
+      this.processor.connect(this.context.destination);
+    }
+
+    start() {
+      this.audioBuffer = [];
+      this.recording = true;
+    }
+
+    stop() {
+      this.recording = false;
+    }
+
+    async exportPCM16() {
+      // concatenate all Float32 chunks
+      const totalLen = this.audioBuffer.reduce((sum, b) => sum + b.length, 0);
+      const buffer = new Float32Array(totalLen);
+      let offset = 0;
+      for (const b of this.audioBuffer) {
+        buffer.set(b, offset);
+        offset += b.length;
+      }
+
+      // resample using OfflineAudioContext
+      const offlineCtx = new OfflineAudioContext(
+        1,
+        Math.ceil(
+          (buffer.length * this.targetSampleRate) / this.inputSampleRate
+        ),
+        this.targetSampleRate
+      );
+      const bufferSource = offlineCtx.createBuffer(
+        1,
+        buffer.length,
+        this.inputSampleRate
+      );
+      bufferSource.copyToChannel(buffer, 0);
+      const source = offlineCtx.createBufferSource();
+      source.buffer = bufferSource;
+      source.connect(offlineCtx.destination);
+      source.start();
+
+      const renderedBuffer = await offlineCtx.startRendering();
+      const resampledData = renderedBuffer.getChannelData(0);
+
+      // convert Float32 [-1,1] to Int16 PCM
+      const pcm16 = new Int16Array(resampledData.length);
+      for (let i = 0; i < resampledData.length; i++) {
+        let s = Math.max(-1, Math.min(1, resampledData[i]));
+        pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+      }
+      return pcm16.buffer;
+    }
+  }
+
+  class AudioChat {
+    constructor() {
+      this.ws = null;
+      this.recorder = null;
+      this.stream = null;
+      this.audioContext = null;
+      this.isRecording = false;
+      this.sendInterval = null;
+
+      this.initializeElements();
+      this.setupEventListeners();
+    }
+
+    initializeElements() {
+      this.startBtn = document.getElementById("start-btn");
+      this.stopBtn = document.getElementById("stop-btn");
+      this.statusDiv = document.getElementById("audio-status");
+      this.transcriptDiv = document.getElementById("transcript-content");
+      this.errorContainer = document.getElementById("error-container");
+      this.modelId = document.getElementById("model-id").value;
+      this.token = document.getElementById("token").value;
+    }
+
+    setupEventListeners() {
+      this.startBtn.addEventListener("click", () => this.startRecording());
+      this.stopBtn.addEventListener("click", () => this.stopRecording());
+    }
+
+    async initializeWebSocket() {
+      return new Promise((resolve, reject) => {
+        const wsUrl = `ws://${location.host}/admin/ws/ais/${this.modelId}/audio-chat?token=${this.token}`;
+        this.ws = new WebSocket(wsUrl);
+        this.ws.binaryType = "arraybuffer"; // <---- حتما اینجا باید تنظیم بشه
+
+        this.ws.onopen = () => {
+          console.log("WebSocket connected");
+          this.updateStatus("متصل", "connected");
+          resolve();
+        };
+        this.ws.onerror = (err) => {
+          console.error("WebSocket error:", err);
+          this.showError("خطا در اتصال وب‌سوکت");
+          reject(err);
+        };
+        this.ws.onclose = () => {
+          this.updateStatus("قطع", "disconnected");
+        };
+        this.ws.onmessage = (msg) => {
+          try {
+            // فرض می‌کنیم پاسخ‌های سرور JSON هستند بجز داده صوتی باینری
+            if (typeof msg.data === "string") {
+              const data = JSON.parse(msg.data);
+              if (data.type === "transcript") {
+                this.addTranscript(data.transcript);
+              } else if (data.type === "error") {
+                this.showError("خطا از سرور: " + data.error);
+              } else if (data.type === "text") {
+                this.addTranscript(data.text);
+              }
+            } else {
+              // دریافت داده صوتی باینری (pcm16) - می‌تونی اینجا پخش کنی اگر میخوای
+              // مثلاً با Web Audio API
+              console.log("Audio chunk received", msg.data.byteLength, "bytes");
+            }
+          } catch (e) {
+            console.error("Error parsing server message:", e);
+          }
+        };
+
+        setTimeout(() => {
+          if (this.ws.readyState !== WebSocket.OPEN) {
+            reject(new Error("WebSocket connection timeout"));
+          }
+        }, 5000);
+      });
+    }
+
+    async startRecording() {
+      try {
+        this.clearError();
+
+        if (this.isRecording) {
+          this.showError("قبلاً در حال ضبط هستید");
+          return;
+        }
+
+        await this.initializeWebSocket();
+
+        this.stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        this.audioContext = new (window.AudioContext ||
+          window.webkitAudioContext)();
+        const input = this.audioContext.createMediaStreamSource(this.stream);
+        this.recorder = new ResamplerRecorder(input, {
+          targetSampleRate: 24000,
+          numChannels: 1,
+        });
+
+        this.recorder.start();
+        this.isRecording = true;
+        this.updateUIForRecording();
+
+        this.sendInterval = setInterval(async () => {
+          if (!this.isRecording) return;
+          const pcmBuffer = await this.recorder.exportPCM16();
+          if (
+            pcmBuffer &&
+            pcmBuffer.byteLength > 0 &&
+            this.ws.readyState === WebSocket.OPEN
+          ) {
+            this.ws.send(pcmBuffer);
+            console.log("📤 PCM16 sent:", pcmBuffer.byteLength, "bytes");
+          }
+        }, 1000);
+      } catch (e) {
+        console.error("Error in startRecording:", e);
+        this.showError("خطا در شروع ضبط: " + e.message);
+        this.updateUIForStopped();
+      }
+    }
+
+    async stopRecording() {
+      if (!this.isRecording) return;
+
+      try {
+        if (this.recorder) {
+          this.recorder.stop();
+          this.recorder = null;
+        }
+
+        if (this.sendInterval) {
+          clearInterval(this.sendInterval);
+          this.sendInterval = null;
+        }
+
+        if (this.audioContext) {
+          await this.audioContext.close();
+          this.audioContext = null;
+        }
+
+        if (this.stream) {
+          this.stream.getTracks().forEach((track) => track.stop());
+          this.stream = null;
+        }
+
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+          this.ws.close();
+        }
+      } catch (e) {
+        console.error("Error in stopRecording:", e);
+      } finally {
+        this.isRecording = false;
+        this.updateUIForStopped();
+      }
+    }
+
+    updateUIForRecording() {
+      this.startBtn.disabled = true;
+      this.stopBtn.disabled = false;
+      this.startBtn.classList.add("recording");
+      this.updateStatus("در حال ضبط...", "listening");
+    }
+
+    updateUIForStopped() {
+      this.startBtn.disabled = false;
+      this.stopBtn.disabled = true;
+      this.startBtn.classList.remove("recording");
+      this.updateStatus("متوقف", "disconnected");
+    }
+
+    updateStatus(message, type) {
+      this.statusDiv.textContent = `وضعیت: ${message}`;
+      this.statusDiv.className = `status ${type}`;
+    }
+
+    addTranscript(text) {
+      const p = document.createElement("p");
+      p.textContent = text;
+      p.style.marginBottom = "10px";
+      this.transcriptDiv.appendChild(p);
+      this.transcriptDiv.scrollTop = this.transcriptDiv.scrollHeight;
+    }
+
+    showError(message) {
+      this.errorContainer.innerHTML = `<div class="error">${message}</div>`;
+      setTimeout(() => {
+        this.errorContainer.innerHTML = "";
+      }, 5000);
+    }
+
+    clearError() {
+      this.errorContainer.innerHTML = "";
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    new AudioChat();
+  });
+</script>
+
+{% endif %} {% endblock %}
