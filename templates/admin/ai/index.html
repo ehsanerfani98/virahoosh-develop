@@ -45,6 +45,8 @@
                   <span class="badge badge-success">تصویر</span>
                   {% elif ai.type.value == 'text' or ai.type.value == 'vision' %}
                   <span class="badge badge-success">متن</span>
+                  {% elif ai.type.value == 'text_image' %}
+                  <span class="badge badge-success">متن و تصویر</span>
                   {% elif ai.type.value == 'video' %}
                   <span class="badge badge-success">ویدیو</span>
                   {% elif ai.type.value == 'audio' or ai.type.value == 'speech_audio' %}
