@@ -899,6 +899,81 @@ async def generate_vision_image(ai_id: int, request: Request, db: Session = Depe
         "image_url": image_data_url,
     })
 
+@router.post("/ais/{ai_id}/generate-text-image", name="admin_ai_generate_text_image")
+async def generate_text_image(
+    ai_id: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    form = await request.form()
+    form_data = dict(form)
+    user = auth(request, db)
+
+    ai_model = db.query(AiModel).filter(AiModel.id == ai_id).first()
+    if not ai_model:
+        return JSONResponse(status_code=404, content={"message": "مدل یافت نشد"})
+
+    # ---- تولید متن ----
+    prompt_filled = ai_model.prompt
+    for input_item in ai_model.inputs:
+        value = form_data.get(input_item.name, "")
+        prompt_filled = prompt_filled.replace(
+            "{" + input_item.name + "}", value)
+
+    system_prompt = ai_model.system_prompt or "تو یک دستیار فارسی هستی."
+    max_tokens = ai_model.max_tokens or 1000
+    text_response = await run_in_threadpool(
+        run_openai_prompt, prompt_filled, system_prompt,
+        max_tokens, ai_model.model, ai_model.provider
+    )
+
+    # ---- تولید تصویر ----
+    image_title = form_data.get("image_title", "").strip()
+    if not image_title:
+        return JSONResponse(status_code=400, content={"message": "عنوان تصویر ارسال نشده"})
+
+    image_prompt = prompt_filled + \
+        " سپس با توجه به توضیحات تصویر را تولید کن، توضیحات: " + image_title
+    translated_prompt = await run_in_threadpool(
+        translate_to_english, image_prompt, ai_model.model, ai_model.provider
+    )
+    image_url = await run_in_threadpool(generate_image_by_prompt, translated_prompt)
+    if not image_url:
+        return JSONResponse(status_code=500, content={"message": "خطا در تولید تصویر"})
+
+    # ---- ذخیره در آرشیو ----
+    archive_text = AiArchive(
+        user_id=user.id,
+        ai_model_id=ai_id,
+        title="",
+        type="text",
+        prompt=prompt_filled,
+        url="",
+        response=text_response,
+        created_at=datetime.now(TEHRAN_TZ)
+    )
+    archive_image = AiArchive(
+        user_id=user.id,
+        ai_model_id=ai_id,
+        title=image_title,
+        type="image",
+        prompt=image_prompt,
+        url=image_url,
+        response=None,
+        created_at=datetime.now(TEHRAN_TZ)
+    )
+    db.add(archive_text)
+    db.add(archive_image)
+    db.commit()
+
+    return JSONResponse({
+        "text_response": text_response,
+        "image_url": image_url,
+        "prompt": prompt_filled,
+        "translated_prompt": translated_prompt,
+        "model_id": ai_id
+    })
+
 
 # @router.post("/ais/archive/save", name="admin_ai_archive_save")
 # def save_to_archive(
