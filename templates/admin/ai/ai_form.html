@@ -88,16 +88,45 @@
       {% for input in ai_model.inputs %}
       <fieldset>
         <legend>{{ input.title }}</legend>
+
         {% if input.input_type in ['text', 'number'] %}
         <input type="{{ input.input_type }}" name="{{ input.name }}" class="form-control" required />
+
         {% elif input.input_type == 'textarea' %}
-        <textarea name="{{ input.name }}" class="form-control" rows="3" required></textarea>
-        {% elif input.input_type == 'select' %}
+        <textarea name="{{ input.name }}" class="form-control" rows="4" required></textarea>
+
+        {% elif input.input_type == 'select' %} {% set options = input.options |
+        default('[]') | loads %}
         <select name="{{ input.name }}" class="form-select" required>
-          {% for option in (input.options | default('[]') | loads) %}
+          {% for option in options %}
           <option value="{{ option }}">{{ option }}</option>
           {% endfor %}
         </select>
+
+        {% elif input.input_type == 'checkbox' %} {% set options = input.options
+        | default('[]') | loads %}
+        <div>
+          {% for option in options %}
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" name="{{ input.name }}"
+              id="{{ input.name }}_{{ loop.index }}" value="{{ option }}" />
+            <label class="form-check-label" for="{{ input.name }}_{{ loop.index }}">{{ option }}</label>
+          </div>
+          {% endfor %}
+        </div>
+
+        {% elif input.input_type == 'radiobutton' %} {% set options =
+        input.options | default('[]') | loads %}
+        <div>
+          {% for option in options %}
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="{{ input.name }}" id="{{ input.name }}_{{ loop.index }}"
+              value="{{ option }}" required />
+            <label class="form-check-label" for="{{ input.name }}_{{ loop.index }}">{{ option }}</label>
+          </div>
+          {% endfor %}
+        </div>
+
         {% endif %}
       </fieldset>
       {% endfor %}
