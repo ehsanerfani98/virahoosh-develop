@@ -639,19 +639,18 @@ endblock %} {% block css %}
         ></textarea>
       </fieldset>
 
-      {% for input in ai_model.inputs %}
+      {% for input in ai_model.inputs %} {% if input.name != "topic" %}
       <fieldset>
         <legend>{{ input.title }}</legend>
 
-        {% if input.input_type in ['text', 'number'] %} {% if input.name !=
-        "topic" %}
+        {% if input.input_type in ['text', 'number'] %}
         <input
           type="{{ input.input_type }}"
           name="{{ input.name }}"
           class="form-control"
           required
         />
-        {% endif %} {% elif input.input_type == 'textarea' %}
+        {% elif input.input_type == 'textarea' %}
         <textarea
           name="{{ input.name }}"
           class="form-control"
@@ -712,7 +711,7 @@ endblock %} {% block css %}
 
         {% endif %}
       </fieldset>
-      {% endfor %}
+      {% endif %} {% endfor %}
 
       <button type="submit" class="btn btn-primary px-4">
         تولید متن و تصویر
