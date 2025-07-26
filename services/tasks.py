@@ -117,7 +117,7 @@ def merge_chunks(results, save_path: str, chunks_dir: str, assistant_id: int, us
         vectorstores = []
         for path in chunk_paths:
             try:
-                vs = FAISS.load_local(path, embed)
+                vs = FAISS.load_local(path, embed, allow_dangerous_deserialization=True)
                 vectorstores.append(vs)
             except Exception as e:
                 logger.warning(f"خطا در بارگذاری chunk {path}: {str(e)}")
