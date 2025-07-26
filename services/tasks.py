@@ -101,6 +101,7 @@ def process_excel_file(assistant_id: int, excel_path: str, user_id: str):
         save_path = f"{get_user_path(user_id)}/vectorstores/{assistant_id}"
         chunks_dir = os.path.join(save_path, "chunks")
         os.makedirs(chunks_dir, exist_ok=True)
+        os.chmod(chunks_dir, 0o755)
 
         tasks = []
         for chunk in split_docs:
@@ -137,6 +138,7 @@ def embed_chunk(text_chunk: str, save_path: str):
 
         vectorstore = FAISS.from_documents([Document(page_content=text_chunk)], embed)
         os.makedirs(save_path, exist_ok=True)
+        os.chmod(save_path, 0o755)
         vectorstore.save_local(save_path)
 
     except Exception as e:

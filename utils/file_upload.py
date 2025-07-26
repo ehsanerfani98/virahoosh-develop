@@ -62,7 +62,8 @@ async def upload_file(
 ) -> str:
     user_folder = get_user_storage_path(user_id)
     os.makedirs(user_folder, exist_ok=True)
-
+    os.chmod(user_folder, 0o775)
+    
     contents = await file.read()
     file_size = len(contents)
 
@@ -111,6 +112,7 @@ def upload_file_from_bytes(
 ) -> str:
     user_folder = get_user_storage_path(user_id)
     os.makedirs(user_folder, exist_ok=True)
+    os.chmod(user_folder, 0o775)
 
     check_user_storage_limit(user_id, len(file_bytes))
 
