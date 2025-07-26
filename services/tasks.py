@@ -61,7 +61,7 @@ import pandas as pd
 import logging
 import shutil
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain.schema import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from database.session import SessionLocal
@@ -140,10 +140,11 @@ def embed_chunk(text_chunk: str, save_path: str):
         os.makedirs(save_path, exist_ok=True)
         os.chmod(save_path, 0o755)
         vectorstore.save_local(save_path)
-
+        return True
+    
     except Exception as e:
         logger.error(f"Error embedding chunk to {save_path}: {str(e)}")
-
+        return False
 
 @celery_app.task(name="tasks.merge_chunks")
 def merge_chunks(save_path: str, chunks_dir: str, assistant_id: int, user_id: str, excel_path: str):
