@@ -8,7 +8,7 @@ from models.file_upload import FileUpload
 import time
 
 # حداکثر فضای ذخیره‌سازی (بر حسب بایت)
-USER_STORAGE_LIMIT = 50 * 1024 * 1024  # 100MB
+USER_STORAGE_LIMIT = 200 * 1024 * 1024  # 100MB
 
 BASE_UPLOAD_DIR = "static/uploads"
 
@@ -63,7 +63,7 @@ async def upload_file(
     user_folder = get_user_storage_path(user_id)
     os.makedirs(user_folder, exist_ok=True)
     os.chmod(user_folder, 0o775)
-    
+
     contents = await file.read()
     file_size = len(contents)
 

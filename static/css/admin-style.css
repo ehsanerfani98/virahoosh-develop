@@ -445,3 +445,17 @@ legend {
     position: absolute;
     top: -18px;
 }
+
+.tokens_used {
+    background: #06d6a0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: white;
+    cursor: pointer;
+    transition: .3s all;
+}
+
+.tokens_used:hover {
+    background: #0bc291;
+}

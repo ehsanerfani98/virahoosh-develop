@@ -18,6 +18,7 @@
                             <tr>
                                 <th>ایمیل / موبایل</th>
                                 <th>نقش‌ها</th>
+                                <th>اشتراک ها</th>
                                 <th class="text-center">عملیات</th>
                             </tr>
                         </thead>
@@ -26,6 +27,12 @@
                             <tr>
                                 <td>{{ u.email or u.phone }}</td>
                                 <td>{{ u.roles | map(attribute='title') | join(', ') }}</td>
+                                <td>
+                                    {% if can('list_user_subscription') %}
+                                    <a target="_blank" href="{{ url_for('admin_user_subscription_detail', user_id=u.id) }}"
+                                        class="btn btn-sm btn-outline-success rounded-pill px-3">مشاهده</a>
+                                    {% endif %}
+                                </td>
                                 <td class="text-center">
                                     {% if can('edit_user') %}
                                     <a href="{{ url_for('admin_users_edit', user_id=u.id) }}"

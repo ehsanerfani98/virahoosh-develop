@@ -1,0 +1,33 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}ویرایش پلن اشتراک{% endblock %}
+{% block page_title %}ویرایش پلن اشتراک{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <form method="post" class="card shadow-sm rounded-4 p-4" id="planEditForm">
+            <div class="mb-3">
+                <label for="title" class="form-label">عنوان پلن</label>
+                <input type="text" class="form-control" id="title" name="title" value="{{ plan.title }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">توضیحات</label>
+                <textarea class="form-control" id="description" name="description" rows="3">{{ plan.description }}</textarea>
+            </div>
+            <div class="mb-3">
+                <label for="duration_days" class="form-label">مدت زمان اشتراک (روز)</label>
+                <input type="number" class="form-control" id="duration_days" name="duration_days" min="1" value="{{ plan.duration_days }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="tokens_allowed" class="form-label">تعداد توکن قابل استفاده</label>
+                <input type="number" class="form-control" id="tokens_allowed" name="tokens_allowed" min="1" value="{{ plan.tokens_allowed }}" required>
+            </div>
+            <div class="text-end">
+                <button type="submit" class="btn btn-sm btn-success px-4">ذخیره تغییرات</button>
+                <a href="{{ url_for('admin_subscription_plans') }}" class="btn btn-sm btn-outline-secondary">بازگشت</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

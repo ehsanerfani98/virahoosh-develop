@@ -52,7 +52,10 @@ def run_openai_prompt(prompt_text: str, system_prompt: str, max_tokens: int, mod
                 temperature=0.5,
                 max_tokens=max_tokens
             )
-            return response.choices[0].message.content.strip()
+            return {
+                'message' : response.choices[0].message.content.strip(),
+                'total_tokens' : response.usage.total_tokens
+            }
 
         elif provider == "deepseek":
             # نمونه ساختگی: اگر DeepSeek API متفاوت است، جایگزین کن
@@ -178,8 +181,6 @@ def analyze_image_with_openai_vision(image: Image.Image, max_tokens: int, prompt
 
     except Exception as e:
         return f"خطا در تحلیل تصویر: {e}"
-
-
 
 
 async def realtime_audio_relay(websocket: WebSocket, deployment: str):

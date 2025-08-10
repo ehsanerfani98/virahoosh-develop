@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, ForeignKey, Text, DateTime, String
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from database.session import Base
-
+from core.config import TEHRAN_TZ
 
 class AiArchive(Base):
     __tablename__ = "ai_archives"
@@ -14,7 +14,7 @@ class AiArchive(Base):
     title = Column(String(255), nullable=False)
     prompt = Column(Text)
     response = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(TEHRAN_TZ))
     type = Column(String(20), nullable=True)
     url = Column(String(512), nullable=True)
     

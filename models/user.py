@@ -1,8 +1,9 @@
-# models/user.py
 from sqlalchemy import Column, Integer, String
 from database.session import Base
 from sqlalchemy.orm import relationship
 from models.user_role import user_roles_table
+from models.UserSubscription import UserSubscription
+from models.user_token import UserToken
 import uuid
 
 class User(Base):
@@ -15,3 +16,6 @@ class User(Base):
     refresh_tokens = relationship("RefreshTokenDB", back_populates="user", cascade="all, delete-orphan" )
     tokens = relationship("TokenDB", back_populates="user", cascade="all, delete-orphan" )
     roles = relationship("Role", secondary=user_roles_table, back_populates="users")
+    
+    subscriptions = relationship("UserSubscription", back_populates="user", cascade="all, delete-orphan")
+    tokens_usage = relationship("UserToken", back_populates="user", cascade="all, delete-orphan")

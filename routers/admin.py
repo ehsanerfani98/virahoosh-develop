@@ -8,6 +8,8 @@ from database.session import get_db
 from models.role import Role
 from models.permission import Permission
 from models.file_upload import FileUpload
+from models.subscription_plan import SubscriptionPlan
+from models.UserSubscription import UserSubscription
 from models.user import User
 from models.assistant import Assistant
 from models.ai import AiModel
@@ -31,11 +33,14 @@ from utils.file_upload import upload_file, upload_file_from_bytes, check_user_st
 import requests
 from utils.auth import websocket_auth
 from utils.token import get_token
+from utils.token_api import tokens_used_global, num_tokens_from_messages
 from starlette.websockets import WebSocketState
 import logging
 from services.tasks import process_excel_file
 import shutil
 import uuid
+from models.user_token import UserToken
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -287,8 +292,6 @@ def delete_permission(request: Request, permission_id: int, db: Session = Depend
     )
 
 # روت کاربران
-
-
 @router.get("/users", response_class=HTMLResponse, name="admin_users")
 def list_users(
     request: Request,
@@ -381,9 +384,178 @@ def delete_user(request: Request, user_id: str, db: Session = Depends(get_db), _
     db.commit()
     return JSONResponse(status_code=200, content={"message": "کاربر با موفقیت حذف شد."})
 
+
+# لیست پلن‌ها
+@router.get("/subscription_plans", response_class=HTMLResponse, name="admin_subscription_plans")
+def list_subscription_plans(
+    request: Request,
+    db: Session = Depends(get_db),
+    _=Depends(has_permission("list_subscription_plan")),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(10, ge=1, le=100)
+):
+    total = db.query(SubscriptionPlan).count()
+    plans = db.query(SubscriptionPlan).order_by(SubscriptionPlan.title.asc()).offset(
+        (page - 1) * per_page).limit(per_page).all()
+
+    total_pages = (total + per_page - 1) // per_page
+
+    return templates.TemplateResponse("admin/subscription_plans/index.html", {
+        "request": request,
+        "plans": plans,
+        "page": page,
+        "per_page": per_page,
+        "total": total,
+        "total_pages": total_pages,
+    })
+
+
+# صفحه ایجاد پلن جدید
+@router.get("/subscription_plans/create", response_class=HTMLResponse, name="admin_subscription_plan_create")
+def create_subscription_plan_page(
+    request: Request,
+    db: Session = Depends(get_db),
+    _=Depends(has_permission("create_subscription_plan"))
+):
+    return templates.TemplateResponse("admin/subscription_plans/create.html", {
+        "request": request
+    })
+
+
+# ذخیره پلن جدید
+@router.post("/subscription_plans/create", name="admin_subscription_plan_store")
+def store_subscription_plan(
+    request: Request,
+    title: str = Form(...),
+    description: str = Form(None),
+    duration_days: int = Form(...),
+    tokens_allowed: int = Form(...),
+    db: Session = Depends(get_db),
+    _=Depends(has_permission("create_subscription_plan"))
+):
+    new_plan = SubscriptionPlan(
+        title=title,
+        description=description,
+        duration_days=duration_days,
+        tokens_allowed=tokens_allowed
+    )
+    db.add(new_plan)
+    db.commit()
+    db.refresh(new_plan)
+    return RedirectResponse(url=request.url_for("admin_subscription_plans"), status_code=302)
+
+
+# صفحه ویرایش پلن
+@router.get("/subscription_plans/{plan_id}/edit", response_class=HTMLResponse, name="admin_subscription_plan_edit")
+def edit_subscription_plan_page(
+    plan_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    _=Depends(has_permission("edit_subscription_plan"))
+):
+    plan = db.query(SubscriptionPlan).filter(SubscriptionPlan.id == plan_id).first()
+    if not plan:
+        return RedirectResponse(request.url_for("admin_subscription_plans"), status_code=302)
+    return templates.TemplateResponse("admin/subscription_plans/edit.html", {
+        "request": request,
+        "plan": plan
+    })
+
+
+# ذخیره تغییرات پلن
+@router.post("/subscription_plans/{plan_id}/edit", name="admin_subscription_plan_update")
+def update_subscription_plan(
+    request: Request,
+    plan_id: str,
+    title: str = Form(...),
+    description: str = Form(None),
+    duration_days: int = Form(...),
+    tokens_allowed: int = Form(...),
+    db: Session = Depends(get_db),
+    _=Depends(has_permission("edit_subscription_plan"))
+):
+    plan = db.query(SubscriptionPlan).filter(SubscriptionPlan.id == plan_id).first()
+    if not plan:
+        return RedirectResponse(request.url_for("admin_subscription_plans"), status_code=302)
+
+    plan.title = title
+    plan.description = description
+    plan.duration_days = duration_days
+    plan.tokens_allowed = tokens_allowed
+    db.commit()
+    return RedirectResponse(request.url_for("admin_subscription_plans"), status_code=302)
+
+
+# حذف پلن
+@router.post("/subscription_plans/{plan_id}/delete", name="admin_subscription_plan_delete")
+def delete_subscription_plan(
+    request: Request,
+    plan_id: str,
+    db: Session = Depends(get_db),
+    _=Depends(has_permission("delete_subscription_plan"))
+):
+    plan = db.query(SubscriptionPlan).filter(SubscriptionPlan.id == plan_id).first()
+    if not plan:
+        return JSONResponse(status_code=404, content={"message": "پلن یافت نشد."})
+
+    db.delete(plan)
+    db.commit()
+    return JSONResponse(status_code=200, content={"message": "پلن با موفقیت حذف شد."})
+
+
+# لیست اشتراک‌های کاربران
+@router.get("/user_subscriptions/{user_id}", response_class=HTMLResponse, name="admin_user_subscription_detail")
+def user_subscription_detail(
+    request: Request,
+    user_id: str,
+    db: Session = Depends(get_db),
+    _=Depends(has_permission("list_user_subscription")),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(10, ge=1, le=100)
+):
+    query = db.query(UserSubscription).filter(UserSubscription.user_id == user_id)
+
+    total = query.count()
+    subscriptions = (
+        query
+        .order_by(UserSubscription.start_date.desc())
+        .offset((page - 1) * per_page)
+        .limit(per_page)
+        .all()
+    )
+
+    total_pages = (total + per_page - 1) // per_page
+
+    return templates.TemplateResponse("admin/user_subscriptions/index.html", {
+        "request": request,
+        "subscriptions": subscriptions,
+        "page": page,
+        "per_page": per_page,
+        "total": total,
+        "total_pages": total_pages,
+    })
+
+
+
+# حذف اشتراک
+@router.post("/user_subscriptions/{subscription_id}/delete", name="admin_user_subscription_delete")
+def delete_user_subscription(
+    request: Request,
+    subscription_id: str,
+    db: Session = Depends(get_db),
+    _=Depends(has_permission("delete_user_subscription"))
+):
+    subscription = db.query(UserSubscription).filter(UserSubscription.id == subscription_id).first()
+    if not subscription:
+        return JSONResponse(status_code=404, content={"message": "اشتراک یافت نشد."})
+
+    db.delete(subscription)
+    db.commit()
+    return JSONResponse(status_code=200, content={"message": "اشتراک با موفقیت حذف شد."})
+
+
+
 # لیست مدل‌ها
-
-
 @router.get("/ais", response_class=HTMLResponse, name="admin_ais")
 def index(request: Request, db: Session = Depends(get_db), _: bool = Depends(has_permission("list_ai")), page: int = 1, per_page: int = 10):
     total = db.query(AiModel).count()
@@ -624,6 +796,8 @@ def ai_form(ai_id: int, request: Request, db: Session = Depends(get_db)):
 
 @router.post("/ais/{ai_id}/generate-text", name="admin_ai_generate_text")
 async def generate_text(ai_id: int, request: Request, db: Session = Depends(get_db)):
+    
+
     form = await request.form()
     form_data = dict(form)
 
@@ -640,9 +814,23 @@ async def generate_text(ai_id: int, request: Request, db: Session = Depends(get_
             "{" + input_item.name + "}", value)
 
     system_prompt = ai_model.system_prompt or "تو یک دستیار فارسی هستی."
-    max_tokens = ai_model.max_tokens or 1000
 
-    text_response = await run_in_threadpool(run_openai_prompt, prompt_filled, system_prompt, max_tokens, model, provider)
+
+    # بررسی مقدار توکن
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": prompt_filled}
+    ]
+    input_token = num_tokens_from_messages(messages, ai_model.model)
+    if(input_token > tokens_used_global(request)):
+        return JSONResponse(status_code=403, content={"message": "توکن شما کافی نیست"})
+    if(tokens_used_global(request) >= ai_model.max_tokens):
+        max_tokens = ai_model.max_tokens
+    else:
+        max_tokens = tokens_used_global(request)
+
+
+    response = await run_in_threadpool(run_openai_prompt, prompt_filled, system_prompt, max_tokens, model, provider)
 
     user = auth(request, db)
     archive = AiArchive(
@@ -652,14 +840,20 @@ async def generate_text(ai_id: int, request: Request, db: Session = Depends(get_
         type="image",
         prompt=prompt_filled,
         url="",
-        response=text_response,
+        response=response['message'],
         created_at=datetime.now(TEHRAN_TZ)
     )
     db.add(archive)
     db.commit()
 
+    if(response):
+        total_tokens = db.query(UserToken).filter(UserToken.user_id == user.id).first()
+        total_tokens.tokens_used = tokens_used_global(request) - response['total_tokens']
+        db.commit()
+
+
     return JSONResponse({
-        "response": text_response,
+        "response": response['message'],
         "prompt": prompt_filled,
         "model_id": ai_id
     })

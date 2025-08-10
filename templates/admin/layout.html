@@ -82,7 +82,14 @@
               
             </li>
             {% endif %}
-
+            {% if can('list_subscription_plan') %}
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_subscription_plans') }}">
+                    <i class="fas fa-medal"></i>
+                    لیست پلن های اشتراک
+                </a>
+            </li>
+            {% endif %}
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('admin_ais_carts') }}">
                     <i class="fas fa-robot"></i>
@@ -121,30 +128,7 @@
 
                 <div class="d-flex align-items-center ms-auto gap-3">
 
-                    <!-- اعلان‌ها -->
-                    <div class="dropdown">
-                        <button class="btn btn-icon position-relative" type="button" id="notificationDropdown"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-bell fs-5"></i>
-                            <span
-                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                3
-                                <span class="visually-hidden">اعلان‌های جدید</span>
-                            </span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm animate__animated animate__fadeIn"
-                            aria-labelledby="notificationDropdown">
-                            <li>
-                                <h6 class="dropdown-header text-muted">اعلان‌ها</h6>
-                            </li>
-                            <li><a class="dropdown-item d-flex align-items-center gap-2" href="#"><i
-                                        class="fas fa-envelope text-primary"></i> پیام جدید</a></li>
-                            <li><a class="dropdown-item d-flex align-items-center gap-2" href="#"><i
-                                        class="fas fa-box text-success"></i> سفارش جدید</a></li>
-                            <li><a class="dropdown-item d-flex align-items-center gap-2" href="#"><i
-                                        class="fas fa-sync-alt text-warning"></i> بروزرسانی سیستم</a></li>
-                        </ul>
-                    </div>
+                    <div class="tokens_used">توکن‌های باقی مانده : {{ tokens_used(request) }}</div>
 
                     <!-- کاربر -->
                     <div class="dropdown">
@@ -165,6 +149,8 @@
                                     خروج</a></li>
                         </ul>
                     </div>
+
+
 
                 </div>
 
