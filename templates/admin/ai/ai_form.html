@@ -1095,11 +1095,11 @@ endblock %} {% block css %}
               title: "خطا",
               text: msg,
             });
-          } else {
+          } else {            
             Swal.fire({
               icon: "error",
               title: "خطا",
-              text: "خطا در پردازش درخواست تولید متن",
+              text: xhr.responseJSON.message,
             });
           }
         },

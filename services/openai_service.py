@@ -78,7 +78,10 @@ def run_openai_prompt(prompt_text: str, system_prompt: str, max_tokens: int, mod
             return "سرویس ناشناخته انتخاب شده است."
 
     except Exception as e:
-        return f"خطا در پاسخ‌دهی: {e}"
+        return {
+            'error': True,
+            'message': f"خطا در پاسخ‌دهی: {e}"
+        }
 
 
 def generate_image_by_prompt(prompt: str, size: str = "1792x1024") -> str:

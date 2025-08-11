@@ -86,7 +86,7 @@
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('admin_subscription_plans') }}">
                     <i class="fas fa-medal"></i>
-                    لیست پلن های اشتراک
+                    لیست بسته ها
                 </a>
             </li>
             {% endif %}
@@ -128,7 +128,7 @@
 
                 <div class="d-flex align-items-center ms-auto gap-3">
 
-                    <div class="tokens_used">توکن‌های باقی مانده : {{ tokens_used(request) }}</div>
+                    <div class="tokens_used">توکن‌های شما : {{ tokens_used(request) }} توکن</div>
 
                     <!-- کاربر -->
                     <div class="dropdown">

@@ -1,14 +1,14 @@
 {% extends "admin/layout.html" %}
 
-{% block title %}ایجاد پلن اشتراک جدید{% endblock %}
-{% block page_title %}ایجاد پلن اشتراک جدید{% endblock %}
+{% block title %}ایجاد بسته جدید{% endblock %}
+{% block page_title %}ایجاد بسته جدید{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-lg-12">
         <form method="post" class="card shadow-sm rounded-4 p-4" id="planCreateForm">
             <div class="mb-3">
-                <label for="title" class="form-label">عنوان پلن</label>
+                <label for="title" class="form-label">عنوان بسته</label>
                 <input type="text" class="form-control" id="title" name="title" required>
             </div>
             <div class="mb-3">
@@ -16,7 +16,7 @@
                 <textarea class="form-control" id="description" name="description" rows="3"></textarea>
             </div>
             <div class="mb-3">
-                <label for="duration_days" class="form-label">مدت زمان اشتراک (روز)</label>
+                <label for="duration_days" class="form-label">مدت زمان بسته (روز)</label>
                 <input type="number" class="form-control" id="duration_days" name="duration_days" min="1" required>
             </div>
             <div class="mb-3">
@@ -24,7 +24,7 @@
                 <input type="number" class="form-control" id="tokens_allowed" name="tokens_allowed" min="1" required>
             </div>
             <div class="text-end mt-4">
-                <button type="submit" class="btn btn-sm btn-success px-4">ایجاد پلن</button>
+                <button type="submit" class="btn btn-sm btn-success px-4">ایجاد بسته</button>
                 <a href="{{ url_for('admin_subscription_plans') }}" class="btn btn-sm btn-outline-secondary">بازگشت</a>
             </div>
         </form>

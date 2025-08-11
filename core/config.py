@@ -27,3 +27,12 @@ TOKEN_PREFIX = os.getenv("TOKEN_PREFIX")
 TEHRAN_TZ = pytz.timezone("Asia/Tehran")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+# MERCHANT_ID = 
+# ACCESS_TOKEN = 
+# SANDBOX = 
+
+class Config:
+    def __init__(self):
+        self.sandbox = os.getenv("SANDBOX")
+        self.merchant_id = os.getenv("MERCHANT_ID")
+        self.access_token = os.getenv("ACCESS_TOKEN")

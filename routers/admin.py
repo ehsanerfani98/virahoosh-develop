@@ -385,7 +385,7 @@ def delete_user(request: Request, user_id: str, db: Session = Depends(get_db), _
     return JSONResponse(status_code=200, content={"message": "کاربر با موفقیت حذف شد."})
 
 
-# لیست پلن‌ها
+# لیست بسته‌ها
 @router.get("/subscription_plans", response_class=HTMLResponse, name="admin_subscription_plans")
 def list_subscription_plans(
     request: Request,
@@ -410,7 +410,7 @@ def list_subscription_plans(
     })
 
 
-# صفحه ایجاد پلن جدید
+# صفحه ایجاد بسته جدید
 @router.get("/subscription_plans/create", response_class=HTMLResponse, name="admin_subscription_plan_create")
 def create_subscription_plan_page(
     request: Request,
@@ -422,7 +422,7 @@ def create_subscription_plan_page(
     })
 
 
-# ذخیره پلن جدید
+# ذخیره بسته جدید
 @router.post("/subscription_plans/create", name="admin_subscription_plan_store")
 def store_subscription_plan(
     request: Request,
@@ -445,7 +445,7 @@ def store_subscription_plan(
     return RedirectResponse(url=request.url_for("admin_subscription_plans"), status_code=302)
 
 
-# صفحه ویرایش پلن
+# صفحه ویرایش بسته
 @router.get("/subscription_plans/{plan_id}/edit", response_class=HTMLResponse, name="admin_subscription_plan_edit")
 def edit_subscription_plan_page(
     plan_id: str,
@@ -462,7 +462,7 @@ def edit_subscription_plan_page(
     })
 
 
-# ذخیره تغییرات پلن
+# ذخیره تغییرات بسته
 @router.post("/subscription_plans/{plan_id}/edit", name="admin_subscription_plan_update")
 def update_subscription_plan(
     request: Request,
@@ -486,7 +486,7 @@ def update_subscription_plan(
     return RedirectResponse(request.url_for("admin_subscription_plans"), status_code=302)
 
 
-# حذف پلن
+# حذف بسته
 @router.post("/subscription_plans/{plan_id}/delete", name="admin_subscription_plan_delete")
 def delete_subscription_plan(
     request: Request,
@@ -496,14 +496,74 @@ def delete_subscription_plan(
 ):
     plan = db.query(SubscriptionPlan).filter(SubscriptionPlan.id == plan_id).first()
     if not plan:
-        return JSONResponse(status_code=404, content={"message": "پلن یافت نشد."})
+        return JSONResponse(status_code=404, content={"message": "بسته یافت نشد."})
 
     db.delete(plan)
     db.commit()
-    return JSONResponse(status_code=200, content={"message": "پلن با موفقیت حذف شد."})
+    return JSONResponse(status_code=200, content={"message": "بسته با موفقیت حذف شد."})
+
+# خرید بسته
+@router.get("/subscription_buy", name="admin_subscription_plan_buy")
+def buy_subscription_plan(
+   request: Request,
+    db: Session = Depends(get_db),
+    _=Depends(has_permission("list_subscription_plan")),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(10, ge=1, le=100)
+):
+    total = db.query(SubscriptionPlan).count()
+    plans = db.query(SubscriptionPlan).order_by(SubscriptionPlan.title.asc()).offset(
+        (page - 1) * per_page).limit(per_page).all()
+
+    total_pages = (total + per_page - 1) // per_page
+
+    return templates.TemplateResponse("admin/subscription_plans/buy.html", {
+        "request": request,
+        "plans": plans,
+        "page": page,
+        "per_page": per_page,
+        "total": total,
+        "total_pages": total_pages,
+    })
+
+@router.get("/subscription_buy/{plan_id}", name="subscription_buy")
+async def buy_subscription(
+    request: Request,
+    plan_id: str,
+    db: Session = Depends(get_db),
+):
+    user = auth(request, db)
+    subscription = db.query(UserSubscription).filter(UserSubscription.user_id == user.id, UserSubscription.active == 1).first()
+    if(subscription):
+        return JSONResponse(status_code=403, content={"message": "شما یک بسته فعال دارید."})
+    
+    usersubscription = UserSubscription(
+        user_id=user.id,
+        plan_id=plan_id,
+        start_date=datetime.now(TEHRAN_TZ),
+        end_date=datetime.now(TEHRAN_TZ),
+        active=True
+    )
+    db.add(usersubscription)
+    db.commit()
+    db.refresh(usersubscription)
+
+    subscriptionplan = db.query(SubscriptionPlan).filter(SubscriptionPlan.id == plan_id).first()
+    user_tokens = db.query(UserToken).filter(UserToken.user_id == user.id).first()
+    if(user_tokens):
+        user_tokens.tokens_used = user_tokens.tokens_used + subscriptionplan.tokens_allowed
+        db.commit()
+    else:
+        usertoken = UserToken(
+            user_id=user.id,
+            tokens_used=subscriptionplan.tokens_allowed,
+            created_at=datetime.now(TEHRAN_TZ)
+        )
+        db.add(usertoken)
+        db.commit()
 
 
-# لیست اشتراک‌های کاربران
+# لیست بسته‌های کاربران
 @router.get("/user_subscriptions/{user_id}", response_class=HTMLResponse, name="admin_user_subscription_detail")
 def user_subscription_detail(
     request: Request,
@@ -537,7 +597,7 @@ def user_subscription_detail(
 
 
 
-# حذف اشتراک
+# حذف بسته
 @router.post("/user_subscriptions/{subscription_id}/delete", name="admin_user_subscription_delete")
 def delete_user_subscription(
     request: Request,
@@ -547,11 +607,11 @@ def delete_user_subscription(
 ):
     subscription = db.query(UserSubscription).filter(UserSubscription.id == subscription_id).first()
     if not subscription:
-        return JSONResponse(status_code=404, content={"message": "اشتراک یافت نشد."})
+        return JSONResponse(status_code=404, content={"message": "بسته یافت نشد."})
 
     db.delete(subscription)
     db.commit()
-    return JSONResponse(status_code=200, content={"message": "اشتراک با موفقیت حذف شد."})
+    return JSONResponse(status_code=200, content={"message": "بسته با موفقیت حذف شد."})
 
 
 
@@ -797,7 +857,6 @@ def ai_form(ai_id: int, request: Request, db: Session = Depends(get_db)):
 @router.post("/ais/{ai_id}/generate-text", name="admin_ai_generate_text")
 async def generate_text(ai_id: int, request: Request, db: Session = Depends(get_db)):
     
-
     form = await request.form()
     form_data = dict(form)
 
@@ -831,32 +890,33 @@ async def generate_text(ai_id: int, request: Request, db: Session = Depends(get_
 
 
     response = await run_in_threadpool(run_openai_prompt, prompt_filled, system_prompt, max_tokens, model, provider)
+    if isinstance(response, dict) and not response.get('error'):
+        user = auth(request, db)
+        archive = AiArchive(
+            user_id=user.id,
+            ai_model_id=ai_id,
+            title="",
+            type="image",
+            prompt=prompt_filled,
+            url="",
+            response=response['message'],
+            created_at=datetime.now(TEHRAN_TZ)
+        )
+        db.add(archive)
+        db.commit()
 
-    user = auth(request, db)
-    archive = AiArchive(
-        user_id=user.id,
-        ai_model_id=ai_id,
-        title="",
-        type="image",
-        prompt=prompt_filled,
-        url="",
-        response=response['message'],
-        created_at=datetime.now(TEHRAN_TZ)
-    )
-    db.add(archive)
-    db.commit()
-
-    if(response):
         total_tokens = db.query(UserToken).filter(UserToken.user_id == user.id).first()
         total_tokens.tokens_used = tokens_used_global(request) - response['total_tokens']
         db.commit()
 
 
-    return JSONResponse({
-        "response": response['message'],
-        "prompt": prompt_filled,
-        "model_id": ai_id
-    })
+        return JSONResponse({
+            "response": response['message'],
+            "prompt": prompt_filled,
+            "model_id": ai_id
+        })
+    
+    return JSONResponse(status_code=500, content={"message": "خطای ناشناخته"})
 
 
 @router.post("/ais/{ai_id}/generate-image", name="admin_ai_generate_image")

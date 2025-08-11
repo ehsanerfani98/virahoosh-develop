@@ -1,10 +1,10 @@
 {% extends "admin/layout.html" %}
 
-{% block title %}لیست پلن های اشتراک{% endblock %}
-{% block page_title %}لیست پلن های اشتراک{% endblock %}
+{% block title %}لیست بسته ها{% endblock %}
+{% block page_title %}لیست بسته ها{% endblock %}
 
 {% block action_button %}
-<a href="{{ url_for('admin_subscription_plan_create') }}" class="btn btn-sm btn-success px-4">+ اشتراک جدید</a>
+<a href="{{ url_for('admin_subscription_plan_create') }}" class="btn btn-sm btn-success px-4">+ بسته جدید</a>
 {% endblock %}
 
 {% block content %}
@@ -37,7 +37,7 @@
                             </tr>
                             {% else %}
                             <tr>
-                                <td colspan="5" class="text-center">پلنی یافت نشد.</td>
+                                <td colspan="5" class="text-center">بستهی یافت نشد.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -57,7 +57,7 @@ $(document).ready(function () {
     if (urlParams.get("success") === "1") {
         iziToast.success({
             title: 'تبریک',
-            message: 'پلن با موفقیت حذف شد.',
+            message: 'بسته با موفقیت حذف شد.',
             position: 'bottomLeft',
             rtl: true,
             timeout: 3000
@@ -69,8 +69,8 @@ $(document).ready(function () {
     $('.delete-plan-btn').on('click', function () {
         const planId = $(this).data('id');
         Swal.fire({
-            title: 'حذف پلن',
-            text: 'آیا مطمئن هستید که می‌خواهید این پلن را حذف کنید؟',
+            title: 'حذف بسته',
+            text: 'آیا مطمئن هستید که می‌خواهید این بسته را حذف کنید؟',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'بله، حذف شود',
@@ -93,7 +93,7 @@ $(document).ready(function () {
                     error: function (xhr) {
                         iziToast.error({
                             title: 'خطا',
-                            message: xhr.responseJSON?.message || 'خطا در حذف پلن',
+                            message: xhr.responseJSON?.message || 'خطا در حذف بسته',
                             position: 'bottomLeft',
                             rtl: true,
                             timeout: 4000

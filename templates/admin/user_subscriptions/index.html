@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
 
-{% block title %}اشتراک‌های {{ subscriptions[0].user.email or subscriptions[0].user.phone or "نامشخص" }}{% endblock %}
-{% block page_title %}اشتراک‌های {{ subscriptions[0].user.email or subscriptions[0].user.phone or "نامشخص" }}{% endblock %}
+{% block title %}بسته‌های {{ subscriptions[0].user.email or subscriptions[0].user.phone or "نامشخص" }}{% endblock %}
+{% block page_title %}بسته‌های {{ subscriptions[0].user.email or subscriptions[0].user.phone or "نامشخص" }}{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -13,7 +13,7 @@
                         <thead class="table-blue">
                             <tr>
                                 <th>کاربر</th>
-                                <th>پلن</th>
+                                <th>بسته</th>
                                 <!-- <th>تاریخ شروع</th>
                                 <th>تاریخ پایان</th> -->
                                 <th>توکن</th>
@@ -42,7 +42,7 @@
                             </tr>
                             {% else %}
                             <tr>
-                                <td colspan="6" class="text-center">اشتراکی یافت نشد.</td>
+                                <td colspan="6" class="text-center">بستهی یافت نشد.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -62,7 +62,7 @@ $(document).ready(function () {
     if (urlParams.get("success") === "1") {
         iziToast.success({
             title: 'موفقیت',
-            message: 'اشتراک با موفقیت حذف شد.',
+            message: 'بسته با موفقیت حذف شد.',
             position: 'bottomLeft',
             rtl: true,
             timeout: 3000
@@ -75,8 +75,8 @@ $(document).ready(function () {
     $('.delete-sub-btn').on('click', function () {
         const subId = $(this).data('id');
         Swal.fire({
-            title: 'حذف اشتراک',
-            text: 'آیا مطمئن هستید که می‌خواهید این اشتراک را حذف کنید؟',
+            title: 'حذف بسته',
+            text: 'آیا مطمئن هستید که می‌خواهید این بسته را حذف کنید؟',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'بله، حذف شود',
@@ -98,7 +98,7 @@ $(document).ready(function () {
                     error: function (xhr) {
                         iziToast.error({
                             title: 'خطا',
-                            message: xhr.responseJSON?.detail || 'خطا در حذف اشتراک',
+                            message: xhr.responseJSON?.detail || 'خطا در حذف بسته',
                             position: 'bottomLeft',
                             rtl: true,
                             timeout: 4000

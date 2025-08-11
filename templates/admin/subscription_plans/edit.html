@@ -1,14 +1,14 @@
 {% extends "admin/layout.html" %}
 
-{% block title %}ویرایش پلن اشتراک{% endblock %}
-{% block page_title %}ویرایش پلن اشتراک{% endblock %}
+{% block title %}ویرایش بسته{% endblock %}
+{% block page_title %}ویرایش بسته{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-lg-12">
         <form method="post" class="card shadow-sm rounded-4 p-4" id="planEditForm">
             <div class="mb-3">
-                <label for="title" class="form-label">عنوان پلن</label>
+                <label for="title" class="form-label">عنوان بسته</label>
                 <input type="text" class="form-control" id="title" name="title" value="{{ plan.title }}" required>
             </div>
             <div class="mb-3">
@@ -16,7 +16,7 @@
                 <textarea class="form-control" id="description" name="description" rows="3">{{ plan.description }}</textarea>
             </div>
             <div class="mb-3">
-                <label for="duration_days" class="form-label">مدت زمان اشتراک (روز)</label>
+                <label for="duration_days" class="form-label">مدت زمان بسته (روز)</label>
                 <input type="number" class="form-control" id="duration_days" name="duration_days" min="1" value="{{ plan.duration_days }}" required>
             </div>
             <div class="mb-3">

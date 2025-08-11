@@ -6,8 +6,8 @@ from database.session import SessionLocal
 import tiktoken
 
 def get_tokens_used(db: Session, user_id: str) -> int:
-    total_tokens = db.query(UserToken).filter(UserToken.user_id == user_id).first()
-    return total_tokens.tokens_used or 0
+    user_token = db.query(UserToken).filter(UserToken.user_id == user_id).first()
+    return user_token.tokens_used if user_token else 0
 
 def tokens_used_global(request: Request) -> int:
     db = SessionLocal()
