@@ -544,8 +544,8 @@ async def buy_subscription(
     user = auth(request, db)
     subscription = db.query(UserSubscription).filter(UserSubscription.user_id == user.id, UserSubscription.active == 1).first()
     if(subscription):
-        return JSONResponse(status_code=403, content={"message": "شما یک بسته فعال دارید."})
-    
+        raise StarletteHTTPException(status_code=201, detail="شما یک بسته فعال دارید")
+
     plan = db.query(SubscriptionPlan).filter(SubscriptionPlan.id == plan_id).first()
     
     # ثبت تراکنش پرداخت
