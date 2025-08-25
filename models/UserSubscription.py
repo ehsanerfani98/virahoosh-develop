@@ -26,3 +26,5 @@ class UserSubscription(Base):
         super().__init__(**kwargs)
         if not self.end_date and self.plan:
             self.end_date = self.start_date + timedelta(days=self.plan.duration_days)
+            
+    payments = relationship("Payment", back_populates="user_subscription")

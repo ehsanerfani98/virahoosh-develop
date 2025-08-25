@@ -16,14 +16,12 @@ block page_title %}لیست بسته ها{% endblock %} {% block css %}
   .card {
     border: none;
     border-radius: 12px;
-    overflow: hidden;
     transition: all 0.3s ease;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
     height: 100%;
     display: flex;
     flex-direction: column;
   }
-
 
   .card-icon {
     font-size: 1.8rem;
@@ -38,7 +36,7 @@ block page_title %}لیست بسته ها{% endblock %} {% block css %}
 
   .card-title {
     color: var(--dark-color);
-    font-size: .8rem;
+    font-size: 0.8rem;
   }
 
   .card-text {
@@ -87,14 +85,30 @@ block page_title %}لیست بسته ها{% endblock %} {% block css %}
     border-radius: 20px;
     font-size: 0.8rem;
   }
+
+  span.amount {
+    position: absolute;
+    top: -22px;
+    right: 0;
+    background: #ffffff;
+    color: #06d6a0;
+    padding: 6px 9px;
+    border-radius: 6px;
+    border-bottom-right-radius: 0;
+    font-size: 13px;
+    box-shadow: 0 -8px 10px rgb(120 120 120 / 5%);
+  }
 </style>
 {% endblock %} {% block content %}
-<div class="row">
+<div class="row mt-4">
   {% for plan in plans %}
   <div class="col-12 col-sm-6 col-md-3 col-lg-4 col-xl-3 col-xxl-2 mb-4">
     <div class="card-container">
       <div class="card h-100">
-        <div class="card-body text-center">
+        <div class="card-body text-center position-relative">
+          <span class="amount"
+            >{{ plan.amount | number_format(',') }} ریال</span
+          >
           <div class="d-flex align-items-center justify-content-between">
             <div>
               <div class="card-icon">
@@ -103,8 +117,14 @@ block page_title %}لیست بسته ها{% endblock %} {% block css %}
               <h6 class="card-title">{{ plan.title }}</h6>
             </div>
             <div class="d-flex flex-column align-items-center">
-                <span class="badge badge-success p-2">{{ plan.tokens_allowed }} توکن</span>
-                <a href="{{ url_for('subscription_buy', plan_id=plan.id) }}" class="btn btn-sm btn-card btn-card-outline mt-2">خرید</a>    
+              <span class="badge badge-success p-2"
+                >{{ plan.tokens_allowed }} توکن</span
+              >
+              <a
+                href="{{ url_for('subscription_buy', plan_id=plan.id) }}"
+                class="btn btn-sm btn-card btn-card-outline mt-2"
+                >خرید</a
+              >
             </div>
           </div>
         </div>

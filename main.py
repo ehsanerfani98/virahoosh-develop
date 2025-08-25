@@ -63,7 +63,7 @@ app = FastAPI(
 
 @app.exception_handler(StarletteHTTPException)
 async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
-    if exc.status_code in [403, 404, 500]:
+    if exc.status_code in [403, 404, 500, 201, 101]:
         return templates.TemplateResponse(
             f"errors/{exc.status_code}.html",
             {"request": request, "detail": exc.detail},

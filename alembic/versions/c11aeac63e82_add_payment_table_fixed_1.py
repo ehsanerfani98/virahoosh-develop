@@ -1,8 +1,8 @@
-"""Add enum value to type column in ai_models tables
+"""Add Payment table fixed 1
 
-Revision ID: 1954d254970e
-Revises: 2f3c06c6031e
-Create Date: 2025-07-03 08:22:17.797267
+Revision ID: c11aeac63e82
+Revises: 0ad79e29a5b1
+Create Date: 2025-08-19 14:23:11.304395
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '1954d254970e'
-down_revision: Union[str, Sequence[str], None] = '2f3c06c6031e'
+revision: str = 'c11aeac63e82'
+down_revision: Union[str, Sequence[str], None] = '0ad79e29a5b1'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

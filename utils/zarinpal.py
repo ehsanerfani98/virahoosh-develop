@@ -1,67 +1,84 @@
 from zarinpal import ZarinPal
 from core.config import Config
+from fastapi.responses import RedirectResponse, JSONResponse
 
 authority = "Your Authority"    
 status = "OK"
 
-def initiate_payment():
+def initiate_payment(amount, callback_url,description):
     try:
-        zarinpal = ZarinPal(Config)
-
+        config = Config()
+        zarinpal = ZarinPal(config)
         response = zarinpal.payments.create({
-            "amount": 20000, 
-            "callback_url": "https://zarinpal.com/", 
-            "description": "Payment creat", 
+            "amount": int(amount), 
+            "callback_url": callback_url, 
+            "description": description, 
         })
 
-        print("Payment created successfully:", response)
+        # print("Payment created successfully:", response)
         
         if "data" in response and "authority" in response["data"]:
             authority = response["data"]["authority"]
             payment_url = zarinpal.payments.generate_payment_url(authority)
-            print("Payment URL:", payment_url)
+            return RedirectResponse(payment_url)
         else:
-            print("Authority not found in response.")
+            return JSONResponse({"error": "Authority not found in response."})
 
 
     except Exception as e:
         print("Error during payment creation:", e)
 
-def get_amount_from_database(authority):
-    return 20000
-
-def verify_payment(authority, status):
+def verify_payment(authority, amount, status):
     if status == "OK":
-        amount = get_amount_from_database(authority)
-
         if amount:
             try:
-                config = Config(
-                    merchant_id= "Your merchant code", 
-                    sandbox=True, 
-                )
+                config = Config()
                 zarinpal = ZarinPal(config)    
                 response = zarinpal.verifications.verify({
-                    "amount": amount,
+                    "amount": int(amount),
                     "authority": authority,
                 })
 
                 if response["data"]["code"] == 100:
-                    print("Payment Verified:")
-                    print("Reference ID:", response["data"]["ref_id"])
-                    print("Card PAN:", response["data"]["card_pan"])
-                    print("Fee:", response["data"]["fee"])
+                    return {
+                        'status' : 'ok',
+                        'ref_id' : response["data"]["ref_id"],
+                        'code' : '',
+                        'error' : ''
+                    }
                 elif response["data"]["code"] == 101:
-                    print("Payment already verified.")
+                    return {
+                        'status' : 'already',
+                        'ref_id' : '',
+                        'code' : '',
+                        'error' : ''
+                    }
                 else:
-                    print("Transaction failed with code:", response["data"]["code"])
-
+                    return {
+                        'status' : 'failed',
+                        'ref_id' : '',
+                        'code' : response["data"]["code"],
+                        'error' : ''
+                    }
             except Exception as e:
-                print("Payment Verification Failed:", e)
+                return {
+                    'status' : 'failed_payment',
+                    'ref_id' : '',
+                    'code' : '',
+                    'error' : e
+                }
         else:
-            print("No Matching Transaction Found For This Authority Code.")
+            return {
+                'status' : 'not_transaction',
+                'ref_id' : '',
+                'code' : '',
+                'error' : ''
+            }
     else:
-        print("Transaction was cancelled or failed.")
-if __name__ == "__main__":
-    initiate_payment()
-    verify_payment(authority, status)
+        return {
+            'status' : 'cancelled_or_failed',
+            'ref_id' : '',
+            'code' : '',
+            'error' : ''
+        }
+

@@ -23,6 +23,10 @@
                 <label for="tokens_allowed" class="form-label">تعداد توکن قابل استفاده</label>
                 <input type="number" class="form-control" id="tokens_allowed" name="tokens_allowed" min="1" required>
             </div>
+            <div class="mb-3">
+                <label for="amount" class="form-label">قیمت (ریال)</label>
+                <input type="number" class="form-control" id="amount" name="amount" required>
+            </div>
             <div class="text-end mt-4">
                 <button type="submit" class="btn btn-sm btn-success px-4">ایجاد بسته</button>
                 <a href="{{ url_for('admin_subscription_plans') }}" class="btn btn-sm btn-outline-secondary">بازگشت</a>

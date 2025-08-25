@@ -33,6 +33,7 @@ DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 
 class Config:
     def __init__(self):
-        self.sandbox = os.getenv("SANDBOX")
         self.merchant_id = os.getenv("MERCHANT_ID")
         self.access_token = os.getenv("ACCESS_TOKEN")
+        self.sandbox = os.getenv("SANDBOX")
+

@@ -13,6 +13,7 @@ from models.UserSubscription import UserSubscription
 from models.user import User
 from models.assistant import Assistant
 from models.ai import AiModel
+from models.payment import Payment, PaymentType, PaymentStatus
 from models.aiinput import AiInput
 from starlette.status import HTTP_302_FOUND
 from passlib.hash import bcrypt
@@ -34,12 +35,14 @@ import requests
 from utils.auth import websocket_auth
 from utils.token import get_token
 from utils.token_api import tokens_used_global, num_tokens_from_messages
+from utils.zarinpal import initiate_payment, verify_payment
 from starlette.websockets import WebSocketState
 import logging
 from services.tasks import process_excel_file
 import shutil
 import uuid
 from models.user_token import UserToken
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 
 # Configure logging
@@ -430,6 +433,7 @@ def store_subscription_plan(
     description: str = Form(None),
     duration_days: int = Form(...),
     tokens_allowed: int = Form(...),
+    amount: str = Form(...),
     db: Session = Depends(get_db),
     _=Depends(has_permission("create_subscription_plan"))
 ):
@@ -437,7 +441,8 @@ def store_subscription_plan(
         title=title,
         description=description,
         duration_days=duration_days,
-        tokens_allowed=tokens_allowed
+        tokens_allowed=tokens_allowed,
+        amount=amount
     )
     db.add(new_plan)
     db.commit()
@@ -471,6 +476,7 @@ def update_subscription_plan(
     description: str = Form(None),
     duration_days: int = Form(...),
     tokens_allowed: int = Form(...),
+    amount: str = Form(...),
     db: Session = Depends(get_db),
     _=Depends(has_permission("edit_subscription_plan"))
 ):
@@ -482,6 +488,7 @@ def update_subscription_plan(
     plan.description = description
     plan.duration_days = duration_days
     plan.tokens_allowed = tokens_allowed
+    plan.amount = amount
     db.commit()
     return RedirectResponse(request.url_for("admin_subscription_plans"), status_code=302)
 
@@ -526,41 +533,112 @@ def buy_subscription_plan(
         "total_pages": total_pages,
     })
 
+
 @router.get("/subscription_buy/{plan_id}", name="subscription_buy")
 async def buy_subscription(
     request: Request,
     plan_id: str,
     db: Session = Depends(get_db),
 ):
+
     user = auth(request, db)
     subscription = db.query(UserSubscription).filter(UserSubscription.user_id == user.id, UserSubscription.active == 1).first()
     if(subscription):
         return JSONResponse(status_code=403, content={"message": "شما یک بسته فعال دارید."})
     
-    usersubscription = UserSubscription(
+    plan = db.query(SubscriptionPlan).filter(SubscriptionPlan.id == plan_id).first()
+    
+    # ثبت تراکنش پرداخت
+    payment = Payment(
         user_id=user.id,
-        plan_id=plan_id,
-        start_date=datetime.now(TEHRAN_TZ),
-        end_date=datetime.now(TEHRAN_TZ),
-        active=True
+        type=PaymentType.subscription_direct,
+        amount=plan.amount,
+        status=PaymentStatus.pending,
+        description='خرید بسته هوشمند',
+        created_at=datetime.now(TEHRAN_TZ),
     )
-    db.add(usersubscription)
+    db.add(payment)
     db.commit()
-    db.refresh(usersubscription)
+    db.refresh(payment)
 
-    subscriptionplan = db.query(SubscriptionPlan).filter(SubscriptionPlan.id == plan_id).first()
-    user_tokens = db.query(UserToken).filter(UserToken.user_id == user.id).first()
-    if(user_tokens):
-        user_tokens.tokens_used = user_tokens.tokens_used + subscriptionplan.tokens_allowed
-        db.commit()
-    else:
-        usertoken = UserToken(
+
+    callback_url = f"http://127.0.0.1:8000/admin/verify/subscription_buy?plan_id={plan_id}&pid={payment.id}"
+    return initiate_payment(plan.amount, callback_url, 'خرید بسته هوشمند')
+
+
+@router.get("/verify/subscription_buy", name="verify_subscription_buy")
+async def verify_buy_subscription(
+    request: Request,
+    authority: str = Query(..., alias="Authority"),
+    status: str = Query(..., alias="Status"),
+    plan_id: str = Query(None),
+    pid: str = Query(None),
+    db: Session = Depends(get_db),
+):
+    
+    plan = db.query(SubscriptionPlan).filter(SubscriptionPlan.id == plan_id).first()
+    user = auth(request, db)
+
+    response = verify_payment(authority, plan.amount, status)
+
+    if response['status'] == 'ok':
+
+        usersubscription = UserSubscription(
             user_id=user.id,
-            tokens_used=subscriptionplan.tokens_allowed,
-            created_at=datetime.now(TEHRAN_TZ)
+            plan_id=plan.id,
+            start_date=datetime.now(TEHRAN_TZ),
+            end_date=datetime.now(TEHRAN_TZ),
+            active=True
         )
-        db.add(usertoken)
+        db.add(usersubscription)
         db.commit()
+        db.refresh(usersubscription)
+
+        payment = db.query(Payment).filter(Payment.id == pid).first()
+
+        payment.user_subscription_id=usersubscription.id
+        payment.status=PaymentStatus.paid
+        payment.authority=authority
+        payment.transaction_id=response['ref_id']
+        db.commit()
+        
+        subscriptionplan = db.query(SubscriptionPlan).filter(SubscriptionPlan.id == plan_id).first()
+        user_tokens = db.query(UserToken).filter(UserToken.user_id == user.id).first()
+        if user_tokens:
+            user_tokens.tokens_used = user_tokens.tokens_used + subscriptionplan.tokens_allowed
+            db.commit()
+        else:
+            usertoken = UserToken(
+                user_id=user.id,
+                tokens_used=subscriptionplan.tokens_allowed,
+                created_at=datetime.now(TEHRAN_TZ)
+            )
+            db.add(usertoken)
+            db.commit()
+
+        raise StarletteHTTPException(status_code=201, detail="پرداخت با موفقیت انجام شد")
+    
+    elif response['status'] == 'already':
+        raise StarletteHTTPException(status_code=101, detail="این تراکنش قبلا انجام شده است!")
+
+    elif response['status'] == 'failed':
+        code = response['code']
+        detail = f"تراکنش با خطا مواجه شد / کد خطا : {code}"
+        raise StarletteHTTPException(status_code=500, detail=detail)
+    
+    elif response['status'] == 'failed_payment':
+        error = response['error']
+        detail = f"پرداخت تایید نشد / خطا : {error}"
+        raise StarletteHTTPException(status_code=500, detail=detail)
+
+    elif response['status'] == 'not_transaction':
+        detail = "تراکنش منطبقی برای این کد مجوز یافت نشد"
+        raise StarletteHTTPException(status_code=500, detail=detail)
+    
+    elif response['status'] == 'cancelled_or_failed':
+        detail = "تراکنش لغو شد یا ناموفق بود"
+        raise StarletteHTTPException(status_code=500, detail=detail)
+
 
 
 # لیست بسته‌های کاربران

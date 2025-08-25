@@ -89,7 +89,14 @@
                     لیست بسته ها
                 </a>
             </li>
-            {% endif %}
+        
+            {% endif %}   
+             <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_subscription_plan_buy') }}">
+                    <i class="fas fa-shopping-cart"></i>
+                    خرید بسته
+                </a>
+            </li>
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('admin_ais_carts') }}">
                     <i class="fas fa-robot"></i>

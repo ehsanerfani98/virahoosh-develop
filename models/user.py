@@ -5,6 +5,7 @@ from models.user_role import user_roles_table
 from models.UserSubscription import UserSubscription
 from models.user_token import UserToken
 import uuid
+from models.payment import Payment
 
 class User(Base):
     __tablename__ = "users"
@@ -19,3 +20,5 @@ class User(Base):
     
     subscriptions = relationship("UserSubscription", back_populates="user", cascade="all, delete-orphan")
     tokens_usage = relationship("UserToken", back_populates="user", cascade="all, delete-orphan")
+
+    payments = relationship("Payment", back_populates="user")

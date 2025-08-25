@@ -23,6 +23,10 @@
                 <label for="tokens_allowed" class="form-label">تعداد توکن قابل استفاده</label>
                 <input type="number" class="form-control" id="tokens_allowed" name="tokens_allowed" min="1" value="{{ plan.tokens_allowed }}" required>
             </div>
+            <div class="mb-3">
+                <label for="amount" class="form-label">قیمت (ریال)</label>
+                <input type="number" class="form-control" id="amount" name="amount" value="{{ plan.amount }}" required>
+            </div>
             <div class="text-end">
                 <button type="submit" class="btn btn-sm btn-success px-4">ذخیره تغییرات</button>
                 <a href="{{ url_for('admin_subscription_plans') }}" class="btn btn-sm btn-outline-secondary">بازگشت</a>
