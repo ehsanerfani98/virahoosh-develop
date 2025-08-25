@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 11, 2025 at 07:35 PM
+-- Generation Time: Aug 25, 2025 at 06:59 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.2.23
 
@@ -156,7 +156,7 @@ CREATE TABLE `alembic_version` (
 --
 
 INSERT INTO `alembic_version` (`version_num`) VALUES
-('794b0f879c94');
+('c11aeac63e82');
 
 -- --------------------------------------------------------
 
@@ -213,6 +213,38 @@ CREATE TABLE `otps` (
   `created_at` datetime DEFAULT NULL,
   `is_used` tinyint(1) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `payments`
+--
+
+CREATE TABLE `payments` (
+  `id` varchar(36) NOT NULL,
+  `user_id` varchar(36) NOT NULL,
+  `user_subscription_id` varchar(36) DEFAULT NULL,
+  `type` enum('wallet_topup','subscription_direct','subscription_wallet') NOT NULL,
+  `amount` float NOT NULL,
+  `discount_amount` float DEFAULT NULL,
+  `discount_code` varchar(256) DEFAULT NULL,
+  `transaction_id` varchar(256) DEFAULT NULL,
+  `invoice_number` varchar(256) DEFAULT NULL,
+  `authority` varchar(256) DEFAULT NULL,
+  `description` varchar(256) DEFAULT NULL,
+  `status` enum('pending','paid','failed') NOT NULL,
+  `created_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `payments`
+--
+
+INSERT INTO `payments` (`id`, `user_id`, `user_subscription_id`, `type`, `amount`, `discount_amount`, `discount_code`, `transaction_id`, `invoice_number`, `authority`, `description`, `status`, `created_at`) VALUES
+('1bd96310-b4c6-4582-a850-9d33e718cb02', '92ac38ff-eeeb-461d-b291-a69660b83c46', 'e65c176c-c387-4312-98aa-3eaefcf54501', 'subscription_direct', 30000000, NULL, NULL, '6138001', NULL, 'S0000000000000000000000000000002z6yo', 'خرید بسته هوشمند', 'paid', '2025-08-21 13:31:19'),
+('305cb0d7-70fe-4617-b314-c74b9414f32d', '92ac38ff-eeeb-461d-b291-a69660b83c46', NULL, 'subscription_direct', 25000000, NULL, NULL, NULL, NULL, NULL, 'خرید بسته هوشمند', 'pending', '2025-08-21 13:26:59'),
+('8f52d039-7f69-4062-835c-309b1e937245', '92ac38ff-eeeb-461d-b291-a69660b83c46', NULL, 'subscription_direct', 25000000, NULL, NULL, NULL, NULL, NULL, 'خرید بسته هوشمند', 'pending', '2025-08-21 13:28:44'),
+('a9757afd-fb62-4326-9b1e-76b256f3c24f', '92ac38ff-eeeb-461d-b291-a69660b83c46', NULL, 'subscription_direct', 30000000, NULL, NULL, NULL, NULL, NULL, 'خرید بسته هوشمند', 'pending', '2025-08-21 13:20:55');
 
 -- --------------------------------------------------------
 
@@ -279,7 +311,7 @@ CREATE TABLE `rate_limits` (
 --
 
 INSERT INTO `rate_limits` (`ip`, `request_count`, `last_request`) VALUES
-('127.0.0.1', 1, '2025-08-11 11:22:24');
+('127.0.0.1', 1, '2025-08-21 12:50:10');
 
 -- --------------------------------------------------------
 
@@ -301,7 +333,7 @@ CREATE TABLE `refresh_tokens` (
 --
 
 INSERT INTO `refresh_tokens` (`id`, `token`, `user_id`, `is_active`, `created_at`, `expires_at`) VALUES
-(17, '0779d039b460c43504c67a4794bbe6d0231e59eb1371b42f657810ceb22fd61c', '92ac38ff-eeeb-461d-b291-a69660b83c46', 1, '2025-08-11 11:22:24', '2025-08-18 11:22:24');
+(21, '55187c542c2da56a053ac65b349113873d317c85a0dc3d609abedcf3b88caab6', '92ac38ff-eeeb-461d-b291-a69660b83c46', 1, '2025-08-21 12:50:10', '2025-08-28 12:50:10');
 
 -- --------------------------------------------------------
 
@@ -381,16 +413,17 @@ CREATE TABLE `subscription_plans` (
   `title` varchar(255) NOT NULL,
   `description` varchar(500) DEFAULT NULL,
   `duration_days` int NOT NULL,
-  `tokens_allowed` int NOT NULL
+  `tokens_allowed` int NOT NULL,
+  `amount` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `subscription_plans`
 --
 
-INSERT INTO `subscription_plans` (`id`, `title`, `description`, `duration_days`, `tokens_allowed`) VALUES
-('5237e273-9e24-4349-818c-2bb6e830427a', 'بسته طلایی', '', 10, 2500),
-('a6219046-0440-4979-8d75-f3855fbbe391', 'بسته نقره ای', 'ندارد', 30, 1000);
+INSERT INTO `subscription_plans` (`id`, `title`, `description`, `duration_days`, `tokens_allowed`, `amount`) VALUES
+('5237e273-9e24-4349-818c-2bb6e830427a', 'بسته طلایی', '', 10, 2500, '25000000'),
+('a6219046-0440-4979-8d75-f3855fbbe391', 'بسته نقره ای', 'ندارد', 30, 3000, '30000000');
 
 -- --------------------------------------------------------
 
@@ -411,7 +444,7 @@ CREATE TABLE `tokens` (
 --
 
 INSERT INTO `tokens` (`id`, `token`, `user_id`, `is_active`, `created_at`) VALUES
-(79, 'b5190368498399e7871d61a5fc5ab3c9f36c6cdc96aa126b77d989b44e6e3044', '92ac38ff-eeeb-461d-b291-a69660b83c46', 1, '2025-08-11 14:07:30');
+(94, 'ba989de4b5976ef89ba5f04489cffbe569da1ba8c19d205f956bbcc3982f14c8', '92ac38ff-eeeb-461d-b291-a69660b83c46', 1, '2025-08-21 14:55:56');
 
 -- --------------------------------------------------------
 
@@ -471,12 +504,7 @@ CREATE TABLE `user_subscriptions` (
 --
 
 INSERT INTO `user_subscriptions` (`id`, `user_id`, `start_date`, `end_date`, `plan_id`, `active`) VALUES
-('66a790ec-ffbb-4381-aa5c-2a53b4f0ff1b', '92ac38ff-eeeb-461d-b291-a69660b83c46', '2025-08-11 11:49:35', '2025-08-11 11:49:35', 'a6219046-0440-4979-8d75-f3855fbbe391', 0),
-('b582c755-e027-4443-80b7-f9b183fd7013', '92ac38ff-eeeb-461d-b291-a69660b83c46', '2025-08-11 12:20:19', '2025-08-11 12:20:19', 'a6219046-0440-4979-8d75-f3855fbbe391', 0),
-('baf232d8-6f0c-47ef-a16f-8bbaac9b59a6', '92ac38ff-eeeb-461d-b291-a69660b83c46', '2025-08-11 11:53:41', '2025-08-11 11:53:41', 'a6219046-0440-4979-8d75-f3855fbbe391', 0),
-('c1f2009b-fb82-456d-9ea7-f7dffe93e723', '92ac38ff-eeeb-461d-b291-a69660b83c46', '2025-08-11 12:21:02', '2025-08-11 12:21:02', 'a6219046-0440-4979-8d75-f3855fbbe391', 0),
-('d94ea735-73ca-402c-bf99-f78f984dfdb0', '92ac38ff-eeeb-461d-b291-a69660b83c46', '2025-08-11 14:15:19', '2025-08-11 14:15:19', 'a6219046-0440-4979-8d75-f3855fbbe391', 0),
-('f4459a01-1bf8-496b-9be3-5958e0245122', '92ac38ff-eeeb-461d-b291-a69660b83c46', '2025-08-11 14:16:50', '2025-08-11 14:16:50', '5237e273-9e24-4349-818c-2bb6e830427a', 1);
+('e65c176c-c387-4312-98aa-3eaefcf54501', '92ac38ff-eeeb-461d-b291-a69660b83c46', '2025-08-21 13:31:21', '2025-08-21 13:31:21', 'a6219046-0440-4979-8d75-f3855fbbe391', 1);
 
 -- --------------------------------------------------------
 
@@ -496,7 +524,7 @@ CREATE TABLE `user_tokens` (
 --
 
 INSERT INTO `user_tokens` (`id`, `user_id`, `tokens_used`, `created_at`) VALUES
-('26cabfba-4cf1-4f07-8971-c63e1905fa86', '92ac38ff-eeeb-461d-b291-a69660b83c46', 4486, '2025-08-11 12:20:19');
+('dd3289e2-0132-49ea-a4b9-93a1ceb719d5', '92ac38ff-eeeb-461d-b291-a69660b83c46', 3000, '2025-08-21 13:31:21');
 
 --
 -- Indexes for dumped tables
@@ -554,6 +582,15 @@ ALTER TABLE `otps`
   ADD PRIMARY KEY (`id`),
   ADD KEY `ix_otps_id` (`id`),
   ADD KEY `ix_otps_phone` (`phone`);
+
+--
+-- Indexes for table `payments`
+--
+ALTER TABLE `payments`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `ix_payments_id` (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `user_subscription_id` (`user_subscription_id`);
 
 --
 -- Indexes for table `permissions`
@@ -695,7 +732,7 @@ ALTER TABLE `permissions`
 -- AUTO_INCREMENT for table `refresh_tokens`
 --
 ALTER TABLE `refresh_tokens`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `roles`
@@ -707,7 +744,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT for table `tokens`
 --
 ALTER TABLE `tokens`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=95;
 
 --
 -- Constraints for dumped tables
@@ -731,6 +768,13 @@ ALTER TABLE `ai_inputs`
 --
 ALTER TABLE `file_uploads`
   ADD CONSTRAINT `file_uploads_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `payments`
+--
+ALTER TABLE `payments`
+  ADD CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `payments_ibfk_2` FOREIGN KEY (`user_subscription_id`) REFERENCES `user_subscriptions` (`id`);
 
 --
 -- Constraints for table `refresh_tokens`
