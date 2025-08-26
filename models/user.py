@@ -23,3 +23,4 @@ class User(Base):
 
     payments = relationship("Payment", back_populates="user")
     
+    assistants = relationship("Assistant", back_populates="user")

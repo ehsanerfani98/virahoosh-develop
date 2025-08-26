@@ -43,6 +43,7 @@ import shutil
 import uuid
 from models.user_token import UserToken
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from models.AssistantUserInfo import AssistantUserInfo
 
 
 # Configure logging
@@ -1513,7 +1514,87 @@ def delete_assistant(request: Request, assistant_id: int, db: Session = Depends(
     return JSONResponse(status_code=200, content={"message": "دستیار با موفقیت حذف شد."})
 
 
+@router.get(
+    "/assistants/userinfo/{assistant_id}",
+    name="assistant_user_info_list",
+    response_class=HTMLResponse
+)
+def list_assistant_user_infos(
+    request: Request,
+    assistant_id: int,
+    db: Session = Depends(get_db),
+):
+    
+    user = auth(request, db)
 
+    assistant = (
+        db.query(Assistant)
+        .filter(Assistant.id == assistant_id, Assistant.user_id == user.id)
+        .first()
+    )
+    if not assistant:
+        raise HTTPException(status_code=404, detail="دستیار پیدا نشد یا متعلق به شما نیست")
+
+    infos = (
+        db.query(AssistantUserInfo)
+        .filter(AssistantUserInfo.assistant_id == assistant_id)
+        .order_by(AssistantUserInfo.id.desc())
+        .all()
+    )
+
+    return templates.TemplateResponse(
+        "admin/assistant_user_infos/list.html",
+        {
+            "request": request,
+            "assistant": assistant,
+            "forms": infos
+        }
+    )
+
+@router.post("/assistants/userinfo/store", name="assistant_user_info_store")
+def store_user_info(
+    request: Request,
+    assistant_id: int = Form(...),
+    fullname: str = Form(...),
+    mobile: str = Form(...),
+    email: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    assistant = db.query(Assistant).filter(Assistant.id == assistant_id).first()
+    if not assistant:
+        raise HTTPException(status_code=404, detail="دستیار پیدا نشد")
+
+    new_info = AssistantUserInfo(
+        assistant_id=assistant_id,
+        fullname=fullname,
+        mobile=mobile,
+        email=email,
+        slug=str(uuid.uuid4())
+    )
+
+    db.add(new_info)
+    db.commit()
+    db.refresh(new_info)
+
+    return JSONResponse(
+        status_code=201,
+        content={"message": "اطلاعات با موفقیت ذخیره شد", "id": new_info.id}
+    )
+
+
+@router.post("/assistants/userinfo/{info_id}/delete", name="assistant_user_info_delete")
+def delete_user_info(
+    request: Request,
+    info_id: int,
+    db: Session = Depends(get_db)
+):
+    info = db.query(AssistantUserInfo).filter(AssistantUserInfo.id == info_id).first()
+    if not info:
+        raise HTTPException(status_code=404, detail="اطلاعات پیدا نشد")
+
+    db.delete(info)
+    db.commit()
+    return JSONResponse(status_code=200, content={"message": "اطلاعات با موفقیت حذف شد"})
 
 
 def get_deployment_for_ai(ai_id: int, db: Session) -> str:
@@ -1534,7 +1615,6 @@ def get_deployment_for_ai(ai_id: int, db: Session) -> str:
     except Exception as e:
         logger.error(f"❌ Error getting deployment for AI {ai_id}: {e}")
         return "gpt-4o-realtime-preview"
-
 
 async def parse_form_as_dict(request: Request):
     form = await request.form()

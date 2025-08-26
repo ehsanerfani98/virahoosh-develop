@@ -1,6 +1,9 @@
 import uuid
-from sqlalchemy import Column, Integer, String, Text, Boolean
+from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 from database.session import Base
+from models.user import User
 
 class Assistant(Base):
     __tablename__ = "assistants"
@@ -14,3 +17,6 @@ class Assistant(Base):
     excel_url = Column(String(500), nullable=True)
     status = Column(Boolean, default=False)
     slug = Column(String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
+    
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False)  
+    user = relationship("User", back_populates="assistants")

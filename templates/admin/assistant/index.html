@@ -50,6 +50,7 @@
                                 <th>وضعیت</th>
                                 <th>لینک دستیار</th>
                                 <th>کد درج در سایت شما</th>
+                                <th>سرنخ ها</th>
                                 <th class="text-center">عملیات</th>
                             </tr>
                         </thead>
@@ -101,6 +102,10 @@
                                 </td>
                                 <td>
                                     <textarea onclick="this.select()" class="form-control" style="font-family: math; font-size: 9px; width: 240px; height: 68px; text-align: left;"><script src="{{ request.base_url }}static/js/assistant.js?assistant_id={{ a.slug }}" defer></script></textarea>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('assistant_user_info_list', assistant_id=a.id) }}"
+                                    class="btn btn-sm btn-outline-success rounded-pill px-3">مشاهده</a>
                                 </td>
                                 <td class="text-center">
                                     <a href="{{ url_for('admin_assistant_edit', assistant_id=a.id) }}"
