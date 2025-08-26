@@ -1443,7 +1443,8 @@ async def create_assistant(
         faiss_url=None,
         pkl_url=None,
         excel_url=saved_file_path,
-        slug=str(uuid.uuid4())
+        slug=str(uuid.uuid4()),
+        user_id=user.id
     )
     db.add(assistant)
     db.commit()
