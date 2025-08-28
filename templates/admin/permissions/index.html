@@ -4,7 +4,7 @@
 {% block page_title %}لیست مجوزها{% endblock %}
 
 {% block action_button %}
-<a href="{{ url_for('admin_permissions_create') }}" class="btn btn-sm btn-success px-4">
+<a href="{{ url_for('admin_permissions_create') }}" class="btn btn-sm btn-primary px-4">
     + ایجاد مجوز جدید
 </a>
 {% endblock %}
@@ -34,10 +34,10 @@
                             <td class="text-center">
                                 {% if can('edit_permission') %}
                                 <a href="{{ url_for('admin_permissions_edit', permission_id=permission.id) }}"
-                                    class="btn btn-sm btn-outline-primary rounded-pill px-3">ویرایش</a>
+                                    class="btn btn-sm btn-primary rounded-pill px-3">ویرایش</a>
                                 {% endif %}
                                 {% if can('delete_permission') %}
-                                <button class="btn btn-sm btn-outline-danger rounded-pill px-3 delete-permission-btn"
+                                <button class="btn btn-sm btn-danger rounded-pill px-3 delete-permission-btn"
                                     data-permission-id="{{ permission.id }}"
                                     data-permission-title="{{ permission.title }}">
                                     حذف

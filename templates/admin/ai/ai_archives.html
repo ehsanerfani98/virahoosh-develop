@@ -51,7 +51,7 @@
                         {% for item in archives %}
                         <tr>
                             <td style="width: 150px;font-size: 15px;">
-                                <div class="small text-muted">
+                                <div class="small text-primary">
                                     {{ item.user.email or item.user.phone or "-" }}
                                 </div>
                             </td>
@@ -63,7 +63,7 @@
                                     <img src="/{{ item.url }}" alt="AI Image" class="img-thumbnail mb-2"
                                         style="max-height: 100px;">
                                     <a href="/{{ item.url }}" target="_blank" download
-                                        class="btn btn-sm btn-outline-primary">
+                                        class="btn btn-sm btn-primary">
                                         دانلود تصویر
                                     </a>
                                 </div>
@@ -73,7 +73,7 @@
                                     <img src="/{{ item.url }}" alt="Vision Image" class="img-thumbnail mb-2"
                                         style="max-height: 100px;">
                                     <a href="/{{ item.url }}" target="_blank" download
-                                        class="btn btn-sm btn-outline-success">
+                                        class="btn btn-sm btn-primary">
                                         دانلود تصویر بینایی
                                     </a>
                                     {% if item.response %}
@@ -91,7 +91,7 @@
                                         مرورگر شما پشتیبانی نمی‌کند.
                                     </audio>
                                     <a href="/{{ item.url }}" target="_blank" download
-                                        class="btn btn-sm btn-outline-primary mt-2">
+                                        class="btn btn-sm btn-primary mt-2">
                                         دانلود صدا
                                     </a>
                                 </div>
@@ -109,7 +109,7 @@
 
                             <td class="text-center" style="width: 100px;font-size: 13px;">
                                 {% if can('delete_archive') %}
-                                <button class="btn btn-sm btn-outline-danger rounded-pill px-3 delete-archive-btn"
+                                <button class="btn btn-sm btn-danger rounded-pill px-3 delete-archive-btn"
                                     data-archive-id="{{ item.id }}" data-archive-title="{{ item.title }}">
                                     حذف
                                 </button>

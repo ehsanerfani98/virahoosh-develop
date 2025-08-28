@@ -1,198 +1,234 @@
-{% extends "admin/layout.html" %}
-
-{% block title %}لیست دستیارها{% endblock %}
-{% block page_title %}لیست دستیارها{% endblock %}
-
-{% block action_button %}
-<a href="{{ url_for('admin_assistant_create') }}" class="btn btn-sm btn-success px-4">+ دستیار جدید</a>
-{% endblock %}
-
-{% block css %}
+{% extends "admin/layout.html" %} {% block title %}لیست دستیارها{% endblock %}
+{% block page_title %}لیست دستیارها{% endblock %} {% block action_button %}
+<a
+  href="{{ url_for('admin_assistant_create') }}"
+  class="btn btn-sm btn-primary px-4"
+  >+ دستیار جدید</a
+>
+{% endblock %} {% block css %}
 <style>
-    #image-loading-spinner {
-        display: flex;
-        align-items: center;
-        gap: 1px;
-    }
+  #image-loading-spinner {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+  }
 
-    #loading-spinner,
-    #loading-spinner-img {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border: 3px solid rgba(13, 110, 253, 0.3);
-        border-top-color: #0d6efd;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        vertical-align: middle;
-        margin-left: 10px;
-    }
+  #loading-spinner,
+  #loading-spinner-img {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgb(83 106 37);
+    border-top-color: #9bd722;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    vertical-align: middle;
+    margin-left: 10px;
+  }
 
-    @keyframes spin {
-        to {
-            transform: rotate(360deg);
-        }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
     }
+  }
 </style>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="row">
-    <div class="col-lg-12 mb-4">
-        <div class="card shadow-sm rounded-4">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-blue">
-                            <tr>
-                                <th>عنوان</th>
-                                <th>توضیحات</th>
-                                <th>وضعیت</th>
-                                <th>لینک دستیار</th>
-                                <th>کد درج در سایت شما</th>
-                                <th>سرنخ ها</th>
-                                <th class="text-center">عملیات</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for a in assistants %}
-                            <tr>
-                                <td>{{ a.title }}</td>
-                                <td>{{ a.description or "-" }}</td>
-                                <td>
-                                    {% if a.status %}
-                                    <!-- وضعیت آماده -->
-                                    <div id="image-loading-spinner">
-                                        <svg width="20px" height="20px" viewBox="0 0 60 60"
-                                            xmlns="http://www.w3.org/2000/svg" fill="#000000">
-                                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                            </g>
-                                            <g id="SVGRepo_iconCarrier">
-                                                <defs>
-                                                    <style>
-                                                        .cls-1 {
-                                                            fill: #06d6a0;
-                                                            fill-rule: evenodd;
-                                                        }
-                                                    </style>
-                                                </defs>
-                                                <path class="cls-1"
-                                                    d="M800,510a30,30,0,1,1,30-30A30,30,0,0,1,800,510Zm-16.986-23.235a3.484,3.484,0,0,1,0-4.9l1.766-1.756a3.185,3.185,0,0,1,4.574.051l3.12,3.237a1.592,1.592,0,0,0,2.311,0l15.9-16.39a3.187,3.187,0,0,1,4.6-.027L817,468.714a3.482,3.482,0,0,1,0,4.846l-21.109,21.451a3.185,3.185,0,0,1-4.552.03Z"
-                                                    id="check" transform="translate(-770 -450)"></path>
-
-                                            </g>
-                                        </svg>
-                                        <div class="small text-muted" style="font-size: 13px; margin-right: 10px;">آماده
-                                            استفاده</div>
-                                    </div>
-                                    {% else %}
-                                    <div id="image-loading-spinner">
-                                        <span id="loading-spinner-img"></span>
-                                        <div class="small text-muted" style="font-size: 13px;">در حال آماده سازی ...
-                                        </div>
-                                    </div>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <input type="text" style="font-family: math;" readonly
-                                        class="form-control form-control-sm"
-                                        value="{{ request.base_url }}assistant/{{ a.slug }}" onclick="this.select()" />
-                                </td>
-                                <td>
-                                    <textarea onclick="this.select()" class="form-control" style="font-family: math; font-size: 9px; width: 240px; height: 68px; text-align: left;"><script src="{{ request.base_url }}static/js/assistant.js?assistant_id={{ a.slug }}" defer></script></textarea>
-                                </td>
-                                <td>
-                                    <a href="{{ url_for('assistant_user_info_list', assistant_id=a.id) }}"
-                                    class="btn btn-sm btn-outline-success rounded-pill px-3">مشاهده</a>
-                                </td>
-                                <td class="text-center">
-                                    <a href="{{ url_for('admin_assistant_edit', assistant_id=a.id) }}"
-                                        class="btn btn-sm btn-outline-primary rounded-pill px-3">ویرایش</a>
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 delete-assistant-btn"
-                                        data-id="{{ a.id }}">حذف</button>
-                                </td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="6" class="text-center">دستیار یافت نشد.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        {# صفحه‌بندی در صورت نیاز اضافه شود #}
-        {# <div class="mt-4">...</div> #}
-    </div>
-</div>
-{% endblock %}
-
-{% block js %}
-<script>
-    $(document).ready(function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get("success") === "1") {
-            iziToast.success({
-                title: 'تبریک',
-                message: 'دستیار با موفقیت حذف شد.',
-                position: 'bottomLeft',
-                rtl: true,
-                timeout: 3000
-            });
-            const newUrl = window.location.origin + window.location.pathname;
-            window.history.replaceState({}, document.title, newUrl);
-        }
-
-        $('.delete-assistant-btn').on('click', function () {
-            const assistantId = $(this).data('id');
-            Swal.fire({
-                title: 'حذف دستیار',
-                text: 'آیا مطمئن هستید که می‌خواهید این دستیار را حذف کنید؟',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'بله، حذف شود',
-                cancelButtonText: 'لغو',
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                reverseButtons: true
-            }).then(result => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: `/admin/assistants/${assistantId}/delete`,
-                        type: "POST",
-                        headers: {
-                            "X-Requested-With": "XMLHttpRequest"
-                        },
-                        success: function () {
-                            window.location.href = window.location.pathname + "?success=1";
-                        },
-                        error: function (xhr) {
-                            if (xhr.status === 403) {
-                                iziToast.error({
-                                    title: 'دسترسی غیرمجاز',
-                                    message: 'شما اجازه حذف این دستیار را ندارید.',
-                                    position: 'bottomLeft',
-                                    rtl: true,
-                                    timeout: 4000
-                                });
-                            } else {
-                                iziToast.error({
-                                    title: 'خطا',
-                                    message: xhr.responseJSON?.message || 'خطا در حذف دستیار',
-                                    position: 'bottomLeft',
-                                    rtl: true,
-                                    timeout: 4000
-                                });
+  <div class="col-lg-12 mb-4">
+    <div class="card shadow-sm rounded-4">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-blue">
+              <tr>
+                <th>عنوان</th>
+                <th>توضیحات</th>
+                <th>وضعیت</th>
+                <th>لینک دستیار</th>
+                <th>کد درج در سایت شما</th>
+                <th>سرنخ ها</th>
+                <th class="text-center">عملیات</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for a in assistants %}
+              <tr>
+                <td>{{ a.title }}</td>
+                <td>{{ a.description or "-" }}</td>
+                <td>
+                  {% if a.status %}
+                  <!-- وضعیت آماده -->
+                  <div id="image-loading-spinner">
+                    <svg
+                      width="20px"
+                      height="20px"
+                      viewBox="0 0 60 60"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="#000000"
+                    >
+                      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                      <g
+                        id="SVGRepo_tracerCarrier"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      ></g>
+                      <g id="SVGRepo_iconCarrier">
+                        <defs>
+                          <style>
+                            .cls-1 {
+                              fill: #63ffc7;
+                              fill-rule: evenodd;
                             }
-                        }
-                    });
-                }
-            });
-        });
+                          </style>
+                        </defs>
+                        <path
+                          class="cls-1"
+                          d="M800,510a30,30,0,1,1,30-30A30,30,0,0,1,800,510Zm-16.986-23.235a3.484,3.484,0,0,1,0-4.9l1.766-1.756a3.185,3.185,0,0,1,4.574.051l3.12,3.237a1.592,1.592,0,0,0,2.311,0l15.9-16.39a3.187,3.187,0,0,1,4.6-.027L817,468.714a3.482,3.482,0,0,1,0,4.846l-21.109,21.451a3.185,3.185,0,0,1-4.552.03Z"
+                          id="check"
+                          transform="translate(-770 -450)"
+                        ></path>
+                      </g>
+                    </svg>
+                    <div
+                      class="small text-primary"
+                      style="font-size: 13px; margin-right: 10px"
+                    >
+                      آماده استفاده
+                    </div>
+                  </div>
+                  {% else %}
+                  <div id="image-loading-spinner">
+                    <span id="loading-spinner-img"></span>
+                    <div class="small text-primary" style="font-size: 13px">
+                      در حال آماده سازی ...
+                    </div>
+                  </div>
+                  {% endif %}
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    style="font-family: math"
+                    readonly
+                    class="form-control form-control-sm"
+                    value="{{ request.base_url }}assistant/{{ a.slug }}"
+                    onclick="this.select()"
+                  />
+                </td>
+                <td>
+                  <textarea
+                    onclick="this.select()"
+                    class="form-control"
+                    style="
+                      font-family: math;
+                      font-size: 9px;
+                      width: 240px;
+                      height: 68px;
+                      text-align: left;
+                    "
+                  >
+<script src="{{ request.base_url }}static/js/assistant.js?assistant_id={{ a.slug }}" defer></script></textarea
+                  >
+                </td>
+                <td>
+                  <a
+                    href="{{ url_for('assistant_user_info_list', assistant_id=a.id) }}"
+                    class="btn btn-sm btn-primary rounded-pill px-3"
+                    >مشاهده</a
+                  >
+                </td>
+                <td class="text-center">
+                  <a
+                    href="{{ url_for('admin_assistant_edit', assistant_id=a.id) }}"
+                    class="btn btn-sm btn-primary rounded-pill px-3"
+                    >ویرایش</a
+                  >
+                  <button
+                    class="btn btn-sm btn-danger rounded-pill px-3 delete-assistant-btn"
+                    data-id="{{ a.id }}"
+                  >
+                    حذف
+                  </button>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="7" class="text-center">دستیار یافت نشد.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    {# صفحه‌بندی در صورت نیاز اضافه شود #} {#
+    <div class="mt-4">...</div>
+    #}
+  </div>
+</div>
+{% endblock %} {% block js %}
+<script>
+  $(document).ready(function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("success") === "1") {
+      iziToast.success({
+        title: "تبریک",
+        message: "دستیار با موفقیت حذف شد.",
+        position: "bottomLeft",
+        rtl: true,
+        timeout: 3000,
+      });
+      const newUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+    }
+
+    $(".delete-assistant-btn").on("click", function () {
+      const assistantId = $(this).data("id");
+      Swal.fire({
+        title: "حذف دستیار",
+        text: "آیا مطمئن هستید که می‌خواهید این دستیار را حذف کنید؟",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "بله، حذف شود",
+        cancelButtonText: "لغو",
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        reverseButtons: true,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $.ajax({
+            url: `/admin/assistants/${assistantId}/delete`,
+            type: "POST",
+            headers: {
+              "X-Requested-With": "XMLHttpRequest",
+            },
+            success: function () {
+              window.location.href = window.location.pathname + "?success=1";
+            },
+            error: function (xhr) {
+              if (xhr.status === 403) {
+                iziToast.error({
+                  title: "دسترسی غیرمجاز",
+                  message: "شما اجازه حذف این دستیار را ندارید.",
+                  position: "bottomLeft",
+                  rtl: true,
+                  timeout: 4000,
+                });
+              } else {
+                iziToast.error({
+                  title: "خطا",
+                  message: xhr.responseJSON?.message || "خطا در حذف دستیار",
+                  position: "bottomLeft",
+                  rtl: true,
+                  timeout: 4000,
+                });
+              }
+            },
+          });
+        }
+      });
     });
+  });
 </script>
 {% endblock %}

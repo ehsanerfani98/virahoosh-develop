@@ -6,7 +6,7 @@
 
 
 {% block action_button %}
-<a href="{{ url_for('admin_ai_create') }}" class="btn btn-sm btn-success px-4">
+<a href="{{ url_for('admin_ai_create') }}" class="btn btn-sm btn-primary px-4">
   + دستیار جدید
 </a>
 {% endblock %}
@@ -59,16 +59,16 @@
                 <td class="text-center">
                   <a
                     href="{{ url_for('admin_ai_edit', ai_id=ai.id) }}"
-                    class="btn btn-sm btn-outline-primary rounded-pill px-3"
+                    class="btn btn-sm btn-primary rounded-pill px-3"
                     >ویرایش</a
                   >
                   <a
                     href="{{ url_for('admin_ai_model', ai_id=ai.id) }}"
-                    class="btn btn-sm btn-outline-success rounded-pill px-3"
+                    class="btn btn-sm btn-primary rounded-pill px-3"
                     >استفاده از دستیار</a
                   >
                   <button
-                    class="btn btn-sm btn-outline-danger rounded-pill px-3 delete-ai-btn"
+                    class="btn btn-sm btn-danger rounded-pill px-3 delete-ai-btn"
                     data-ai-id="{{ ai.id }}"
                     data-ai-title="{{ ai.title }}"
                   >

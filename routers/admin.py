@@ -9,7 +9,7 @@ from models.role import Role
 from models.permission import Permission
 from models.file_upload import FileUpload
 from models.subscription_plan import SubscriptionPlan
-from models.UserSubscription import UserSubscription
+from models.user_subscription import UserSubscription
 from models.user import User
 from models.assistant import Assistant
 from models.ai import AiModel
@@ -515,7 +515,7 @@ def delete_subscription_plan(
 def buy_subscription_plan(
    request: Request,
     db: Session = Depends(get_db),
-    _=Depends(has_permission("list_subscription_plan")),
+    _=Depends(has_permission("subscription_plan_buy")),
     page: int = Query(1, ge=1),
     per_page: int = Query(10, ge=1, le=100)
 ):
@@ -640,8 +640,6 @@ async def verify_buy_subscription(
         detail = "تراکنش لغو شد یا ناموفق بود"
         raise StarletteHTTPException(status_code=500, detail=detail)
 
-
-
 # لیست بسته‌های کاربران
 @router.get("/user_subscriptions/{user_id}", response_class=HTMLResponse, name="admin_user_subscription_detail")
 def user_subscription_detail(
@@ -665,6 +663,8 @@ def user_subscription_detail(
 
     total_pages = (total + per_page - 1) // per_page
 
+    user = db.query(User).filter(User.id == user_id).first()
+
     return templates.TemplateResponse("admin/user_subscriptions/index.html", {
         "request": request,
         "subscriptions": subscriptions,
@@ -672,11 +672,52 @@ def user_subscription_detail(
         "per_page": per_page,
         "total": total,
         "total_pages": total_pages,
+        "user": user,
     })
 
 
 
-# حذف بسته
+# لیست بسته‌ کاربر جاری
+@router.get("/user_subscriptions/current/user", response_class=HTMLResponse, name="admin_current_user_subscription_detail")
+def user_subscription_detail(
+    request: Request,
+    db: Session = Depends(get_db),
+    _=Depends(has_permission("list_user_subscription")),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(10, ge=1, le=100)
+):
+    user = auth(request, db)
+
+    query = db.query(UserSubscription).filter(UserSubscription.user_id == user.id)
+
+    total = query.count()
+    subscriptions = (
+        query
+        .order_by(UserSubscription.start_date.desc())
+        .offset((page - 1) * per_page)
+        .limit(per_page)
+        .all()
+    )
+
+    total_pages = (total + per_page - 1) // per_page
+
+    user = db.query(User).filter(User.id == user.id).first()
+
+    return templates.TemplateResponse("admin/user_subscriptions/index.html", {
+        "request": request,
+        "subscriptions": subscriptions,
+        "page": page,
+        "per_page": per_page,
+        "total": total,
+        "total_pages": total_pages,
+        "user": user,
+    })
+
+
+
+
+
+# منقضی بسته
 @router.post("/user_subscriptions/{subscription_id}/delete", name="admin_user_subscription_delete")
 def delete_user_subscription(
     request: Request,
@@ -688,9 +729,9 @@ def delete_user_subscription(
     if not subscription:
         return JSONResponse(status_code=404, content={"message": "بسته یافت نشد."})
 
-    db.delete(subscription)
+    subscription.active = 0
     db.commit()
-    return JSONResponse(status_code=200, content={"message": "بسته با موفقیت حذف شد."})
+    return JSONResponse(status_code=200, content={"message": "بسته با موفقیت منقضی شد."})
 
 
 
@@ -712,7 +753,7 @@ def index(request: Request, db: Session = Depends(get_db), _: bool = Depends(has
 
 
 @router.get("/ais/carts", response_class=HTMLResponse, name="admin_ais_carts")
-def list_ai_carts(request: Request, db: Session = Depends(get_db), page: int = 1, per_page: int = 10):
+def list_ai_carts(request: Request, db: Session = Depends(get_db), _: bool = Depends(has_permission("list_ai_users")), page: int = 1, per_page: int = 10):
     total = db.query(AiModel).count()
     ai_models = db.query(AiModel).order_by(AiModel.id.desc()).offset(
         (page - 1) * per_page).limit(per_page).all()
@@ -921,7 +962,7 @@ def delete(ai_id: int, db: Session = Depends(get_db), _: bool = Depends(has_perm
 
 
 @router.get("/ais/{ai_id}", response_class=HTMLResponse, name="admin_ai_model")
-def ai_form(ai_id: int, request: Request, db: Session = Depends(get_db)):
+def ai_form(ai_id: int, request: Request, db: Session = Depends(get_db), _: bool = Depends(has_permission("list_ai_users"))):
     ai_model = db.query(AiModel).filter(AiModel.id == ai_id).first()
     if not ai_model:
         return HTMLResponse("مدل یافت نشد", status_code=404)
@@ -969,7 +1010,7 @@ async def generate_text(ai_id: int, request: Request, db: Session = Depends(get_
 
 
     response = await run_in_threadpool(run_openai_prompt, prompt_filled, system_prompt, max_tokens, model, provider)
-    if isinstance(response, dict) and not response.get('error'):
+    if not response['error']:
         user = auth(request, db)
         archive = AiArchive(
             user_id=user.id,
@@ -988,14 +1029,13 @@ async def generate_text(ai_id: int, request: Request, db: Session = Depends(get_
         total_tokens.tokens_used = tokens_used_global(request) - response['total_tokens']
         db.commit()
 
-
         return JSONResponse({
             "response": response['message'],
             "prompt": prompt_filled,
             "model_id": ai_id
         })
     
-    return JSONResponse(status_code=500, content={"message": "خطای ناشناخته"})
+    return JSONResponse(status_code=500, content={"message": response['message']})
 
 
 @router.post("/ais/{ai_id}/generate-image", name="admin_ai_generate_image")
@@ -1022,7 +1062,21 @@ async def generate_image(ai_id: int, request: Request, db: Session = Depends(get
 
     model = ai_model.model
     provider = ai_model.provider
-    translated_prompt = await run_in_threadpool(translate_to_english, image_prompt, model, provider)
+
+    # بررسی مقدار توکن
+    messages = [
+        {"role": "system", "content": ""},
+        {"role": "user", "content": image_prompt}
+    ]
+    input_token = num_tokens_from_messages(messages, ai_model.model) + 12000
+    if(input_token > tokens_used_global(request)):
+        return JSONResponse(status_code=403, content={"message": "توکن شما کافی نیست"})
+    if(tokens_used_global(request) >= ai_model.max_tokens):
+        max_tokens = ai_model.max_tokens
+    else:
+        max_tokens = tokens_used_global(request)
+
+    translated_prompt = await run_in_threadpool(translate_to_english, image_prompt, model, provider, max_tokens)
     image_url = await run_in_threadpool(generate_image_by_prompt, translated_prompt)
 
     if not image_url:
@@ -1073,6 +1127,10 @@ async def generate_image(ai_id: int, request: Request, db: Session = Depends(get
         created_at=datetime.now(TEHRAN_TZ),
     )
     db.add(archive)
+    db.commit()
+
+    total_tokens = db.query(UserToken).filter(UserToken.user_id == user.id).first()
+    total_tokens.tokens_used = tokens_used_global(request) - input_token
     db.commit()
 
     return JSONResponse({
@@ -1399,15 +1457,25 @@ async def audio_chat_ws(
             except:
                 pass
 
-
 @router.get("/assistants", response_class=HTMLResponse, name="admin_assistants")
-def list_assistants(request: Request, db: Session = Depends(get_db)):
-    assistants = db.query(Assistant).order_by(Assistant.id.desc()).all()
+def list_assistants(request: Request, db: Session = Depends(get_db), _: bool = Depends(has_permission("list_assistants"))):
+    
+    user = auth(request, db)
+
+    if (user_has_role(user, 'Admin')):
+        assistants = db.query(Assistant).order_by(Assistant.id.desc()).all()
+    else:
+        assistants = db.query(Assistant).filter(Assistant.user_id == user.id).order_by(Assistant.id.desc()).all()
+
     return templates.TemplateResponse("admin/assistant/index.html", {"request": request, "assistants": assistants})
 
+@router.get("/assistants/users/{user_id}", response_class=HTMLResponse, name="admin_users_assistants")
+def list_assistants(request: Request, user_id: str, db: Session = Depends(get_db), _: bool = Depends(has_permission("view_users_assistants"))):
+    assistants = db.query(Assistant).filter(Assistant.user_id == user_id).order_by(Assistant.id.desc()).all()
+    return templates.TemplateResponse("admin/assistant/index.html", {"request": request, "assistants": assistants})
 
 @router.get("/assistants/create", response_class=HTMLResponse, name="admin_assistant_create")
-def create_page(request: Request):
+def create_page(request: Request, _: bool = Depends(has_permission("create_assistants"))):
     return templates.TemplateResponse("admin/assistant/create.html", {"request": request})
 
 
@@ -1417,7 +1485,8 @@ async def create_assistant(
     title: str = Form(...),
     description: str = Form(""),
     domain: str = Form(""),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    _: bool = Depends(has_permission("create_assistants"))
 ):
     
     form = await request.form()
@@ -1534,7 +1603,7 @@ def list_assistant_user_infos(
         .first()
     )
     if not assistant:
-        raise HTTPException(status_code=404, detail="دستیار پیدا نشد یا متعلق به شما نیست")
+        raise HTTPException(status_code=403, detail="دستیار پیدا نشد یا متعلق به شما نیست")
 
     infos = (
         db.query(AssistantUserInfo)
@@ -1544,44 +1613,13 @@ def list_assistant_user_infos(
     )
 
     return templates.TemplateResponse(
-        "admin/assistant_user_infos/list.html",
+        "admin/assistant/leads.html",
         {
             "request": request,
             "assistant": assistant,
             "forms": infos
         }
     )
-
-@router.post("/assistants/userinfo/store", name="assistant_user_info_store")
-def store_user_info(
-    request: Request,
-    assistant_id: int = Form(...),
-    fullname: str = Form(...),
-    mobile: str = Form(...),
-    email: str = Form(...),
-    db: Session = Depends(get_db)
-):
-    assistant = db.query(Assistant).filter(Assistant.id == assistant_id).first()
-    if not assistant:
-        raise HTTPException(status_code=404, detail="دستیار پیدا نشد")
-
-    new_info = AssistantUserInfo(
-        assistant_id=assistant_id,
-        fullname=fullname,
-        mobile=mobile,
-        email=email,
-        slug=str(uuid.uuid4())
-    )
-
-    db.add(new_info)
-    db.commit()
-    db.refresh(new_info)
-
-    return JSONResponse(
-        status_code=201,
-        content={"message": "اطلاعات با موفقیت ذخیره شد", "id": new_info.id}
-    )
-
 
 @router.post("/assistants/userinfo/{info_id}/delete", name="assistant_user_info_delete")
 def delete_user_info(

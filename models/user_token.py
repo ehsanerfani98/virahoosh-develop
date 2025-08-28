@@ -2,8 +2,8 @@
 from sqlalchemy import Column, String, Integer, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from database.session import Base
-from datetime import datetime
 import uuid
+from datetime import datetime
 from core.config import TEHRAN_TZ
 
 class UserToken(Base):
@@ -16,4 +16,3 @@ class UserToken(Base):
 
     tokens_used = Column(Integer, nullable=False)
     created_at = Column(DateTime, default=datetime.now(TEHRAN_TZ), nullable=False)
-

@@ -4,7 +4,7 @@
 {% block page_title %}لیست بسته ها{% endblock %}
 
 {% block action_button %}
-<a href="{{ url_for('admin_subscription_plan_create') }}" class="btn btn-sm btn-success px-4">+ بسته جدید</a>
+<a href="{{ url_for('admin_subscription_plan_create') }}" class="btn btn-sm btn-primary px-4">+ بسته جدید</a>
 {% endblock %}
 
 {% block content %}
@@ -33,8 +33,8 @@
                                 <td>{{ plan.tokens_allowed }}</td>
                                 <td>{{ plan.amount | number_format(',') }} ریال</td>
                                 <td class="text-center">
-                                    <a href="{{ url_for('admin_subscription_plan_edit', plan_id=plan.id) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">ویرایش</a>
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 delete-plan-btn" data-id="{{ plan.id }}">حذف</button>
+                                    <a href="{{ url_for('admin_subscription_plan_edit', plan_id=plan.id) }}" class="btn btn-sm btn-primary rounded-pill px-3">ویرایش</a>
+                                    <button class="btn btn-sm btn-danger rounded-pill px-3 delete-plan-btn" data-id="{{ plan.id }}">حذف</button>
                                 </td>
                             </tr>
                             {% else %}

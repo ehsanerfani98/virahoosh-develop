@@ -53,13 +53,12 @@ def run_openai_prompt(prompt_text: str, system_prompt: str, max_tokens: int, mod
                 max_tokens=max_tokens
             )
             return {
+                'error': False,
                 'message' : response.choices[0].message.content.strip(),
                 'total_tokens' : response.usage.total_tokens
             }
 
         elif provider == "deepseek":
-            # نمونه ساختگی: اگر DeepSeek API متفاوت است، جایگزین کن
-            # این فقط نمونه است و باید DeepSeek SDK واقعی یا API client داشته باشی
             import requests
             deepseek_url = "https://api.deepseek.com/chat/completions"
             headers = {"Authorization": f"Bearer {DEEPSEEK_API_KEY}"}
@@ -72,10 +71,15 @@ def run_openai_prompt(prompt_text: str, system_prompt: str, max_tokens: int, mod
             }
             r = requests.post(deepseek_url, json=payload, headers=headers)
             r.raise_for_status()
-            return r.json()["choices"][0]["message"]["content"].strip()
-
+            return {
+                'error': False,
+                'message': r.json()["choices"][0]["message"]["content"].strip()
+            }
         else:
-            return "سرویس ناشناخته انتخاب شده است."
+            return {
+                'error': True,
+                'message': "سرویس ناشناخته انتخاب شده است"
+            }
 
     except Exception as e:
         return {
@@ -98,7 +102,7 @@ def generate_image_by_prompt(prompt: str, size: str = "1792x1024") -> str:
         return None
 
 
-def translate_to_english(text: str, model: str, provider: str) -> str:
+def translate_to_english(text: str, model: str, provider: str, max_tokens: int) -> str:
     try:
         if provider == "openai":
             response = client.chat.completions.create(
@@ -108,6 +112,7 @@ def translate_to_english(text: str, model: str, provider: str) -> str:
                     {"role": "user", "content": f"Translate the text '{text}' into English."}
                 ],
                 temperature=0,
+                max_tokens=max_tokens
             )
             return response.choices[0].message.content.strip()
 

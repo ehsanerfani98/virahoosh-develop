@@ -4,7 +4,7 @@
 {% block page_title %}نقش ها{% endblock %}
 
 {% block action_button %}
-<a href="{{ url_for('admin_roles_create') }}" class="btn btn-sm btn-success px-4">
+<a href="{{ url_for('admin_roles_create') }}" class="btn btn-sm btn-primary px-4">
     + نقش جدید
 </a>
 {% endblock %}
@@ -37,7 +37,7 @@
                                         class="badge bg-success bg-opacity-10 text-success fw-semibold px-3 py-2 rounded-pill">فعال</span>
                                 </td>
                                 <td class="text-center">
-                                    <button class="btn btn-sm btn-outline-primary rounded-pill px-3">مشاهده</button>
+                                    <button class="btn btn-sm btn-primary rounded-pill px-3">مشاهده</button>
                                 </td>
                             </tr>
                             <tr>
@@ -49,7 +49,7 @@
                                         class="badge bg-success bg-opacity-10 text-success fw-semibold px-3 py-2 rounded-pill">فعال</span>
                                 </td>
                                 <td class="text-center">
-                                    <button class="btn btn-sm btn-outline-primary rounded-pill px-3">مشاهده</button>
+                                    <button class="btn btn-sm btn-primary rounded-pill px-3">مشاهده</button>
                                 </td>
                             </tr>
                             <tr>
@@ -61,7 +61,7 @@
                                         class="badge bg-warning bg-opacity-10 text-warning fw-semibold px-3 py-2 rounded-pill">معلق</span>
                                 </td>
                                 <td class="text-center">
-                                    <button class="btn btn-sm btn-outline-primary rounded-pill px-3">مشاهده</button>
+                                    <button class="btn btn-sm btn-primary rounded-pill px-3">مشاهده</button>
                                 </td>
                             </tr>
                             <tr>
@@ -73,7 +73,7 @@
                                         class="badge bg-danger bg-opacity-10 text-danger fw-semibold px-3 py-2 rounded-pill">غیرفعال</span>
                                 </td>
                                 <td class="text-center">
-                                    <button class="btn btn-sm btn-outline-primary rounded-pill px-3">مشاهده</button>
+                                    <button class="btn btn-sm btn-primary rounded-pill px-3">مشاهده</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -108,10 +108,10 @@
                                 <td class="text-center">
                                     {% if can('edit_role') %}
                                     <a href="{{ url_for('admin_roles_edit', role_id=role.id) }}"
-                                        class="btn btn-sm btn-outline-primary rounded-pill px-3">ویرایش</a>
+                                        class="btn btn-sm btn-primary rounded-pill px-3">ویرایش</a>
                                     {% endif %}
                                     {% if can('delete_role') %}
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 delete-role-btn"
+                                    <button class="btn btn-sm btn-danger rounded-pill px-3 delete-role-btn"
                                         data-role-id="{{ role.id }}" data-role-title="{{ role.title }}">
                                         حذف
                                     </button>

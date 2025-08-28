@@ -27,24 +27,24 @@
 
     .card-icon {
         font-size: 2.5rem;
-        color: var(--primary-color);
+        color: #9bd722;
         transition: all 0.3s ease;
     }
 
-    .card:hover .card-icon {
+    .card:hover {
         transform: scale(1.1);
         color: var(--secondary-color);
     }
 
     .card-title {
         font-weight: 700;
-        color: var(--dark-color);
+        color: #9bd722;
         margin-bottom: 15px;
         font-size: 14px;
     }
 
     .card-text {
-        color: #666;
+        color: #ffffff;
         flex-grow: 1;
         font-size: 9px;
         text-align: justify;
@@ -156,7 +156,7 @@
                             </div>
                             <h6 class="card-title">{{ ai.title }}</h6>
                             <a href="{{ url_for('admin_ai_model', ai_id=ai.id) }}" style="font-size: 12px;"
-                                class="btn btn-sm btn-warning">استفاده از دستیار</a>
+                                class="btn btn-sm btn-primary">استفاده از دستیار</a>
                         </div>
                         <div class="d-flex flex-column align-items-end" style="width: 60%;">
                             <span style="display: flex; align-items: center; gap: 10px;">

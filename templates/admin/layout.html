@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>پنل مدیریت | {% block title %}{% endblock %}</title>
+    <title>ویراهوش | {% block title %}{% endblock %}</title>
     <!-- Bootstrap 5 RTL -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <!-- Font Awesome -->
@@ -22,7 +22,7 @@
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header text-center">
-            <h4>پنل مدیریت</h4>
+            <h4>ویراهوش</h4>
         </div>
         <ul class="nav flex-column px-3">
             <li class="nav-item">
@@ -79,7 +79,7 @@
                         </li>
                         {% endif %}
                 </div>
-              
+
             </li>
             {% endif %}
             {% if can('list_subscription_plan') %}
@@ -89,20 +89,34 @@
                     لیست بسته ها
                 </a>
             </li>
-        
-            {% endif %}   
-             <li class="nav-item">
+            {% endif %}
+
+            {% if can('subscription_plan_buy') %}
+            <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('admin_subscription_plan_buy') }}">
                     <i class="fas fa-shopping-cart"></i>
                     خرید بسته
                 </a>
             </li>
+            {% endif %}
+
+            {% if can('list_ai_users') %}
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('admin_ais_carts') }}">
                     <i class="fas fa-robot"></i>
                     دستیارها
                 </a>
             </li>
+            {% endif %}
+
+            {% if can('list_user_subscription') %}
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_current_user_subscription_detail') }}">
+                    <i class="fas fa-cubes"></i>
+                    بسته های خریداری شده
+                </a>
+            </li>
+            {% endif %}
 
             {% if can('archive_ai') %}
             <li class="nav-item">
@@ -113,12 +127,12 @@
             </li>
             {% endif %}
 
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a class="nav-link" href="#">
                     <i class="fas fa-cog"></i>
                     تنظیمات
                 </a>
-            </li>
+            </li> -->
         </ul>
     </div>
 
@@ -139,18 +153,18 @@
 
                     <!-- کاربر -->
                     <div class="dropdown">
-                        <button class="btn btn-light d-flex align-items-center gap-2 rounded-pill px-3 py-1"
+                        <button class="btn btn-primary d-flex align-items-center gap-2 rounded-pill px-3 py-1"
                             type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user-circle fa-lg text-secondary"></i>
+                            <i class="fas fa-user-circle fa-lg text-primary"></i>
                             <span class="fw-semibold">مدیر سیستم</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm animate__animated animate__fadeIn"
                             aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> پروفایل</a></li>
+                            <!-- <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> پروفایل</a></li>
                             <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> تنظیمات</a></li>
                             <li>
                                 <hr class="dropdown-divider">
-                            </li>
+                            </li> -->
                             <li><a class="dropdown-item text-danger" href="#" onclick="handleLogout()"><i
                                         class="fas fa-sign-out-alt me-2"></i>
                                     خروج</a></li>

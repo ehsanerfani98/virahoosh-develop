@@ -7,7 +7,6 @@ from core.config import TEHRAN_TZ
 
 class AiArchive(Base):
     __tablename__ = "ai_archives"
-
     id = Column(Integer, primary_key=True)
     ai_model_id = Column(Integer, ForeignKey("ai_models.id"))
     user_id = Column(String(36), ForeignKey("users.id"))
@@ -18,6 +17,5 @@ class AiArchive(Base):
     type = Column(String(20), nullable=True)
     url = Column(String(512), nullable=True)
     
-    
-    ai_model = relationship("AiModel")
-    user = relationship("User")
+    ai_model = relationship("AiModel", back_populates="archives")
+    user = relationship("User", back_populates="archives")

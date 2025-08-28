@@ -25,7 +25,7 @@
 
             <div class="mb-3">
                 <label class="form-label">انتخاب سرویس هوش مصنوعی</label>
-                <select name="provider" class="form-select" required>
+                <select name="provider" class="form-control" required>
                     <option value="openai" {% if ai_model.provider=="openai" %}selected{% endif %}>OpenAI</option>
                     <option value="deepseek" {% if ai_model.provider=="deepseek" %}selected{% endif %}>DeepSeek</option>
                 </select>
@@ -33,23 +33,23 @@
 
             <div class="mb-3">
                 <label class="form-label">انتخاب مدل</label>
-                <select name="model" class="form-select" required>
+                <select name="model" class="form-control" required>
                     <optgroup label="مدل‌های اصلی">
                         <option value="gpt-4o" {% if ai_model.model=="gpt-4o" %}selected{% endif %}>GPT-4o</option>
                         <option value="gpt-4o-mini" {% if ai_model.model=="gpt-4o-mini" %}selected{% endif %}>GPT-4o
                             Mini</option>
-                        <option value="gpt-4.1" {% if ai_model.model=="gpt-4.1" %}selected{% endif %}>GPT-4.1</option>
-                        <option value="gpt-4.1-mini" {% if ai_model.model=="gpt-4.1-mini" %}selected{% endif %}>GPT-4.1
-                            Mini</option>
-                        <option value="gpt-4.1-nano" {% if ai_model.model=="gpt-4.1-nano" %}selected{% endif %}>GPT-4.1
-                            Nano</option>
+                        <!-- <option value="gpt-4.1" {% if ai_model.model=="gpt-4.1" %}selected{% endif %}>GPT-4.1</option> -->
+                        <!-- <option value="gpt-4.1-mini" {% if ai_model.model=="gpt-4.1-mini" %}selected{% endif %}>GPT-4.1
+                            Mini</option> -->
+                        <!-- <option value="gpt-4.1-nano" {% if ai_model.model=="gpt-4.1-nano" %}selected{% endif %}>GPT-4.1
+                            Nano</option> -->
                         <option value="gpt-4" {% if ai_model.model=="gpt-4" %}selected{% endif %}>GPT-4</option>
                         <option value="gpt-3.5-turbo" {% if ai_model.model=="gpt-3.5-turbo" %}selected{% endif %}>
                             GPT-3.5 Turbo</option>
                         <option value="gpt-4-turbo" {% if ai_model.model=="gpt-4-turbo" %}selected{% endif %}>GPT-4
                             Turbo</option>
                         <option value="o3" {% if ai_model.model=="o3" %}selected{% endif %}>O3</option>
-                        <option value="o4-mini" {% if ai_model.model=="o4-mini" %}selected{% endif %}>O4 Mini</option>
+                        <!-- <option value="o4-mini" {% if ai_model.model=="o4-mini" %}selected{% endif %}>O4 Mini</option> -->
                     </optgroup>
                     <optgroup label="مدل تولید صدا">
                         <option value="tts-1" {% if ai_model.model=="tts-1" %}selected{% endif%}>tts-1</option>
@@ -57,7 +57,7 @@
                         <option value="gpt-4o-mini-tts" {% if ai_model.model=="gpt-4o-mini-tts" %}selected{% endif%}>
                             gpt-4o-mini-tts</option>
                     </optgroup>
-                    <optgroup label="نسخه‌های Preview">
+                    <!-- <optgroup label="نسخه‌های Preview">
                         <option value="gpt-4-1106-preview" {% if ai_model.model=="gpt-4-1106-preview" %}selected{% endif
                             %}>GPT-4 1106 Preview</option>
                         <option value="gpt-4-turbo-preview" {% if ai_model.model=="gpt-4-turbo-preview" %}selected{%
@@ -73,12 +73,11 @@
                         <option value="gpt-4o-mini-realtime-preview" {% if
                             ai_model.model=="gpt-4o-mini-realtime-preview" %}selected{% endif %}>
                             gpt-4o-mini-realtime-preview</option>
-
-                    </optgroup>
-                    <optgroup label="سایر مدل‌ها">
+                    </optgroup> -->
+                    <!-- <optgroup label="سایر مدل‌ها">
                         <option value="deepseek-chat" {% if ai_model.model=="deepseek-chat" %}selected{% endif %}>
                             DeepSeek Chat</option>
-                    </optgroup>
+                    </optgroup> -->
                 </select>
             </div>
 
@@ -130,7 +129,7 @@
             <div class="mb-3">
                 <label for="prompt" class="form-label">کانتنت پرامپت</label>
                 <textarea class="form-control" id="prompt" name="prompt" rows="5">{{ ai_model.prompt }}</textarea>
-                <small class="text-muted">برای جایگذاری ورودی‌ها از کلیدهای {name} استفاده کنید. مثال: مقاله‌ای درباره
+                <small class="text-primary">برای جایگذاری ورودی‌ها از کلیدهای {name} استفاده کنید. مثال: مقاله‌ای درباره
                     {subject} بنویسید.</small>
             </div>
 
@@ -163,7 +162,7 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">نوع ورودی</label>
-                            <select class="form-select input-type" name="input_type" required>
+                            <select class="form-control input-type" name="input_type" required>
                                 {% set types = ['text', 'textarea', 'number', 'select', 'checkbox', 'radiobutton'] %}
                                 {% for t in types %}
                                 <option value="{{ t }}" {% if input.input_type==t %}selected{% endif %}>{{ t }}</option>
@@ -181,12 +180,12 @@
                 {% endfor %}
             </div>
 
-            <button type="button" class="btn btn-sm btn-outline-primary mb-3" id="addInputBtn">+ افزودن ورودی
+            <button type="button" class="btn btn-sm btn-primary mb-3" id="addInputBtn">+ افزودن ورودی
                 جدید</button>
 
             <div class="text-end">
-                <button type="submit" class="btn btn-sm btn-success px-4">ذخیره تغییرات</button>
-                <a href="{{ url_for('admin_ais') }}" class="btn btn-sm btn-outline-secondary">انصراف</a>
+                <button type="submit" class="btn btn-sm btn-primary px-4">ذخیره تغییرات</button>
+                <a href="{{ url_for('admin_ais') }}" class="btn btn-sm btn-danger">انصراف</a>
             </div>
         </form>
     </div>
@@ -214,7 +213,7 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">نوع ورودی</label>
-                            <select class="form-select input-type" name="input_type" required>
+                            <select class="form-control input-type" name="input_type" required>
                                 ${optionsHtml}
                             </select>
                         </div>

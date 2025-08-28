@@ -6,22 +6,38 @@
 
     if (!assistantId) return;
 
-    const iframeSrc = `https://shetabito.ir/iframe/assistant/${assistantId}`;
+    const iframeSrc = `http://127.0.0.1:8000/iframe/assistant/${assistantId}`;
+
+    const googleapis = document.createElement('link');
+    googleapis.href = "https://fonts.googleapis.com";
+    googleapis.rel = "preconnect";
+    document.head.appendChild(googleapis);
+
+    const gstatic = document.createElement('link');
+    gstatic.href = "https://fonts.gstatic.com";
+    gstatic.rel = "preconnect";
+    document.head.appendChild(gstatic);
+
+    const vazirfont = document.createElement('link');
+    vazirfont.href = "https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap";
+    vazirfont.rel = "stylesheet";
+    document.head.appendChild(vazirfont);
+
 
     // ساخت باکس چت شناور
     const widgetContainer = document.createElement('div');
     widgetContainer.id = 'chatWidgetContainer';
     widgetContainer.style.position = 'fixed';
     widgetContainer.style.bottom = '30px';
-    widgetContainer.style.right = '30px';
+    widgetContainer.style.right = '50px';
     widgetContainer.style.zIndex = '9999';
     widgetContainer.style.transition = 'all 0.3s ease';
 
     // دکمه باز کردن/بستن چت
     const toggleBtn = document.createElement('div');
     toggleBtn.id = 'chatToggleBtn';
-    toggleBtn.style.width = '60px';
-    toggleBtn.style.height = '60px';
+    toggleBtn.style.width = '40px';
+    toggleBtn.style.height = '40px';
     toggleBtn.style.borderRadius = '50%';
     toggleBtn.style.background = 'linear-gradient(135deg, #4285F4, #34A853)';
     toggleBtn.style.display = 'flex';
@@ -48,7 +64,7 @@
     const chatIcon = document.createElement('div');
     chatIcon.id = 'chatIcon';
     chatIcon.style.color = 'white';
-    chatIcon.style.fontSize = '24px';
+    chatIcon.style.fontSize = '20px';
     chatIcon.style.transition = 'all 0.3s ease';
     chatIcon.style.position = 'relative';
     chatIcon.style.zIndex = '1';
@@ -73,12 +89,13 @@
     tooltip.style.opacity = '1';
     tooltip.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
     tooltip.style.pointerEvents = 'none';
+    tooltip.style.fontFamily = 'Vazirmatn';
     
     // پیکان بالن
     const tooltipArrow = document.createElement('div');
     tooltipArrow.style.position = 'absolute';
     tooltipArrow.style.top = '100%';
-    tooltipArrow.style.left = '78%';
+    tooltipArrow.style.left = '67%';
     tooltipArrow.style.transform = 'translateX(-50%)';
     tooltipArrow.style.width = '0';
     tooltipArrow.style.height = '0';
@@ -154,7 +171,7 @@
             setTimeout(() => {
                 chatIcon.innerHTML = '✕';
                 chatIcon.style.transform = 'rotate(0deg)';
-                chatIcon.style.fontSize = '28px';
+                chatIcon.style.fontSize = '20px';
             }, 150);
             
             // بزرگ کردن دکمه هنگام باز بودن
@@ -173,7 +190,7 @@
             setTimeout(() => {
                 chatIcon.innerHTML = '💬';
                 chatIcon.style.transform = 'rotate(0deg)';
-                chatIcon.style.fontSize = '24px';
+                chatIcon.style.fontSize = '20px';
             }, 150);
             
             // بازگرداندن اندازه دکمه

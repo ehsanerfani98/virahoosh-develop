@@ -1,76 +1,73 @@
 {% extends "admin/layout.html" %} {% block title %}{{ ai_model.title }}{%
-  endblock %} {% block css %}
-  <style>
-    /* استایل اسپینر ساده */
-    #loading-spinner,
-    #loading-spinner-img {
-      display: inline-block;
-      width: 24px;
-      height: 24px;
-      border: 3px solid rgba(13, 110, 253, 0.3);
-      border-top-color: #0d6efd;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      vertical-align: middle;
-      margin-left: 10px;
-    }
-  
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-  
-    /* Optional: استایل بهتر برای لینک‌ها، کدها و هدینگ‌های رندر شده */
-    #ai-response-html a {
-      color: #0d6efd;
-      text-decoration: underline;
-    }
-  
-    #ai-response-html pre {
-      background: #f8f9fa;
-      padding: 10px;
-      border-radius: 5px;
-      overflow-x: auto;
-    }
-  
-    #ai-response-html code {
-      background: #f1f3f5;
-      padding: 2px 4px;
-      border-radius: 4px;
-      font-family: monospace;
-    }
-  
-    #ai-response-html h1,
-    #ai-response-html h2,
-    #ai-response-html h3 {
-      margin-top: 1rem;
-      margin-bottom: 0.5rem;
-    }
-  
-    /* استایل دکمه دانلود در لایت باکس */
-    .lb-download {
-      display: block;
-      position: absolute;
-      right: 40px;
-      top: 0;
-      height: 40px;
-      line-height: 40px;
-      width: 40px;
-      text-align: center;
-      color: white;
-      font-size: 20px;
-      text-decoration: none;
-    }
-  
-    .lb-download:hover {
-      color: #0d6efd;
-    }
-  </style>
-  {% endblock %} {% block content %}
+endblock %} {% block css %}
+<style>
+  /* استایل اسپینر ساده */
+  #loading-spinner,
+  #loading-spinner-img {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgb(83 106 37);
+    border-top-color: #9bd722;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    vertical-align: middle;
+    margin-left: 10px;
+  }
 
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
 
-  {% if ai_model.type.value == "text_image" %}
+  /* Optional: استایل بهتر برای لینک‌ها، کدها و هدینگ‌های رندر شده */
+  #ai-response-html a {
+    color: #0d6efd;
+    text-decoration: underline;
+  }
+
+  #ai-response-html pre {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+  }
+
+  #ai-response-html code {
+    background: #f1f3f5;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: monospace;
+  }
+
+  #ai-response-html h1,
+  #ai-response-html h2,
+  #ai-response-html h3 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* استایل دکمه دانلود در لایت باکس */
+  .lb-download {
+    display: block;
+    position: absolute;
+    right: 40px;
+    top: 0;
+    height: 40px;
+    line-height: 40px;
+    width: 40px;
+    text-align: center;
+    color: white;
+    font-size: 20px;
+    text-decoration: none;
+  }
+
+  .lb-download:hover {
+    color: #0d6efd;
+  }
+</style>
+{% endblock %} {% block content %} {% if ai_model.type.value == "text_image" %}
 <div class="row">
   <div class="col-lg-12">
     <div class="d-flex align-items-center mb-3 gap-2">
@@ -81,7 +78,12 @@
       {{ ai_model.description }}
     </div>
 
-    <form id="ai-form" data-model-id="{{ ai_model.id }}" method="post" class="card p-4 shadow-sm rounded-4 mb-4">
+    <form
+      id="ai-form"
+      data-model-id="{{ ai_model.id }}"
+      method="post"
+      class="card p-4 shadow-sm rounded-4 mb-4"
+    >
       <!-- <div class="mb-3">
         <label class="form-label">موضوع محتوا</label>
         <textarea name="image_title" id="image_title" class="form-control" rows="3"></textarea>
@@ -89,7 +91,12 @@
 
       <fieldset>
         <legend>موضوع محتوا</legend>
-        <textarea name="topic" class="form-control" rows="4" required></textarea>
+        <textarea
+          name="topic"
+          class="form-control"
+          rows="4"
+          required
+        ></textarea>
       </fieldset>
 
       {% for input in ai_model.inputs %}
@@ -97,14 +104,24 @@
         <legend>{{ input.title }}</legend>
 
         {% if input.input_type in ['text', 'number'] %}
-        <input type="{{ input.input_type }}" name="{{ input.name }}" class="form-control" required />
+        <input
+          type="{{ input.input_type }}"
+          name="{{ input.name }}"
+          class="form-control"
+          required
+        />
 
         {% elif input.input_type == 'textarea' %}
-        <textarea name="{{ input.name }}" class="form-control" rows="4" required></textarea>
+        <textarea
+          name="{{ input.name }}"
+          class="form-control"
+          rows="4"
+          required
+        ></textarea>
 
         {% elif input.input_type == 'select' %} {% set options = input.options |
         default('[]') | loads %}
-        <select name="{{ input.name }}" class="form-select" required>
+        <select name="{{ input.name }}" class="form-control" required>
           {% for option in options %}
           <option value="{{ option }}">{{ option }}</option>
           {% endfor %}
@@ -115,9 +132,18 @@
         <div>
           {% for option in options %}
           <div class="form-check form-check-inline">
-            <input class="form-check-input" type="checkbox" name="{{ input.name }}"
-              id="{{ input.name }}_{{ loop.index }}" value="{{ option }}" />
-            <label class="form-check-label" for="{{ input.name }}_{{ loop.index }}">{{ option }}</label>
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="{{ input.name }}"
+              id="{{ input.name }}_{{ loop.index }}"
+              value="{{ option }}"
+            />
+            <label
+              class="form-check-label"
+              for="{{ input.name }}_{{ loop.index }}"
+              >{{ option }}</label
+            >
           </div>
           {% endfor %}
         </div>
@@ -127,9 +153,19 @@
         <div>
           {% for option in options %}
           <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="{{ input.name }}" id="{{ input.name }}_{{ loop.index }}"
-              value="{{ option }}" required />
-            <label class="form-check-label" for="{{ input.name }}_{{ loop.index }}">{{ option }}</label>
+            <input
+              class="form-check-input"
+              type="radio"
+              name="{{ input.name }}"
+              id="{{ input.name }}_{{ loop.index }}"
+              value="{{ option }}"
+              required
+            />
+            <label
+              class="form-check-label"
+              for="{{ input.name }}_{{ loop.index }}"
+              >{{ option }}</label
+            >
           </div>
           {% endfor %}
         </div>
@@ -138,24 +174,35 @@
       </fieldset>
       {% endfor %}
 
-      <button type="submit" class="btn btn-primary px-4">تولید متن و تصویر</button>
+      <button type="submit" class="btn btn-primary px-4">
+        تولید متن و تصویر
+      </button>
     </form>
 
     <!-- نمایش نتیجه -->
     <div id="ai-response-box" style="display: none">
       <div class="card shadow-sm rounded-4 p-4 bg-light">
         <h5 class="mb-3">متن تولید شده:</h5>
-        <div id="ai-response-html"
-             style="max-height: 300px; overflow-y: auto; border:1px solid #ddd; padding:15px; border-radius:8px; background:white;"></div>
+        <div id="ai-response-html"></div>
 
         <h5 class="mt-4 mb-3">تصویر تولید شده:</h5>
         <div class="text-center">
           <a href="" id="image-lightbox-link" data-lightbox="generated-image">
-            <img id="generated-image" src="" alt="تصویر تولید شده"
-                 class="img-fluid rounded" style="max-height: 300px;">
+            <img
+              id="generated-image"
+              src=""
+              alt="تصویر تولید شده"
+              class="img-fluid rounded"
+              style="max-height: 300px"
+            />
           </a>
-          <br>
-          <a href="#" target="_blank" id="download-btn" class="btn btn-sm btn-outline-primary mt-2">
+          <br />
+          <a
+            href="#"
+            target="_blank"
+            id="download-btn"
+            class="btn btn-sm btn-primary mt-2"
+          >
             <i class="fas fa-download"></i> دانلود تصویر
           </a>
         </div>
@@ -163,63 +210,60 @@
     </div>
   </div>
 </div>
-{% endif %}
-
-
-
-
-{% endblock %}
-
-{% block js %}
+{% endif %} {% endblock %} {% block js %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet" />
+<link
+  href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css"
+  rel="stylesheet"
+/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
-
 
 {% if ai_model.type.value == "text_image" %}
 <script>
-$(document).ready(function () {
-  const ai_id = $("#ai-form").data("model-id");
-  const $form = $("#ai-form");
-  const $submitBtn = $form.find('button[type="submit"]');
-  const $loading = $('<span id="loading-spinner" style="display:none;"></span>');
-  $submitBtn.after($loading);
+  $(document).ready(function () {
+    const ai_id = $("#ai-form").data("model-id");
+    const $form = $("#ai-form");
+    const $submitBtn = $form.find('button[type="submit"]');
+    const $loading = $(
+      '<span id="loading-spinner" style="display:none;"></span>'
+    );
+    $submitBtn.after($loading);
 
-  $form.on("submit", function (e) {
-    e.preventDefault();
-    $submitBtn.prop("disabled", true);
-    $loading.show();
+    $form.on("submit", function (e) {
+      e.preventDefault();
+      $submitBtn.prop("disabled", true);
+      $loading.show();
 
-    const formData = $form.serialize();
-    $.ajax({
-      url: `/admin/ais/${ai_id}/generate-text-image`,
-      type: "POST",
-      data: formData,
-      beforeSend: function () {
-        $("#ai-response-box").hide();
-      },
-      success: function (res) {
-        $("#ai-response-html").html(marked.parse(res.text_response));
-        $("#generated-image").attr("src", res.image_url);
-        $("#image-lightbox-link").attr("href", res.image_url);
-        $("#download-btn").attr("href", res.image_url).attr("download", "image-" + Date.now() + ".jpg");
-        $("#ai-response-box").fadeIn();
-      },
-      error: function (xhr) {
-        let msg = "خطا در پردازش";
-        try { msg = JSON.parse(xhr.responseText).message || msg; } catch (_) {}
-        Swal.fire({ icon: 'error', title: 'خطا', text: msg });
-      },
-      complete: function () {
-        $submitBtn.prop("disabled", false);
-        $loading.hide();
-      }
+      const formData = $form.serialize();
+      $.ajax({
+        url: `/admin/ais/${ai_id}/generate-text-image`,
+        type: "POST",
+        data: formData,
+        beforeSend: function () {
+          $("#ai-response-box").hide();
+        },
+        success: function (res) {
+          $("#ai-response-html").html(marked.parse(res.text_response));
+          $("#generated-image").attr("src", res.image_url);
+          $("#image-lightbox-link").attr("href", res.image_url);
+          $("#download-btn")
+            .attr("href", res.image_url)
+            .attr("download", "image-" + Date.now() + ".jpg");
+          $("#ai-response-box").fadeIn();
+        },
+        error: function (xhr) {
+          let msg = "خطا در پردازش";
+          try {
+            msg = JSON.parse(xhr.responseText).message || msg;
+          } catch (_) {}
+          Swal.fire({ icon: "error", title: "خطا", text: msg });
+        },
+        complete: function () {
+          $submitBtn.prop("disabled", false);
+          $loading.hide();
+        },
+      });
     });
   });
-});
 </script>
-{% endif %}
-
-
-
-{% endblock %}
+{% endif %} {% endblock %}

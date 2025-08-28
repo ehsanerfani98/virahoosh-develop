@@ -1,195 +1,762 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=400, initial-scale=1" />
-  <title>{{ assistant.title }}</title>
-  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Vazir', Tahoma, sans-serif;
-    }
-
-    body {
-      background-color: #f8f9fa;
-      color: #333;
-      width: 400px;
-      height: 500px;
-      overflow-y: auto;
-      direction: rtl;
-      font-size: 12px;
-    }
-
-    .container {
-      padding: 10px;
-      max-width: 380px;
-      margin: auto;
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 15px;
-    }
-
-    .logo {
-      width: 50px;
-      height: 50px;
-      background: linear-gradient(135deg, #4285F4, #34A853);
-      border-radius: 50%;
-      margin: 0 auto 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 5px 15px rgba(66, 133, 244, 0.3);
-    }
-
-    .logo i {
-      font-size: 1.5rem;
-      color: white;
-    }
-
-    h1 {
-      font-size: 1.3rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #4285F4, #EA4335);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      margin-bottom: 6px;
-    }
-
-    /* فرم ورود اطلاعات */
-    #userInfoForm {
-      display: block;
-      margin-bottom: 15px;
-      background: white;
-      padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    #userInfoForm input {
-      width: 100%;
-      margin-bottom: 10px;
-      padding: 8px 10px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 12px;
-    }
-
-    #userInfoForm button {
-      width: 100%;
-      padding: 8px;
-      background: linear-gradient(135deg, #4285F4, #34A853);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: bold;
-    }
-
-    /* فرم چت پیشفرض مخفی */
-    #chatBox {
-      display: none;
-    }
-
-    form.ask-form {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 15px;
-    }
-
-    input.question-input {
-      flex: 1;
-      padding: 8px 10px;
-      border-radius: 12px;
-      border: 1px solid #eee;
-    }
-
-    button.submit-btn {
-      padding: 0 12px;
-      border-radius: 12px;
-      font-weight: 600;
-      background: linear-gradient(135deg, #4285F4, #34A853);
-      color: white;
-      border: none;
-      cursor: pointer;
-      min-width: 70px;
-    }
-
-    .answer-section {
-      display: none;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="container">
-    <div class="header">
-      <div class="logo">
-        <i class="fas fa-robot"></i>
-      </div>
-      <h1>{{ assistant.title }}</h1>
-    </div>
-
-    <!-- فرم ورود اطلاعات -->
-    <form id="userInfoForm">
-      <input type="text" id="fullname" placeholder="نام و نام خانوادگی" required />
-      <input type="text" id="mobile" placeholder="شماره موبایل" required />
-      <input type="email" id="email" placeholder="ایمیل" required />
-      <button type="submit">شروع چت</button>
-    </form>
-
-    <!-- بخش چت -->
-    <div id="chatBox">
-      <form id="askForm" class="ask-form" autocomplete="off" novalidate>
-        <input type="text" id="questionInput" name="question" class="question-input"
-          placeholder="هر سوالی دارید بپرسید..." required />
-        <button id="submitBtn" type="submit" class="submit-btn">بپرسید</button>
-      </form>
-
-      <div id="answerSection" class="answer-section">
-        <div class="answer">
-          <h4><i class="fas fa-comment-dots"></i> پاسخ:</h4>
-          <p id="answerText"></p>
-        </div>
-        <div class="related">
-          <h5><i class="fas fa-link"></i> سوالات مشابه:</h5>
-          <ul id="relatedList"></ul>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const userInfoForm = document.getElementById("userInfoForm");
-    const chatBox = document.getElementById("chatBox");
-
-    userInfoForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      const fullname = document.getElementById("fullname").value.trim();
-      const mobile = document.getElementById("mobile").value.trim();
-      const email = document.getElementById("email").value.trim();
-
-      if (!fullname || !mobile || !email) {
-        alert("لطفا همه فیلدها را پر کنید");
-        return;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=400, initial-scale=1" />
+    <title>{{ assistant.title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Vazirmatn", Tahoma, sans-serif;
       }
 
-      // اینجا میتونی اطلاعات کاربر رو به سرور بفرستی (Ajax / fetch)
-      console.log({ fullname, mobile, email });
+      /* width */
+      ::-webkit-scrollbar {
+        width: 5px;
+        border-radius: 20px;
+      }
 
-      // فرم مخفی و چت نمایش داده شود
-      userInfoForm.style.display = "none";
-      chatBox.style.display = "block";
-    });
-  </script>
-</body>
+      /* Track */
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+
+      /* Handle */
+      ::-webkit-scrollbar-thumb {
+        background: #4285f4;
+      }
+
+      /* Handle on hover */
+      ::-webkit-scrollbar-thumb:hover {
+        background: #3980f1;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+      @keyframes gradientBG {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+
+      body {
+        background-color: #f8f9fa;
+        color: #333;
+        width: 400px;
+        height: 500px;
+        overflow-y: auto;
+        direction: rtl;
+        font-size: 12px;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          135deg,
+          rgba(101, 78, 163, 0.05) 0%,
+          rgba(234, 67, 53, 0.05) 50%,
+          rgba(251, 188, 5, 0.05) 100%
+        );
+        z-index: -1;
+      }
+
+      .ai-bg-element {
+        position: fixed;
+        opacity: 0.05;
+        z-index: -1;
+      }
+
+      .ai-bg-element:nth-child(1) {
+        top: 10%;
+        left: 5%;
+        font-size: 4rem;
+        color: #4285f4;
+        animation: float 8s ease-in-out infinite;
+      }
+
+      .ai-bg-element:nth-child(2) {
+        top: 70%;
+        right: 10%;
+        font-size: 3rem;
+        color: #ea4335;
+        animation: pulse 6s ease-in-out infinite;
+      }
+
+      .ai-bg-element:nth-child(3) {
+        bottom: 20%;
+        left: 15%;
+        font-size: 5rem;
+        color: #34a853;
+        animation: float 10s ease-in-out infinite;
+      }
+
+      .container {
+        padding: 10px;
+        max-width: 380px;
+        margin: auto;
+        position: relative;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 15px;
+      }
+
+      .logo {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #4285f4, #34a853);
+        border-radius: 50%;
+        margin: 0 auto 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 5px 15px rgba(66, 133, 244, 0.3);
+        animation: pulse 3s ease-in-out infinite;
+      }
+
+      .logo i {
+        font-size: 1.5rem;
+        color: white;
+      }
+
+      h1 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #4285f4, #ea4335);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 6px;
+      }
+
+      /* فرم ورود اطلاعات */
+      #userInfoForm {
+        display: block;
+        margin-bottom: 15px;
+        background: white;
+        padding: 15px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #eee;
+      }
+
+      #userInfoForm::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 5px;
+        height: 100%;
+        background: linear-gradient(to bottom, #4285f4, #34a853);
+      }
+
+      #userInfoForm input {
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 10px 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 12px;
+        transition: all 0.3s ease;
+      }
+
+      #userInfoForm input:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+        border-color: #4285f4;
+      }
+
+      #userInfoForm button {
+        width: 100%;
+        padding: 10px;
+        background: linear-gradient(135deg, #4285f4, #34a853);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      #userInfoForm button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(66, 133, 244, 0.3);
+      }
+
+      #userInfoForm button:active {
+        transform: translateY(0);
+      }
+
+      #userInfoForm button::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: 0.5s;
+      }
+
+      #userInfoForm button:hover::before {
+        left: 100%;
+      }
+
+      /* فرم چت پیشفرض مخفی */
+      #chatBox {
+        display: none;
+      }
+
+      form.ask-form {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 15px;
+      }
+
+      input.question-input {
+        flex: 1;
+        padding: 0 12px;
+        border-radius: 6px;
+        border: 1px solid #eee;
+        background-color: white;
+        color: #333;
+        font-family: "Vazirmatn", Tahoma, sans-serif;
+        font-size: 12px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        height: 30px;
+      }
+
+      input.question-input:focus {
+        outline: none;
+        box-shadow: 0 3px 15px rgba(66, 133, 244, 0.2);
+        border-color: #4285f4;
+      }
+
+      input.question-input::placeholder {
+        color: #aaa;
+      }
+
+      button.submit-btn {
+        border-radius: 6px;
+        font-weight: 600;
+        background: linear-gradient(135deg, #4285f4, #34a853);
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 11px;
+        box-shadow: 0 3px 10px rgba(66, 133, 244, 0.3);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 105px;
+        position: relative;
+        overflow: hidden;
+        height: 30px;
+        gap: 6px;
+      }
+
+      button.submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(66, 133, 244, 0.4);
+      }
+
+      button.submit-btn:active {
+        transform: translateY(0);
+      }
+
+      button.submit-btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: 0.5s;
+      }
+
+      button.submit-btn:hover::before {
+        left: 100%;
+      }
+
+      button.submit-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none !important;
+      }
+
+      .spinner {
+        width: 12px;
+        height: 12px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 0.8s ease-in-out infinite;
+        margin-left: 5px;
+        display: none;
+      }
+
+      /* استایل‌های جدید */
+      #loadingSpinner {
+        display: none;
+        text-align: center;
+        margin: 0;
+      }
+
+      #loadingSpinner .spinner {
+        display: inline-block;
+        margin: 0 auto 10px;
+      }
+
+      #successMessage {
+        display: none;
+        text-align: center;
+        margin: 20px 0;
+        background-color: #d4edda;
+        padding: 15px;
+        border-radius: 15px;
+        color: #155724;
+        font-weight: bold;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        border: 1px solid #c3e6cb;
+        animation: fadeIn 0.5s ease-out;
+      }
+
+      #successMessage i {
+        color: #28a745;
+        margin-left: 8px;
+        font-size: 16px;
+      }
+
+      .answer-section {
+        display: none;
+        animation: fadeIn 0.8s ease-out;
+      }
+
+      .answer,
+      .related {
+        background-color: white;
+        border-radius: 15px;
+        padding: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 15px;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #eee;
+      }
+
+      .answer::before,
+      .related::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 5px;
+        height: 100%;
+        background: linear-gradient(to bottom, #4285f4, #34a853);
+      }
+
+      .answer h4,
+      .related h5 {
+        color: #4285f4;
+        margin-bottom: 10px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+      }
+
+      .answer h4 i,
+      .related h5 i {
+        margin-left: 5px;
+      }
+
+      #answerText {
+        white-space: pre-wrap;
+        min-height: 40px;
+        line-height: 1.6;
+        color: #555;
+        font-size: 12px;
+      }
+
+      .typing-cursor {
+        display: inline-block;
+        width: 6px;
+        height: 16px;
+        background-color: #4285f4;
+        animation: blink 1s infinite;
+        vertical-align: middle;
+        margin-left: 2px;
+        border-radius: 1px;
+      }
+
+      .related-list {
+        list-style: none;
+      }
+
+      .related-list li {
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+        color: #666;
+        transition: all 0.3s ease;
+        position: relative;
+        padding-right: 20px;
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      .related-list li:last-child {
+        border-bottom: none;
+      }
+
+      .related-list li::before {
+        content: "\f053";
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #ea4335;
+        transition: all 0.3s ease;
+        font-size: 10px;
+      }
+
+      .related-list li:hover {
+        color: #4285f4;
+        transform: translateX(-5px);
+      }
+
+      .related-list li:hover::before {
+        right: -5px;
+        color: #4285f4;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">
+          <i class="fas fa-robot"></i>
+        </div>
+        <h1>{{ assistant.title }}</h1>
+      </div>
+
+      <!-- فرم ورود اطلاعات -->
+      <form id="userInfoForm">
+        <input
+          type="text"
+          type="text"
+          id="fullname"
+          placeholder="نام و نام خانوادگی"
+          required
+        />
+        <input type="text" id="mobile" placeholder="شماره موبایل" required />
+        <input type="email" id="email" placeholder="ایمیل" required />
+        <button type="submit">شروع چت</button>
+      </form>
+
+      <!-- بخش پیام موفقیت‌آمیز -->
+      <div id="successMessage">
+        <i class="fas fa-check-circle"></i>
+        اطلاعات شما با موفقیت ثبت شد.
+      </div>
+
+      <!-- بخش چت -->
+      <div id="chatBox">
+        <form id="askForm" class="ask-form" autocomplete="off" novalidate>
+          <input
+            type="text"
+            id="questionInput"
+            name="question"
+            class="question-input"
+            placeholder="هر سوالی دارید بپرسید..."
+            required
+          />
+          <button id="submitBtn" type="submit" class="submit-btn">
+            <span id="submitText">بپرسید</span>
+            <span id="loadingSpinner" class="spinner"></span>
+          </button>
+        </form>
+
+        <div id="answerSection" class="answer-section">
+          <div class="answer">
+            <h4><i class="fas fa-comment-dots"></i> پاسخ:</h4>
+            <p id="answerText"></p>
+          </div>
+          <div class="related">
+            <h5><i class="fas fa-link"></i> سوالات مشابه:</h5>
+            <ul id="relatedList" class="related-list"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const userInfoForm = document.getElementById("userInfoForm");
+      const chatBox = document.getElementById("chatBox");
+      const loadingSpinner = document.getElementById("loadingSpinner");
+      const successMessage = document.getElementById("successMessage");
+
+      // تابع برای بررسی وجود اطلاعات کاربر در localStorage
+      function getUserInfo() {
+        const userInfo = localStorage.getItem("assistantUserInfo");
+        if (userInfo) {
+          try {
+            return JSON.parse(userInfo);
+          } catch (e) {
+            console.error("Error parsing user info from localStorage", e);
+            return null;
+          }
+        }
+        return null;
+      }
+
+      // تابع برای ذخیره اطلاعات کاربر در localStorage
+      function saveUserInfo(userInfo) {
+        localStorage.setItem("assistantUserInfo", JSON.stringify(userInfo));
+      }
+
+      // بررسی اینکه آیا کاربر قبلاً اطلاعات خود را ثبت کرده است
+      window.addEventListener("DOMContentLoaded", (event) => {
+        const userInfo = getUserInfo();
+        if (userInfo && userInfo.id) {
+          userInfoForm.style.display = "none";
+          chatBox.style.display = "block";
+          initChat();
+        }
+      });
+
+      userInfoForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const fullname = document.getElementById("fullname").value.trim();
+        const mobile = document.getElementById("mobile").value.trim();
+        const email = document.getElementById("email").value.trim();
+
+        if (!fullname || !mobile || !email) {
+          alert("لطفا همه فیلدها را پر کنید");
+          return;
+        }
+
+        // نمایش لودینگ و مخفی کردن فرم
+        userInfoForm.style.display = "none";
+        loadingSpinner.style.display = "block";
+
+        // ارسال اطلاعات کاربر به سرور
+        fetch("/assistants/userinfo/store", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            assistant_id: "{{ assistant.id }}",
+            fullname,
+            mobile,
+            email,
+          }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.id) {
+              // ذخیره اطلاعات کاربر در localStorage
+              saveUserInfo({
+                id: data.id,
+                fullname: fullname,
+                mobile: mobile,
+                email: email,
+                assistant_id: "{{ assistant.id }}",
+              });
+
+              // مخفی کردن لودینگ و نمایش پیام موفقیت‌آمیز
+              loadingSpinner.style.display = "none";
+              successMessage.style.display = "block";
+
+              // پس از 2 ثانیه، پیام موفقیت‌آمیز را مخفی کرده و چت را نمایش می‌دهیم
+              setTimeout(() => {
+                successMessage.style.display = "none";
+                chatBox.style.display = "block";
+
+                // حالا که چت فعال شد، اسکریپت چت را اجرا می‌کنیم
+                initChat();
+              }, 2000);
+            } else {
+              // در صورت خطا، دوباره فرم را نمایش می‌دهیم
+              loadingSpinner.style.display = "none";
+              userInfoForm.style.display = "block";
+              alert("خطا در ذخیره اطلاعات. لطفا دوباره تلاش کنید.");
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+            loadingSpinner.style.display = "none";
+            userInfoForm.style.display = "block";
+            alert("خطا در ارتباط با سرور.");
+          });
+      });
+
+      function initChat() {
+        const form = document.getElementById("askForm");
+        const questionInput = document.getElementById("questionInput");
+        const submitBtn = document.getElementById("submitBtn");
+        const submitText = document.getElementById("submitText");
+        const loadingSpinner = document.getElementById("loadingSpinner");
+        const answerSection = document.getElementById("answerSection");
+        const answerText = document.getElementById("answerText");
+        const relatedList = document.getElementById("relatedList");
+
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const question = questionInput.value.trim();
+          if (!question) return;
+
+          submitBtn.disabled = true;
+          submitText.textContent = "در حال پردازش...";
+          loadingSpinner.style.display = "inline-block";
+          answerSection.style.display = "none";
+
+          const formData = new FormData();
+          formData.append("question", question);
+
+          try {
+            const response = await fetch(`/assistants/{{ assistant.id }}/ask`, {
+              method: "POST",
+              body: formData,
+            });
+
+            if (!response.ok) {
+              alert("خطا در دریافت پاسخ. لطفاً بعداً تلاش کنید.");
+              return;
+            }
+
+            const data = await response.json();
+            if (data.error) {
+              alert("سیستم هنوز آماده نیست، لطفا کمی صبر کنید.");
+              return;
+            }
+
+            // تایپینگ افکت
+            answerText.innerHTML = "";
+            const cursorSpan = document.createElement("span");
+            cursorSpan.className = "typing-cursor";
+            answerText.appendChild(cursorSpan);
+
+            let i = 0;
+            const typingInterval = setInterval(() => {
+              if (i < data.answer.length) {
+                answerText.insertBefore(
+                  document.createTextNode(data.answer[i]),
+                  cursorSpan
+                );
+                i++;
+                answerText.scrollTop = answerText.scrollHeight;
+              } else {
+                clearInterval(typingInterval);
+                cursorSpan.remove();
+              }
+            }, 20);
+
+            relatedList.innerHTML = "";
+            data.related.forEach((item) => {
+              const li = document.createElement("li");
+              li.textContent = item;
+              relatedList.appendChild(li);
+            });
+
+            answerSection.style.display = "block";
+          } catch (error) {
+            alert("خطا در ارتباط با سرور.");
+            console.error(error);
+          } finally {
+            submitBtn.disabled = false;
+            submitText.textContent = "بپرسید";
+            loadingSpinner.style.display = "none";
+          }
+        });
+      }
+    </script>
+  </body>
 </html>

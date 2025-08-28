@@ -15,7 +15,6 @@ class AiModelType(enum.Enum):
 
 class AiModel(Base):
     __tablename__ = "ai_models"
-
     id = Column(Integer, primary_key=True, index=True)
     icon = Column(String(255), nullable=True)
     title = Column(String(255), nullable=False)
@@ -26,6 +25,6 @@ class AiModel(Base):
     system_prompt = Column(Text, nullable=True)
     max_tokens = Column(Integer, nullable=True, default=500)
     type = Column(Enum(AiModelType), nullable=False, default="text")
-
     inputs = relationship(
         "AiInput", back_populates="ai_model", cascade="all, delete-orphan")
+    archives = relationship("AiArchive", back_populates="ai_model")

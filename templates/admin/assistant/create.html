@@ -25,12 +25,12 @@
             <div class="mb-3">
                 <label for="file" class="form-label">فایل Excel</label>
                 <input type="file" class="form-control" id="file" name="file" accept=".xls,.xlsx" required>
-                <small class="text-muted">فقط فرمت Excel (xls یا xlsx) قابل قبول است.</small>
+                <small class="text-primary">فقط فرمت Excel (xls یا xlsx) قابل قبول است.</small>
             </div>
 
             <div class="text-end mt-4">
-                <button type="submit" class="btn btn-sm btn-success px-4">ایجاد دستیار</button>
-                <a href="{{ url_for('admin_assistants') }}" class="btn btn-sm btn-outline-secondary">بازگشت</a>
+                <button type="submit" class="btn btn-sm btn-primary px-4">ایجاد دستیار</button>
+                <a href="{{ url_for('admin_assistants') }}" class="btn btn-sm btn-danger">بازگشت</a>
             </div>
         </form>
     </div>

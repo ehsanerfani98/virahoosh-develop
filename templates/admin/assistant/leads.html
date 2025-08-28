@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
 
-{% block title %}لیست فرم‌های دستیار{% endblock %}
-{% block page_title %}لیست فرم‌های دستیار: {{ assistant.title }}{% endblock %}
+{% block title %}لیست سرنخ ها{% endblock %}
+{% block page_title %}لیست سرنخ های {{ assistant.title }}{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -16,7 +16,6 @@
                                 <th>نام و نام خانوادگی</th>
                                 <th>موبایل</th>
                                 <th>ایمیل</th>
-                                <th>تاریخ ثبت</th>
                                 <th class="text-center">عملیات</th>
                             </tr>
                         </thead>
@@ -27,15 +26,14 @@
                                 <td>{{ f.fullname }}</td>
                                 <td>{{ f.mobile }}</td>
                                 <td>{{ f.email or "-" }}</td>
-                                <td>{{ f.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
                                 <td class="text-center">
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 delete-form-btn"
+                                    <button class="btn btn-sm btn-danger rounded-pill px-3 delete-form-btn"
                                         data-id="{{ f.id }}">حذف</button>
                                 </td>
                             </tr>
                             {% else %}
                             <tr>
-                                <td colspan="6" class="text-center">هیچ فرمی برای این دستیار ثبت نشده است.</td>
+                                <td colspan="6" class="text-center">هیچ سرنخی برای این دستیار ثبت نشده است.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -44,21 +42,30 @@
             </div>
         </div>
 
-        <div class="mt-3">
-            <a href="{{ url_for('admin_assistants_list') }}" class="btn btn-outline-secondary rounded-pill px-4">بازگشت</a>
-        </div>
     </div>
 </div>
 {% endblock %}
-
 {% block js %}
 <script>
     $(document).ready(function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("success") === "1") {
+            iziToast.success({
+                title: "تبریک",
+                message: "سرنخ با موفقیت حذف شد.",
+                position: "bottomLeft",
+                rtl: true,
+                timeout: 3000,
+            });
+            const newUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
+        }
+
         $('.delete-form-btn').on('click', function () {
             const formId = $(this).data('id');
             Swal.fire({
-                title: 'حذف فرم',
-                text: 'آیا مطمئن هستید که می‌خواهید این فرم را حذف کنید؟',
+                title: 'حذف سرنخ',
+                text: 'آیا مطمئن هستید که می‌خواهید این سرنخ را حذف کنید؟',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'بله، حذف شود',
@@ -69,20 +76,30 @@
             }).then(result => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: `/assistant_user_infos/${formId}/delete`,
+                        url: `/admin/assistants/userinfo/${formId}/delete`,
                         type: "POST",
                         headers: { "X-Requested-With": "XMLHttpRequest" },
                         success: function () {
-                            window.location.reload();
+                            window.location.href = window.location.pathname + "?success=1";
                         },
                         error: function (xhr) {
-                            iziToast.error({
-                                title: 'خطا',
-                                message: xhr.responseJSON?.message || 'خطا در حذف فرم',
-                                position: 'bottomLeft',
-                                rtl: true,
-                                timeout: 4000
-                            });
+                            if (xhr.status === 403) {
+                                iziToast.error({
+                                    title: 'دسترسی غیرمجاز',
+                                    message: 'شما اجازه حذف این سرنخ را ندارید.',
+                                    position: 'bottomLeft',
+                                    rtl: true,
+                                    timeout: 4000
+                                });
+                            } else {
+                                iziToast.error({
+                                    title: 'خطا',
+                                    message: xhr.responseJSON?.message || 'خطا در حذف سرنخ',
+                                    position: 'bottomLeft',
+                                    rtl: true,
+                                    timeout: 4000
+                                });
+                            }
                         }
                     });
                 }

@@ -25,22 +25,22 @@ block page_title %}لیست بسته ها{% endblock %} {% block css %}
 
   .card-icon {
     font-size: 1.8rem;
-    color: var(--primary-color);
+    color: #9bd722;
     transition: all 0.3s ease;
   }
 
-  .card:hover .card-icon {
+  .card:hover {
     transform: scale(1.1);
     color: var(--secondary-color);
   }
 
   .card-title {
-    color: var(--dark-color);
+    color: #9bd722;
     font-size: 0.8rem;
   }
 
   .card-text {
-    color: #666;
+    color: #ffffff;
     flex-grow: 1;
     font-size: 0.9rem;
     text-align: justify;
@@ -88,16 +88,16 @@ block page_title %}لیست بسته ها{% endblock %} {% block css %}
 
   span.amount {
     position: absolute;
-    top: -22px;
+    top: -33px;
     right: 0;
-    background: #ffffff;
+    background: #ffffff1f;
     color: #06d6a0;
     padding: 6px 9px;
     border-radius: 6px;
     border-bottom-right-radius: 0;
     font-size: 13px;
     box-shadow: 0 -8px 10px rgb(120 120 120 / 5%);
-  }
+}
 </style>
 {% endblock %} {% block content %}
 <div class="row mt-4">
@@ -122,7 +122,7 @@ block page_title %}لیست بسته ها{% endblock %} {% block css %}
               >
               <a
                 href="{{ url_for('subscription_buy', plan_id=plan.id) }}"
-                class="btn btn-sm btn-card btn-card-outline mt-2"
+                class="btn btn-sm btn-primary mt-2"
                 >خرید</a
               >
             </div>

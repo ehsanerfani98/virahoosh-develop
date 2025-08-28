@@ -6,11 +6,11 @@ from core.config import DATABASE_URL
 
 engine = create_engine(
     DATABASE_URL,
-    pool_size=10,          # افزایش ظرفیت پیش‌فرض
-    max_overflow=20,       # حداکثر اتصال‌های اضافی
-    pool_recycle=1800,     # اتصال‌ها پس از 1 ساعت تجدید شوند
-    pool_timeout=30,       # زمان انتظار برای اتصال
-    echo=False             # برای دیباگ می‌توانید True کنید
+    pool_size=10,          
+    max_overflow=20,       
+    pool_recycle=1800,     
+    pool_timeout=30,       
+    echo=False             
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

@@ -8,6 +8,10 @@ from starlette.concurrency import run_in_threadpool
 from services.assistant import load_vectorstore_for_assistant
 from sqlalchemy.orm import Session
 from models.assistant import Assistant
+import uuid
+from models.AssistantUserInfo import AssistantUserInfo
+from typing import Annotated
+
 
 router_site = APIRouter(prefix="")
 
@@ -46,6 +50,35 @@ def view_assistant(request: Request, slug: str, db: Session = Depends(get_db)):
         "assistant": assistant
     })
 
+@router_site.post("/assistants/userinfo/store", name="assistant_user_info_store")
+def store_user_info(
+    request: Request,
+    assistant_id: Annotated[int, Form()],
+    fullname: Annotated[str, Form()],
+    mobile: Annotated[str, Form()],
+    email: Annotated[str, Form()],
+    db: Session = Depends(get_db)
+):
+    assistant = db.query(Assistant).filter(Assistant.id == assistant_id).first()
+    if not assistant:
+        raise HTTPException(status_code=404, detail="دستیار پیدا نشد")
+    new_info = AssistantUserInfo(
+        assistant_id=assistant_id,
+        fullname=fullname,
+        mobile=mobile,
+        email=email,
+        slug=str(uuid.uuid4())
+    )
+    db.add(new_info)
+    db.commit()
+    db.refresh(new_info)
+    
+    # حذف تنظیم کوکی - اکنون از localStorage استفاده می‌کنیم
+    
+    return JSONResponse(
+        status_code=201,
+        content={"message": "اطلاعات با موفقیت ذخیره شد", "id": new_info.id}
+    )
 
 @router_site.post("/assistants/{assistant_id}/ask")
 async def ask_for_assistant(

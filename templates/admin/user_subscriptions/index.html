@@ -1,7 +1,7 @@
 {% extends "admin/layout.html" %}
 
-{% block title %}بسته‌های {{ subscriptions[0].user.email or subscriptions[0].user.phone or "نامشخص" }}{% endblock %}
-{% block page_title %}بسته‌های {{ subscriptions[0].user.email or subscriptions[0].user.phone or "نامشخص" }}{% endblock %}
+{% block title %}بسته‌های {{ user.email or user.phone or "نامشخص" }}{% endblock %}
+{% block page_title %}بسته‌های {{ user.email or user.phone or "نامشخص" }}{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -18,7 +18,9 @@
                                 <th>تاریخ پایان</th> -->
                                 <th>توکن</th>
                                 <th>وضعیت</th>
+                                {% if can('delete_user_subscription') %}
                                 <th class="text-center">عملیات</th>
+                                {% endif %}
                             </tr>
                         </thead>
                         <tbody>
@@ -31,18 +33,21 @@
                                 <td>{{ sub.end_date.strftime('%Y-%m-%d') }}</td> -->
                                 <td>
                                     {% if sub.active %}
-                                        <span class="badge badge-success">فعال</span>
+                                    <span class="badge badge-success">فعال</span>
                                     {% else %}
-                                        <span class="badge badge-danger">غیرفعال</span>
+                                    <span class="badge badge-danger">غیرفعال</span>
                                     {% endif %}
                                 </td>
+                                {% if can('delete_user_subscription') %}
                                 <td class="text-center">
-                                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 delete-sub-btn" data-id="{{ sub.id }}">حذف</button>
+                                    <button class="btn btn-sm btn-danger rounded-pill px-3 delete-sub-btn"
+                                        data-id="{{ sub.id }}">منقضی کردن</button>
                                 </td>
+                                {% endif %}
                             </tr>
                             {% else %}
                             <tr>
-                                <td colspan="6" class="text-center">بستهی یافت نشد.</td>
+                                <td colspan="6" class="text-center">بسته ای یافت نشد.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -56,58 +61,58 @@
 
 {% block js %}
 <script>
-$(document).ready(function () {
-    // پیام موفقیت بعد از حذف
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("success") === "1") {
-        iziToast.success({
-            title: 'موفقیت',
-            message: 'بسته با موفقیت حذف شد.',
-            position: 'bottomLeft',
-            rtl: true,
-            timeout: 3000
-        });
-        const newUrl = window.location.origin + window.location.pathname;
-        window.history.replaceState({}, document.title, newUrl);
-    }
+    $(document).ready(function () {
+        // پیام موفقیت بعد از منقضی
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("success") === "1") {
+            iziToast.success({
+                title: 'موفقیت',
+                message: 'بسته با موفقیت منقضی شد.',
+                position: 'bottomLeft',
+                rtl: true,
+                timeout: 3000
+            });
+            const newUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
+        }
 
-    // دکمه حذف
-    $('.delete-sub-btn').on('click', function () {
-        const subId = $(this).data('id');
-        Swal.fire({
-            title: 'حذف بسته',
-            text: 'آیا مطمئن هستید که می‌خواهید این بسته را حذف کنید؟',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'بله، حذف شود',
-            cancelButtonText: 'لغو',
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            reverseButtons: true
-        }).then(result => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/admin/user_subscriptions/${subId}/delete`,
-                    type: "POST",
-                    headers: {
-                        "X-Requested-With": "XMLHttpRequest"
-                    },
-                    success: function () {
-                        window.location.href = window.location.pathname + "?success=1";
-                    },
-                    error: function (xhr) {
-                        iziToast.error({
-                            title: 'خطا',
-                            message: xhr.responseJSON?.detail || 'خطا در حذف بسته',
-                            position: 'bottomLeft',
-                            rtl: true,
-                            timeout: 4000
-                        });
-                    }
-                });
-            }
+        // دکمه منقضی
+        $('.delete-sub-btn').on('click', function () {
+            const subId = $(this).data('id');
+            Swal.fire({
+                title: 'منقضی کردن بسته',
+                text: 'آیا مطمئن هستید که می‌خواهید این بسته را منقضی کنید؟',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'بله، منقضی شود',
+                cancelButtonText: 'لغو',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                reverseButtons: true
+            }).then(result => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/admin/user_subscriptions/${subId}/delete`,
+                        type: "POST",
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest"
+                        },
+                        success: function () {
+                            window.location.href = window.location.pathname + "?success=1";
+                        },
+                        error: function (xhr) {
+                            iziToast.error({
+                                title: 'خطا',
+                                message: xhr.responseJSON?.detail || 'خطا در انقضای بسته',
+                                position: 'bottomLeft',
+                                rtl: true,
+                                timeout: 4000
+                            });
+                        }
+                    });
+                }
+            });
         });
     });
-});
 </script>
 {% endblock %}

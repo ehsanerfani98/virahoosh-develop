@@ -1,5 +1,7 @@
-{% extends "admin/layout.html" %} {% block title %}{{ ai_model.title }}{%
-endblock %} {% block css %}
+{% extends "admin/layout.html" %}
+{% block title %}{{ ai_model.title }}{%endblock %}
+
+{% block css %}
 <style>
   /* استایل اسپینر ساده */
   #loading-spinner,
@@ -7,8 +9,8 @@ endblock %} {% block css %}
     display: inline-block;
     width: 24px;
     height: 24px;
-    border: 3px solid rgba(13, 110, 253, 0.3);
-    border-top-color: #0d6efd;
+    border: 3px solid rgb(83 106 37);
+    border-top-color: #9bd722;
     border-radius: 50%;
     animation: spin 1s linear infinite;
     vertical-align: middle;
@@ -67,7 +69,13 @@ endblock %} {% block css %}
     color: #0d6efd;
   }
 </style>
-{% endblock %} {% block content %} {% if ai_model.type.value == "image" %}
+{% endblock %}
+
+
+{% block content %}
+
+
+{% if ai_model.type.value == "image" %}
 <div class="row">
   <div class="col-lg-12">
     <div class="d-flex align-items-center mb-3 gap-2">
@@ -77,40 +85,25 @@ endblock %} {% block css %}
     <div class="alert alert-info" role="alert" style="line-height: 2">
       {{ ai_model.description }}
     </div>
-    <form
-      id="ai-form"
-      data-model-id="{{ ai_model.id }}"
-      method="post"
-      class="card p-4 shadow-sm rounded-4 mb-4"
-    >
-      <!-- <div class="mb-3">
+    <form id="ai-form" data-model-id="{{ ai_model.id }}" method="post" class="card p-4 shadow-sm rounded-4 mb-4">
+      <div class="mb-3">
         <label class="form-label">توضیحات تصویر</label>
         <textarea name="image_title" id="image_title" class="form-control" rows="5"></textarea>
-      </div> -->
+      </div>
 
       {% for input in ai_model.inputs %}
       <fieldset>
         <legend>{{ input.title }}</legend>
 
         {% if input.input_type in ['text', 'number'] %}
-        <input
-          type="{{ input.input_type }}"
-          name="{{ input.name }}"
-          class="form-control"
-          required
-        />
+        <input type="{{ input.input_type }}" name="{{ input.name }}" class="form-control" required />
 
         {% elif input.input_type == 'textarea' %}
-        <textarea
-          name="{{ input.name }}"
-          class="form-control"
-          rows="4"
-          required
-        ></textarea>
+        <textarea name="{{ input.name }}" class="form-control" rows="4" required></textarea>
 
         {% elif input.input_type == 'select' %} {% set options = input.options |
         default('[]') | loads %}
-        <select name="{{ input.name }}" class="form-select" required>
+        <select name="{{ input.name }}" class="form-control" required>
           {% for option in options %}
           <option value="{{ option }}">{{ option }}</option>
           {% endfor %}
@@ -121,18 +114,9 @@ endblock %} {% block css %}
         <div>
           {% for option in options %}
           <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              name="{{ input.name }}"
-              id="{{ input.name }}_{{ loop.index }}"
-              value="{{ option }}"
-            />
-            <label
-              class="form-check-label"
-              for="{{ input.name }}_{{ loop.index }}"
-              >{{ option }}</label
-            >
+            <input class="form-check-input" type="checkbox" name="{{ input.name }}"
+              id="{{ input.name }}_{{ loop.index }}" value="{{ option }}" />
+            <label class="form-check-label" for="{{ input.name }}_{{ loop.index }}">{{ option }}</label>
           </div>
           {% endfor %}
         </div>
@@ -142,19 +126,9 @@ endblock %} {% block css %}
         <div>
           {% for option in options %}
           <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="{{ input.name }}"
-              id="{{ input.name }}_{{ loop.index }}"
-              value="{{ option }}"
-              required
-            />
-            <label
-              class="form-check-label"
-              for="{{ input.name }}_{{ loop.index }}"
-              >{{ option }}</label
-            >
+            <input class="form-check-input" type="radio" name="{{ input.name }}" id="{{ input.name }}_{{ loop.index }}"
+              value="{{ option }}" required />
+            <label class="form-check-label" for="{{ input.name }}_{{ loop.index }}">{{ option }}</label>
           </div>
           {% endfor %}
         </div>
@@ -164,11 +138,7 @@ endblock %} {% block css %}
       {% endfor %}
 
       <div class="">
-        <button
-          type="submit"
-          class="btn btn-primary px-4"
-          style="margin-left: 10px"
-        >
+        <button type="submit" class="btn btn-primary px-4" style="margin-left: 10px">
           ارسال
         </button>
       </div>
@@ -178,30 +148,14 @@ endblock %} {% block css %}
         <div id="ai-image-box" class="text-center mb-3" style="display: none">
           <div id="image-loading-spinner" style="display: none">
             <span id="loading-spinner-img" style="display: none"></span>
-            <div class="small text-muted mt-2">در حال بارگذاری تصویر...</div>
+            <div class="small text-primary mt-2">در حال بارگذاری تصویر...</div>
           </div>
-          <a
-            href=""
-            id="image-lightbox-link"
-            data-lightbox="generated-image"
-            data-title="تصویر تولید شده"
-          >
-            <img
-              id="generated-image"
-              src=""
-              alt="تصویر تولید شده"
-              class="img-fluid rounded mt-3"
-              style="max-height: 300px; display: none"
-            />
+          <a href="" id="image-lightbox-link" data-lightbox="generated-image" data-title="تصویر تولید شده">
+            <img id="generated-image" src="" alt="تصویر تولید شده" class="img-fluid rounded mt-3"
+              style="max-height: 300px; display: none" />
           </a>
           <div class="mt-2">
-            <a
-              href="#"
-              target="_blank"
-              id="download-btn"
-              class="btn btn-sm btn-outline-primary"
-              style="display: none"
-            >
+            <a href="#" target="_blank" id="download-btn" class="btn btn-sm btn-primary" style="display: none">
               <i class="fas fa-download"></i> دانلود تصویر
             </a>
           </div>
@@ -210,7 +164,9 @@ endblock %} {% block css %}
     </div>
   </div>
 </div>
-{% endif %} {% if ai_model.type.value == "text" %}
+{% endif %}
+
+{% if ai_model.type.value == "text" %}
 <div class="row">
   <div class="col-lg-12">
     <div class="d-flex align-items-center mb-3 gap-2">
@@ -220,35 +176,20 @@ endblock %} {% block css %}
     <div class="alert alert-info" role="alert" style="line-height: 2">
       {{ ai_model.description }}
     </div>
-    <form
-      id="ai-form"
-      data-model-id="{{ ai_model.id }}"
-      method="post"
-      class="card p-4 shadow-sm rounded-4 mb-4"
-    >
+    <form id="ai-form" data-model-id="{{ ai_model.id }}" method="post" class="card p-4 shadow-sm rounded-4 mb-4">
       {% for input in ai_model.inputs %}
       <fieldset>
         <legend>{{ input.title }}</legend>
 
         {% if input.input_type in ['text', 'number'] %}
-        <input
-          type="{{ input.input_type }}"
-          name="{{ input.name }}"
-          class="form-control"
-          required
-        />
+        <input type="{{ input.input_type }}" name="{{ input.name }}" class="form-control" required />
 
         {% elif input.input_type == 'textarea' %}
-        <textarea
-          name="{{ input.name }}"
-          class="form-control"
-          rows="4"
-          required
-        ></textarea>
+        <textarea name="{{ input.name }}" class="form-control" rows="4" required></textarea>
 
         {% elif input.input_type == 'select' %} {% set options = input.options |
         default('[]') | loads %}
-        <select name="{{ input.name }}" class="form-select" required>
+        <select name="{{ input.name }}" class="form-control" required>
           {% for option in options %}
           <option value="{{ option }}">{{ option }}</option>
           {% endfor %}
@@ -259,18 +200,9 @@ endblock %} {% block css %}
         <div>
           {% for option in options %}
           <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              name="{{ input.name }}"
-              id="{{ input.name }}_{{ loop.index }}"
-              value="{{ option }}"
-            />
-            <label
-              class="form-check-label"
-              for="{{ input.name }}_{{ loop.index }}"
-              >{{ option }}</label
-            >
+            <input class="form-check-input" type="checkbox" name="{{ input.name }}"
+              id="{{ input.name }}_{{ loop.index }}" value="{{ option }}" />
+            <label class="form-check-label" for="{{ input.name }}_{{ loop.index }}">{{ option }}</label>
           </div>
           {% endfor %}
         </div>
@@ -280,19 +212,9 @@ endblock %} {% block css %}
         <div>
           {% for option in options %}
           <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="{{ input.name }}"
-              id="{{ input.name }}_{{ loop.index }}"
-              value="{{ option }}"
-              required
-            />
-            <label
-              class="form-check-label"
-              for="{{ input.name }}_{{ loop.index }}"
-              >{{ option }}</label
-            >
+            <input class="form-check-input" type="radio" name="{{ input.name }}" id="{{ input.name }}_{{ loop.index }}"
+              value="{{ option }}" required />
+            <label class="form-check-label" for="{{ input.name }}_{{ loop.index }}">{{ option }}</label>
           </div>
           {% endfor %}
         </div>
@@ -301,11 +223,7 @@ endblock %} {% block css %}
       </fieldset>
       {% endfor %}
       <div class="">
-        <button
-          type="submit"
-          class="btn btn-primary px-4"
-          style="margin-left: 10px"
-        >
+        <button type="submit" class="btn btn-primary px-4" style="margin-left: 10px">
           ارسال
         </button>
       </div>
@@ -314,23 +232,14 @@ endblock %} {% block css %}
       <div class="card shadow-sm rounded-4 p-4 bg-light">
         <h5 class="mb-3">پاسخ :</h5>
 
-        <div
-          id="ai-response-html"
-          class="mb-3"
-          style="
-            max-height: 400px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 8px;
-            background: white;
-          "
-        ></div>
+        <div id="ai-response-html" class="mb-3"></div>
       </div>
     </div>
   </div>
 </div>
-{% endif %} {% if ai_model.type.value == "audio" %}
+{% endif %}
+
+{% if ai_model.type.value == "audio" %}
 <div class="row">
   <div class="col-lg-12">
     <div class="d-flex align-items-center mb-3 gap-2">
@@ -341,20 +250,10 @@ endblock %} {% block css %}
       {{ ai_model.description }}
     </div>
 
-    <form
-      id="ai-form"
-      data-model-id="{{ ai_model.id }}"
-      method="post"
-      class="card p-4 shadow-sm rounded-4 mb-4"
-    >
+    <form id="ai-form" data-model-id="{{ ai_model.id }}" method="post" class="card p-4 shadow-sm rounded-4 mb-4">
       <div class="mb-3">
         <label class="form-label">متن</label>
-        <textarea
-          name="text_title"
-          id="text_title"
-          class="form-control"
-          rows="5"
-        ></textarea>
+        <textarea name="text_title" id="text_title" class="form-control" rows="5"></textarea>
       </div>
 
       <div class="mb-3">
@@ -375,22 +274,13 @@ endblock %} {% block css %}
 
       <div class="mb-3">
         <label class="form-label">با چه لحنی صدا تولید شود؟</label>
-        <textarea
-          placeholder="مثال : با لحنی عصبانی و خشن صحبت کن"
-          name="text_instructions"
-          id="text_instructions"
-          class="form-control"
-          rows="3"
-        ></textarea>
+        <textarea placeholder="مثال : با لحنی عصبانی و خشن صحبت کن" name="text_instructions" id="text_instructions"
+          class="form-control" rows="3"></textarea>
       </div>
 
       <div class="mb-3">
         <label class="form-label">فرمت خروجی صدا را تعیین کنید</label>
-        <select
-          name="text_response_format"
-          id="text_response_format"
-          class="form-control"
-        >
+        <select name="text_response_format" id="text_response_format" class="form-control">
           <option value="mp3">mp3</option>
           <option value="opus">opus</option>
           <option value="aac">aac</option>
@@ -405,24 +295,14 @@ endblock %} {% block css %}
         <legend>{{ input.title }}</legend>
 
         {% if input.input_type in ['text', 'number'] %}
-        <input
-          type="{{ input.input_type }}"
-          name="{{ input.name }}"
-          class="form-control"
-          required
-        />
+        <input type="{{ input.input_type }}" name="{{ input.name }}" class="form-control" required />
 
         {% elif input.input_type == 'textarea' %}
-        <textarea
-          name="{{ input.name }}"
-          class="form-control"
-          rows="4"
-          required
-        ></textarea>
+        <textarea name="{{ input.name }}" class="form-control" rows="4" required></textarea>
 
         {% elif input.input_type == 'select' %} {% set options = input.options |
         default('[]') | loads %}
-        <select name="{{ input.name }}" class="form-select" required>
+        <select name="{{ input.name }}" class="form-control" required>
           {% for option in options %}
           <option value="{{ option }}">{{ option }}</option>
           {% endfor %}
@@ -433,18 +313,9 @@ endblock %} {% block css %}
         <div>
           {% for option in options %}
           <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              name="{{ input.name }}"
-              id="{{ input.name }}_{{ loop.index }}"
-              value="{{ option }}"
-            />
-            <label
-              class="form-check-label"
-              for="{{ input.name }}_{{ loop.index }}"
-              >{{ option }}</label
-            >
+            <input class="form-check-input" type="checkbox" name="{{ input.name }}"
+              id="{{ input.name }}_{{ loop.index }}" value="{{ option }}" />
+            <label class="form-check-label" for="{{ input.name }}_{{ loop.index }}">{{ option }}</label>
           </div>
           {% endfor %}
         </div>
@@ -454,19 +325,9 @@ endblock %} {% block css %}
         <div>
           {% for option in options %}
           <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="{{ input.name }}"
-              id="{{ input.name }}_{{ loop.index }}"
-              value="{{ option }}"
-              required
-            />
-            <label
-              class="form-check-label"
-              for="{{ input.name }}_{{ loop.index }}"
-              >{{ option }}</label
-            >
+            <input class="form-check-input" type="radio" name="{{ input.name }}" id="{{ input.name }}_{{ loop.index }}"
+              value="{{ option }}" required />
+            <label class="form-check-label" for="{{ input.name }}_{{ loop.index }}">{{ option }}</label>
           </div>
           {% endfor %}
         </div>
@@ -476,11 +337,7 @@ endblock %} {% block css %}
       {% endfor %}
 
       <div>
-        <button
-          type="submit"
-          class="btn btn-primary px-4"
-          style="margin-left: 10px"
-        >
+        <button type="submit" class="btn btn-primary px-4" style="margin-left: 10px">
           ارسال
         </button>
       </div>
@@ -490,25 +347,15 @@ endblock %} {% block css %}
       <div class="card shadow-sm rounded-4 p-4 bg-light text-center">
         <div id="audio-loading-spinner" style="display: none">
           <span id="loading-spinner-img" style="display: none"></span>
-          <div class="small text-muted mt-2">در حال تولید صدا...</div>
+          <div class="small text-primary mt-2">در حال تولید صدا...</div>
         </div>
 
         <div id="ai-audio-box" style="display: none">
           <h6 class="mb-3">🔊 پخش صدا:</h6>
-          <audio
-            id="generated-audio"
-            controls
-            style="width: 100%; max-width: 600px"
-          ></audio>
+          <audio id="generated-audio" controls style="width: 100%; max-width: 600px"></audio>
 
           <div class="mt-3">
-            <a
-              href="#"
-              target="_blank"
-              id="download-audio-btn"
-              class="btn btn-sm btn-outline-primary"
-              style="display: none"
-            >
+            <a href="#" target="_blank" id="download-audio-btn" class="btn btn-sm btn-primary" style="display: none">
               <i class="fas fa-download"></i> دانلود فایل صوتی
             </a>
           </div>
@@ -517,7 +364,9 @@ endblock %} {% block css %}
     </div>
   </div>
 </div>
-{% endif %} {% if ai_model.type.value == "vision" %}
+{% endif %}
+
+{% if ai_model.type.value == "vision" %}
 <div class="row">
   <div class="col-lg-12">
     <div class="d-flex align-items-center mb-3 gap-2">
@@ -528,40 +377,20 @@ endblock %} {% block css %}
       {{ ai_model.description }}
     </div>
 
-    <form
-      id="ai-form"
-      data-model-id="{{ ai_model.id }}"
-      method="post"
-      enctype="multipart/form-data"
-      class="card p-4 shadow-sm rounded-4 mb-4"
-    >
+    <form id="ai-form" data-model-id="{{ ai_model.id }}" method="post" enctype="multipart/form-data"
+      class="card p-4 shadow-sm rounded-4 mb-4">
       <div class="mb-3">
         <label class="form-label">توضیح یا سوال درباره تصویر</label>
-        <textarea
-          name="vision_title"
-          class="form-control"
-          rows="4"
-          required
-        ></textarea>
+        <textarea name="vision_title" class="form-control" rows="4" required></textarea>
       </div>
 
       <div class="mb-3">
         <label class="form-label">آپلود تصویر</label>
-        <input
-          type="file"
-          name="file"
-          accept="image/*"
-          class="form-control"
-          required
-        />
+        <input type="file" name="file" accept="image/*" class="form-control" required />
       </div>
 
       <div>
-        <button
-          type="submit"
-          class="btn btn-primary px-4"
-          style="margin-left: 10px"
-        >
+        <button type="submit" class="btn btn-primary px-4" style="margin-left: 10px">
           ارسال
         </button>
       </div>
@@ -572,42 +401,28 @@ endblock %} {% block css %}
         <div class="row">
           <!-- پیشنمایش تصویر سمت چپ -->
           <div class="col-md-5 d-flex flex-column align-items-center">
-            <div
-              style="
+            <div style="
                 border: 1px solid #ddd;
                 border-radius: 8px;
                 padding: 10px;
                 max-width: 100%;
-              "
-            >
-              <img
-                id="preview-img"
-                src=""
-                alt="پیشنمایش تصویر"
-                style="max-width: 100%; max-height: 300px; border-radius: 8px"
-              />
+              ">
+              <img id="preview-img" src="" alt="پیشنمایش تصویر"
+                style="max-width: 100%; max-height: 300px; border-radius: 8px" />
             </div>
           </div>
           <!-- متن پاسخ سمت راست -->
           <div class="col-md-7">
-            <div
-              id="ai-response-html"
-              style="
-                max-height: 300px;
-                overflow-y: auto;
-                border: 1px solid #ddd;
-                padding: 15px;
-                border-radius: 8px;
-                background: white;
-              "
-            ></div>
+            <div id="ai-response-html"></div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-{% endif %} {% if ai_model.type.value == "text_image" %}
+{% endif %}
+
+{% if ai_model.type.value == "text_image" %}
 <div class="row">
   <div class="col-lg-12">
     <div class="d-flex align-items-center mb-3 gap-2">
@@ -618,12 +433,7 @@ endblock %} {% block css %}
       {{ ai_model.description }}
     </div>
 
-    <form
-      id="ai-form"
-      data-model-id="{{ ai_model.id }}"
-      method="post"
-      class="card p-4 shadow-sm rounded-4 mb-4"
-    >
+    <form id="ai-form" data-model-id="{{ ai_model.id }}" method="post" class="card p-4 shadow-sm rounded-4 mb-4">
       <!-- <div class="mb-3">
         <label class="form-label">موضوع محتوا</label>
         <textarea name="image_title" id="image_title" class="form-control" rows="3"></textarea>
@@ -631,12 +441,7 @@ endblock %} {% block css %}
 
       <fieldset>
         <legend>موضوع محتوا</legend>
-        <textarea
-          name="topic"
-          class="form-control"
-          rows="4"
-          required
-        ></textarea>
+        <textarea name="topic" class="form-control" rows="4" required></textarea>
       </fieldset>
 
       {% for input in ai_model.inputs %} {% if input.name != "topic" %}
@@ -644,23 +449,13 @@ endblock %} {% block css %}
         <legend>{{ input.title }}</legend>
 
         {% if input.input_type in ['text', 'number'] %}
-        <input
-          type="{{ input.input_type }}"
-          name="{{ input.name }}"
-          class="form-control"
-          required
-        />
+        <input type="{{ input.input_type }}" name="{{ input.name }}" class="form-control" required />
         {% elif input.input_type == 'textarea' %}
-        <textarea
-          name="{{ input.name }}"
-          class="form-control"
-          rows="4"
-          required
-        ></textarea>
+        <textarea name="{{ input.name }}" class="form-control" rows="4" required></textarea>
 
         {% elif input.input_type == 'select' %} {% set options = input.options |
         default('[]') | loads %}
-        <select name="{{ input.name }}" class="form-select" required>
+        <select name="{{ input.name }}" class="form-control" required>
           {% for option in options %}
           <option value="{{ option }}">{{ option }}</option>
           {% endfor %}
@@ -671,18 +466,9 @@ endblock %} {% block css %}
         <div>
           {% for option in options %}
           <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              name="{{ input.name }}"
-              id="{{ input.name }}_{{ loop.index }}"
-              value="{{ option }}"
-            />
-            <label
-              class="form-check-label"
-              for="{{ input.name }}_{{ loop.index }}"
-              >{{ option }}</label
-            >
+            <input class="form-check-input" type="checkbox" name="{{ input.name }}"
+              id="{{ input.name }}_{{ loop.index }}" value="{{ option }}" />
+            <label class="form-check-label" for="{{ input.name }}_{{ loop.index }}">{{ option }}</label>
           </div>
           {% endfor %}
         </div>
@@ -692,19 +478,9 @@ endblock %} {% block css %}
         <div>
           {% for option in options %}
           <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="{{ input.name }}"
-              id="{{ input.name }}_{{ loop.index }}"
-              value="{{ option }}"
-              required
-            />
-            <label
-              class="form-check-label"
-              for="{{ input.name }}_{{ loop.index }}"
-              >{{ option }}</label
-            >
+            <input class="form-check-input" type="radio" name="{{ input.name }}" id="{{ input.name }}_{{ loop.index }}"
+              value="{{ option }}" required />
+            <label class="form-check-label" for="{{ input.name }}_{{ loop.index }}">{{ option }}</label>
           </div>
           {% endfor %}
         </div>
@@ -714,11 +490,7 @@ endblock %} {% block css %}
       {% endif %} {% endfor %}
 
       <div>
-        <button
-          type="submit"
-          class="btn btn-primary px-4"
-          style="margin-left: 10px"
-        >
+        <button type="submit" class="btn btn-primary px-4" style="margin-left: 10px">
           ارسال
         </button>
       </div>
@@ -729,36 +501,16 @@ endblock %} {% block css %}
     <div id="ai-response-box" style="display: none">
       <div class="card shadow-sm rounded-4 p-4 bg-light">
         <h5 class="mb-3">متن تولید شده:</h5>
-        <div
-          id="ai-response-html"
-          style="
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 8px;
-            background: white;
-          "
-        ></div>
+        <div id="ai-response-html"></div>
 
         <h5 class="mt-4 mb-3">تصویر تولید شده:</h5>
         <div class="text-center">
           <a href="" id="image-lightbox-link" data-lightbox="generated-image">
-            <img
-              id="generated-image"
-              src=""
-              alt="تصویر تولید شده"
-              class="img-fluid rounded"
-              style="max-height: 300px"
-            />
+            <img id="generated-image" src="" alt="تصویر تولید شده" class="img-fluid rounded"
+              style="max-height: 300px" />
           </a>
           <br />
-          <a
-            href="#"
-            target="_blank"
-            id="download-btn"
-            class="btn btn-sm btn-outline-primary mt-2"
-          >
+          <a href="#" target="_blank" id="download-btn" class="btn btn-sm btn-primary mt-2">
             <i class="fas fa-download"></i> دانلود تصویر
           </a>
         </div>
@@ -766,11 +518,13 @@ endblock %} {% block css %}
     </div>
   </div>
 </div>
-{% endif %} {% if ai_model.type.value == "speech_audio" %}
+{% endif %}
+
+{% if ai_model.type.value == "speech_audio" %}
 <!-- <div class="mb-3">
-  <button id="start-btn" class="btn btn-success">شروع گفت‌وگو</button>
+  <button id="start-btn" class="btn btn-primary">شروع گفت‌وگو</button>
   <button id="stop-btn" class="btn btn-danger" disabled>پایان</button>
-  <div id="audio-status" class="small text-muted">وضعیت: قطع</div>
+  <div id="audio-status" class="small text-primary">وضعیت: قطع</div>
   <input type="hidden" name="model-id" id="model-id" value="{{ ai_model.id }}">
   <input type="hidden" name="token" id="token" value="{{ token }}">
 </div> -->
@@ -806,12 +560,12 @@ endblock %} {% block css %}
     transition: all 0.3s;
   }
 
-  .btn-success {
+  .btn-primary {
     background-color: #28a745;
     color: white;
   }
 
-  .btn-success:hover {
+  .btn-primary:hover {
     background-color: #218838;
   }
 
@@ -901,7 +655,7 @@ endblock %} {% block css %}
   <h1>گفت‌وگوی صوتی هوشمند</h1>
 
   <div class="controls">
-    <button id="start-btn" class="btn btn-success">شروع گفت‌وگو</button>
+    <button id="start-btn" class="btn btn-primary">شروع گفت‌وگو</button>
     <button id="stop-btn" class="btn btn-danger" disabled>پایان</button>
   </div>
 
@@ -918,12 +672,14 @@ endblock %} {% block css %}
   <input type="hidden" id="model-id" value="4" />
   <input type="hidden" id="token" value="{{ token }}" />
 </div>
-{% endif %} {% endblock %} {% block js %}
+{% endif %}
+
+{% endblock %}
+
+
+{% block js %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<link
-  href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css"
-  rel="stylesheet"
-/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
 
 {% if ai_model.type.value == "image" %}
@@ -989,13 +745,21 @@ endblock %} {% block css %}
           }
         },
         error: function (xhr) {
+          $submitBtn.prop("disabled", false);
+          $("#ai-response-box").fadeOut();
+          $loading.hide();
           let res = {};
           try {
             res = JSON.parse(xhr.responseText);
           } catch (e) {
+            $submitBtn.prop("disabled", false);
+            $("#ai-response-box").fadeIn();
             // اگر خطایی در پارس بود اینجا میاد
           }
           if (xhr.status === 403) {
+            $submitBtn.prop("disabled", false);
+            $("#ai-response-box").fadeOut();
+            $loading.hide();
             if (res.image_url) {
               $loading.hide();
               $submitBtn.prop("disabled", false);
@@ -1025,13 +789,16 @@ endblock %} {% block css %}
               if (res.message) {
                 msg = res.message;
               }
-            } catch (e) {}
+            } catch (e) { }
             Swal.fire({
               icon: "info",
               title: "توجه!",
               text: msg,
             });
           } else {
+            $submitBtn.prop("disabled", false);
+            $("#ai-response-box").fadeOut();
+            $loading.hide();
             Swal.fire({
               icon: "error",
               title: "خطا",
@@ -1044,7 +811,9 @@ endblock %} {% block css %}
     });
   });
 </script>
-{% endif %} {% if ai_model.type.value == "text" %}
+{% endif %}
+
+{% if ai_model.type.value == "text" %}
 <script>
   lightbox.option({
     wrapAround: true,
@@ -1089,13 +858,13 @@ endblock %} {% block css %}
               if (res.message) {
                 msg = res.message;
               }
-            } catch (e) {}
+            } catch (e) { }
             Swal.fire({
               icon: "error",
               title: "خطا",
               text: msg,
             });
-          } else {            
+          } else {
             Swal.fire({
               icon: "error",
               title: "خطا",
@@ -1111,7 +880,9 @@ endblock %} {% block css %}
     });
   });
 </script>
-{% endif %} {% if ai_model.type.value == "audio" %}
+{% endif %}
+
+{% if ai_model.type.value == "audio" %}
 <script>
   $(document).ready(function () {
     const ai_id = $("#ai-form").data("model-id");
@@ -1170,7 +941,7 @@ endblock %} {% block css %}
               if (res.message) {
                 msg = res.message;
               }
-            } catch (e) {}
+            } catch (e) { }
             Swal.fire({
               icon: "error",
               title: "خطا",
@@ -1188,7 +959,9 @@ endblock %} {% block css %}
     });
   });
 </script>
-{% endif %} {% if ai_model.type.value == "text_image" %}
+{% endif %}
+
+{% if ai_model.type.value == "text_image" %}
 <script>
   $(document).ready(function () {
     const ai_id = $("#ai-form").data("model-id");
@@ -1225,7 +998,7 @@ endblock %} {% block css %}
           let msg = "خطا در پردازش";
           try {
             msg = JSON.parse(xhr.responseText).message || msg;
-          } catch (_) {}
+          } catch (_) { }
           Swal.fire({ icon: "error", title: "خطا", text: msg });
         },
         complete: function () {
@@ -1236,7 +1009,9 @@ endblock %} {% block css %}
     });
   });
 </script>
-{% endif %} {% if ai_model.type.value == "vision" %}
+{% endif %}
+
+{% if ai_model.type.value == "vision" %}
 <script>
   $(document).ready(function () {
     const ai_id = $("#ai-form").data("model-id");
@@ -1283,7 +1058,7 @@ endblock %} {% block css %}
               if (res.message) {
                 msg = res.message;
               }
-            } catch (e) {}
+            } catch (e) { }
             Swal.fire({
               icon: "error",
               title: "خطا",
@@ -1305,7 +1080,9 @@ endblock %} {% block css %}
     });
   });
 </script>
-{% endif %} {% if ai_model.type.value == "speech_audio" %}
+{% endif %}
+
+{% if ai_model.type.value == "speech_audio" %}
 <!-- <script>
   const ai_id = $("#model-id").val();
   const token = $("#token").val();
@@ -1656,4 +1433,6 @@ endblock %} {% block css %}
   });
 </script>
 
-{% endif %} {% endblock %}
+{% endif %}
+
+{% endblock %}

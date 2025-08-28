@@ -15,7 +15,7 @@ class UserSubscription(Base):
     user = relationship("User", back_populates="subscriptions")
     
     plan_id = Column(String(36), ForeignKey("subscription_plans.id"), nullable=False)
-    plan = relationship("SubscriptionPlan")
+    plan = relationship("SubscriptionPlan", back_populates="user_subscriptions")
     
     start_date = Column(DateTime, default=datetime.now(TEHRAN_TZ), nullable=False)
     end_date = Column(DateTime, nullable=False)
