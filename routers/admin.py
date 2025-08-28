@@ -1068,7 +1068,7 @@ async def generate_image(ai_id: int, request: Request, db: Session = Depends(get
         {"role": "system", "content": ""},
         {"role": "user", "content": image_prompt}
     ]
-    input_token = num_tokens_from_messages(messages, ai_model.model) + 12000
+    input_token = num_tokens_from_messages(messages, ai_model.model) + 40000
     if(input_token > tokens_used_global(request)):
         return JSONResponse(status_code=403, content={"message": "توکن شما کافی نیست"})
     if(tokens_used_global(request) >= ai_model.max_tokens):
@@ -1304,30 +1304,67 @@ async def generate_text_image(
     if not ai_model:
         return JSONResponse(status_code=404, content={"message": "مدل یافت نشد"})
 
+
+   
     # ---- تولید متن ----
+    system_prompt = ai_model.system_prompt
     prompt_filled = ai_model.prompt
     for input_item in ai_model.inputs:
         value = form_data.get(input_item.name, "")
         prompt_filled = prompt_filled.replace(
             "{" + input_item.name + "}", value)
 
-    system_prompt = ai_model.system_prompt or "تو یک دستیار فارسی هستی."
-    max_tokens = ai_model.max_tokens or 1000
+    # بررسی مقدار توکن
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": prompt_filled}
+    ]
+    input_token = num_tokens_from_messages(messages, ai_model.model) + 40000
+    if(input_token > tokens_used_global(request)):
+        return JSONResponse(status_code=403, content={"message": "توکن شما کافی نیست"})
+    if(tokens_used_global(request) >= ai_model.max_tokens):
+        max_tokens = ai_model.max_tokens
+    else:
+        max_tokens = tokens_used_global(request)
+
+        
     text_response = await run_in_threadpool(
         run_openai_prompt, prompt_filled, system_prompt,
         max_tokens, ai_model.model, ai_model.provider
     )
+
+
+    total_tokens = db.query(UserToken).filter(UserToken.user_id == user.id).first()
+    total_tokens.tokens_used = tokens_used_global(request)
+    db.commit()
+
 
     # ---- تولید تصویر ----
     image_title = form_data.get("topic", "").strip()
     if not image_title:
         return JSONResponse(status_code=400, content={"message": "عنوان تصویر ارسال نشده"})
 
+
     image_prompt = prompt_filled + \
         " سپس با توجه به توضیحات تصویر را تولید کن، توضیحات: " + image_title
+    
+    messages = [
+        {"role": "system", "content": ""},
+        {"role": "user", "content": image_prompt}
+    ]
+    input_token = num_tokens_from_messages(messages, ai_model.model) + 40000
+    if(input_token > tokens_used_global(request)):
+        return JSONResponse(status_code=403, content={"message": "توکن شما کافی نیست"})
+    if(tokens_used_global(request) >= ai_model.max_tokens):
+        max_tokens = ai_model.max_tokens
+    else:
+        max_tokens = tokens_used_global(request)
+
+
     translated_prompt = await run_in_threadpool(
-        translate_to_english, image_prompt, ai_model.model, ai_model.provider
+        translate_to_english, image_prompt, ai_model.model, ai_model.provider,max_tokens
     )
+    
     image_url = await run_in_threadpool(generate_image_by_prompt, translated_prompt)
     if not image_url:
         return JSONResponse(status_code=500, content={"message": "خطا در تولید تصویر"})
@@ -1355,6 +1392,10 @@ async def generate_text_image(
     )
     db.add(archive_text)
     db.add(archive_image)
+    db.commit()
+
+    total_tokens = db.query(UserToken).filter(UserToken.user_id == user.id).first()
+    total_tokens.tokens_used = tokens_used_global(request) - input_token
     db.commit()
 
     return JSONResponse({
