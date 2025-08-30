@@ -1116,22 +1116,23 @@ async def generate_image(ai_id: int, request: Request, db: Session = Depends(get
     except Exception as e:
         return JSONResponse(status_code=500, content={"message": f"خطا در ذخیره فایل: {str(e)}"})
 
-    archive = AiArchive(
-        user_id=user.id,
-        ai_model_id=ai_id,
-        title=image_title,
-        type="image",
-        prompt=image_prompt,
-        url=saved_path,
-        response=None,
-        created_at=datetime.now(TEHRAN_TZ),
-    )
-    db.add(archive)
-    db.commit()
+    if not image_url:
+        archive = AiArchive(
+            user_id=user.id,
+            ai_model_id=ai_id,
+            title=image_title,
+            type="image",
+            prompt=image_prompt,
+            url=saved_path,
+            response=None,
+            created_at=datetime.now(TEHRAN_TZ),
+        )
+        db.add(archive)
+        db.commit()
 
-    total_tokens = db.query(UserToken).filter(UserToken.user_id == user.id).first()
-    total_tokens.tokens_used = tokens_used_global(request) - input_token
-    db.commit()
+        total_tokens = db.query(UserToken).filter(UserToken.user_id == user.id).first()
+        total_tokens.tokens_used = tokens_used_global(request) - input_token
+        db.commit()
 
     return JSONResponse({
         "image_url": image_url,
@@ -1144,7 +1145,7 @@ async def generate_image(ai_id: int, request: Request, db: Session = Depends(get
 @router.post("/ais/{ai_id}/generate-text-audio", name="admin_ai_generate_text_audio")
 async def generate_text_audio(ai_id: int, request: Request, db: Session = Depends(get_db)):
     form = await request.form()
-    form_data = dict(form)
+    form_data = dict(form)        
 
     ai_model = db.query(AiModel).filter(AiModel.id == ai_id).first()
     if not ai_model:
@@ -1165,6 +1166,15 @@ async def generate_text_audio(ai_id: int, request: Request, db: Session = Depend
 
     temp_audio_path = f"static/audio/{user.id}/{filename}"
     os.makedirs(os.path.dirname(temp_audio_path), exist_ok=True)
+
+
+    messages = [
+        {"role": "system", "content": ""},
+        {"role": "user", "content": title}
+    ]
+    input_token = num_tokens_from_messages(messages, ai_model.model)
+    if(input_token > tokens_used_global(request)):
+        return JSONResponse(status_code=403, content={"message": "توکن شما کافی نیست"})
 
     audio_path_or_error = text_to_speech(
         input_text=title,
@@ -1194,19 +1204,26 @@ async def generate_text_audio(ai_id: int, request: Request, db: Session = Depend
     except HTTPException as e:
         return JSONResponse(status_code=e.status_code, content={"message": e.detail})
 
-    # ذخیره در آرشیو AiArchive
-    archive = AiArchive(
-        user_id=user.id,
-        ai_model_id=ai_id,
-        title=title,
-        type="audio",
-        prompt="",
-        response="",
-        url=saved_path,
-        created_at=datetime.now(TEHRAN_TZ)
-    )
-    db.add(archive)
-    db.commit()
+
+    if not audio_path_or_error.startswith("خطا"):
+        # ذخیره در آرشیو AiArchive
+        archive = AiArchive(
+            user_id=user.id,
+            ai_model_id=ai_id,
+            title=title,
+            type="audio",
+            prompt="",
+            response="",
+            url=saved_path,
+            created_at=datetime.now(TEHRAN_TZ)
+        )
+        db.add(archive)
+        db.commit()
+
+        total_tokens = db.query(UserToken).filter(UserToken.user_id == user.id).first()
+        total_tokens.tokens_used = tokens_used_global(request) - input_token
+        db.commit()
+
 
     # حذف فایل موقت (اختیاری)
     try:
