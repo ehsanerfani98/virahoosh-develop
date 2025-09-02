@@ -99,7 +99,7 @@ def generate_image_by_prompt(prompt: str, size: str = "1792x1024") -> str:
         )
         return response.data[0].url
     except Exception as e:
-        return None
+        return e
 
 
 def translate_to_english(text: str, model: str, provider: str, max_tokens: int) -> str:
@@ -192,7 +192,6 @@ def analyze_image_with_openai_vision(image: Image.Image, max_tokens: int, prompt
             ],
             max_completion_tokens=max_tokens
         )
-        print(response.usage.prompt_tokens)
         return {
             'error': False,
             'message' : response.choices[0].message.content.strip(),

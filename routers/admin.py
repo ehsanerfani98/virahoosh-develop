@@ -1137,16 +1137,17 @@ async def generate_image(ai_id: int, request: Request, db: Session = Depends(get
 
         print(input_token)
         total_tokens = db.query(UserToken).filter(UserToken.user_id == user.id).first()
-        total_tokens.tokens_used = tokens_used_global(request) - input_token
+        total_tokens.tokens_used = tokens_used_global(request) - 40000
         db.commit()
 
-    return JSONResponse({
-        "image_url": image_url,
-        "prompt": image_prompt,
-        "translated_prompt": translated_prompt['message'],
-        "model_id": ai_id
-    })
-
+        return JSONResponse({
+            "image_url": image_url,
+            "prompt": image_prompt,
+            "translated_prompt": translated_prompt['message'],
+            "model_id": ai_id
+        })
+    
+    return JSONResponse(status_code=500, content={"message": image_url})
 
 @router.post("/ais/{ai_id}/generate-text-audio", name="admin_ai_generate_text_audio")
 async def generate_text_audio(ai_id: int, request: Request, db: Session = Depends(get_db)):
@@ -1230,17 +1231,18 @@ async def generate_text_audio(ai_id: int, request: Request, db: Session = Depend
         total_tokens.tokens_used = tokens_used_global(request) - input_token
         db.commit()
 
+        # حذف فایل موقت (اختیاری)
+        try:
+            os.remove(temp_audio_path)
+        except Exception:
+            pass
 
-    # حذف فایل موقت (اختیاری)
-    try:
-        os.remove(temp_audio_path)
-    except Exception:
-        pass
-
-    return JSONResponse({
-        "response": "text_response",
-        "audio_url": f"/{saved_path}"
-    })
+        return JSONResponse({
+            "response": "text_response",
+            "audio_url": f"/{saved_path}"
+        })
+    
+    return JSONResponse(status_code=500, content={"message": audio_path_or_error})
 
 @router.post("/ais/{ai_id}/vision-image", name="admin_ai_vision_image")
 async def generate_vision_image(ai_id: int, request: Request, db: Session = Depends(get_db)):
@@ -1276,39 +1278,60 @@ async def generate_vision_image(ai_id: int, request: Request, db: Session = Depe
     with open(saved_file_path, "rb") as f:
         image_bytes = f.read()
     image = Image.open(BytesIO(image_bytes))
+
+    # بررسی مقدار توکن
+    messages = [
+        {"role": "system", "content": ""},
+        {"role": "user", "content": ai_model.prompt}
+    ]
+    input_token = num_tokens_from_messages(messages, ai_model.model) + 765
+    if(input_token > tokens_used_global(request)):
+        return JSONResponse(status_code=403, content={"message": "توکن شما کافی نیست"})
+    if(tokens_used_global(request) >= ai_model.max_tokens):
+        max_tokens = ai_model.max_tokens
+    else:
+        max_tokens = tokens_used_global(request)
+    
     # اجرای مدل بینایی
     result_text = await run_in_threadpool(
         analyze_image_with_openai_vision,
         image=image,
-        max_tokens=ai_model.max_tokens,
+        max_tokens=max_tokens,
         prompt=vision_title,
         model=ai_model.model,
     )
 
-    # ذخیره در آرشیو
-    archive = AiArchive(
-        user_id=user.id,
-        ai_model_id=ai_id,
-        title=vision_title,
-        type="vision",
-        prompt=vision_title,
-        url=saved_file_path,
-        response=result_text,
-        created_at=datetime.now(TEHRAN_TZ),
-    )
-    db.add(archive)
-    db.commit()
+    if not result_text['error']:
+        # ذخیره در آرشیو
+        archive = AiArchive(
+            user_id=user.id,
+            ai_model_id=ai_id,
+            title=vision_title,
+            type="vision",
+            prompt=vision_title,
+            url=saved_file_path,
+            response=result_text['message'],
+            created_at=datetime.now(TEHRAN_TZ),
+        )
+        db.add(archive)
+        db.commit()
 
-    # آماده‌سازی Base64 برای نمایش در مرورگر
-    image_base64 = base64.b64encode(image_bytes).decode("utf-8")
-    image_data_url = f"data:{image_file.content_type};base64,{image_base64}"
+        # آماده‌سازی Base64 برای نمایش در مرورگر
+        image_base64 = base64.b64encode(image_bytes).decode("utf-8")
+        image_data_url = f"data:{image_file.content_type};base64,{image_base64}"
 
-    return JSONResponse({
-        "result": result_text,
-        "prompt": vision_title,
-        "model_id": ai_id,
-        "image_url": image_data_url,
-    })
+        total_tokens = db.query(UserToken).filter(UserToken.user_id == user.id).first()
+        total_tokens.tokens_used = tokens_used_global(request) - result_text['total_tokens']
+        db.commit()
+
+        return JSONResponse({
+            "result": result_text['message'],
+            "prompt": vision_title,
+            "model_id": ai_id,
+            "image_url": image_data_url,
+        })
+    
+    return JSONResponse(status_code=500, content={"message": result_text['message']})
 
 @router.post("/ais/{ai_id}/vision-image-analyst", name="admin_ai_vision_image_analyst")
 async def generate_vision_image_analyst(ai_id: int, request: Request, db: Session = Depends(get_db)):
@@ -1341,7 +1364,7 @@ async def generate_vision_image_analyst(ai_id: int, request: Request, db: Sessio
         image_bytes = f.read()
     image = Image.open(BytesIO(image_bytes))
     
-        # بررسی مقدار توکن
+    # بررسی مقدار توکن
     messages = [
         {"role": "system", "content": ""},
         {"role": "user", "content": ai_model.prompt}
@@ -1354,7 +1377,6 @@ async def generate_vision_image_analyst(ai_id: int, request: Request, db: Sessio
     else:
         max_tokens = tokens_used_global(request)
 
-    print(input_token)
     # اجرای مدل بینایی
     result_text = await run_in_threadpool(
         analyze_image_with_openai_vision,
@@ -1364,30 +1386,41 @@ async def generate_vision_image_analyst(ai_id: int, request: Request, db: Sessio
         model=ai_model.model,
     )
 
-    # ذخیره در آرشیو
-    archive = AiArchive(
-        user_id=user.id,
-        ai_model_id=ai_id,
-        title="تحلیلگر",
-        type="vision",
-        prompt=ai_model.prompt,
-        url=saved_file_path,
-        response=result_text,
-        created_at=datetime.now(TEHRAN_TZ),
-    )
-    db.add(archive)
-    db.commit()
 
-    # آماده‌سازی Base64 برای نمایش در مرورگر
-    image_base64 = base64.b64encode(image_bytes).decode("utf-8")
-    image_data_url = f"data:{image_file.content_type};base64,{image_base64}"
+    if not result_text['error']:
 
-    return JSONResponse({
-        "result": result_text,
-        "prompt": ai_model.prompt,
-        "model_id": ai_id,
-        "image_url": image_data_url,
-    })
+        # ذخیره در آرشیو
+        archive = AiArchive(
+            user_id=user.id,
+            ai_model_id=ai_id,
+            title="تحلیلگر",
+            type="vision",
+            prompt=ai_model.prompt,
+            url=saved_file_path,
+            response=result_text['message'],
+            created_at=datetime.now(TEHRAN_TZ),
+        )
+        db.add(archive)
+        db.commit()
+
+        # آماده‌سازی Base64 برای نمایش در مرورگر
+        image_base64 = base64.b64encode(image_bytes).decode("utf-8")
+        image_data_url = f"data:{image_file.content_type};base64,{image_base64}"
+
+        total_tokens = db.query(UserToken).filter(UserToken.user_id == user.id).first()
+        total_tokens.tokens_used = tokens_used_global(request) - result_text['total_tokens']
+        db.commit()
+
+        return JSONResponse({
+            "result": result_text['message'],
+            "prompt": ai_model.prompt,
+            "model_id": ai_id,
+            "image_url": image_data_url,
+        })
+    
+
+    return JSONResponse(status_code=500, content={"message": result_text['message']})
+
 
 @router.post("/ais/{ai_id}/generate-text-image", name="admin_ai_generate_text_image")
 async def generate_text_image(
