@@ -422,6 +422,58 @@
 </div>
 {% endif %}
 
+{% if ai_model.type.value == "analyst" %}
+<div class="row">
+  <div class="col-lg-12">
+    <div class="d-flex align-items-center mb-3 gap-2">
+      <div class="ai-icon">{{ ai_model.icon | safe }}</div>
+      <h3 class="">{{ ai_model.title }}</h3>
+    </div>
+    <div class="alert alert-info" role="alert" style="line-height: 2">
+      {{ ai_model.description }}
+    </div>
+
+    <form id="ai-form" data-model-id="{{ ai_model.id }}" method="post" enctype="multipart/form-data"
+      class="card p-4 shadow-sm rounded-4 mb-4">
+    
+      <div class="mb-3">
+        <label class="form-label">آپلود تصویر</label>
+        <input type="file" name="file" accept="image/*" class="form-control" required />
+      </div>
+
+      <div>
+        <button type="submit" class="btn btn-primary px-4" style="margin-left: 10px">
+          ارسال
+        </button>
+      </div>
+    </form>
+
+    <div id="ai-response-box" style="display: none">
+      <div class="card shadow-sm rounded-4 p-4 bg-light">
+        <div class="row">
+          <!-- پیشنمایش تصویر سمت چپ -->
+          <div class="col-md-5 d-flex flex-column align-items-center">
+            <div style="
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 10px;
+                max-width: 100%;
+              ">
+              <img id="preview-img" src="" alt="پیشنمایش تصویر"
+                style="max-width: 100%; max-height: 300px; border-radius: 8px" />
+            </div>
+          </div>
+          <!-- متن پاسخ سمت راست -->
+          <div class="col-md-7">
+            <div id="ai-response-html"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
 {% if ai_model.type.value == "text_image" %}
 <div class="row">
   <div class="col-lg-12">
@@ -441,10 +493,11 @@
 
       <fieldset>
         <legend>موضوع محتوا</legend>
-        <textarea name="topic" class="form-control" rows="4" required></textarea>
+        <input name="topic" class="form-control" required>
       </fieldset>
 
-      {% for input in ai_model.inputs %} {% if input.name != "topic" %}
+      {% for input in ai_model.inputs %} 
+      {% if input.name != "topic" %}
       <fieldset>
         <legend>{{ input.title }}</legend>
 
@@ -1032,6 +1085,77 @@
 
       $.ajax({
         url: `/admin/ais/${ai_id}/vision-image`,
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (res) {
+          if (res.result) {
+            const htmlContent = marked.parse(res.result);
+            $("#ai-response-html").html(htmlContent);
+            $("#ai-response-box").fadeIn();
+          }
+          if (res.image_url) {
+            $("#preview-img").attr("src", res.image_url);
+            $("#vision-image-preview").show();
+          } else {
+            $("#vision-image-preview").hide();
+          }
+        },
+        error: function (xhr) {
+          $("#ai-response-box").hide();
+          if (xhr.status === 403) {
+            let msg = "شما اجازه دسترسی به این بخش را ندارید.";
+            try {
+              let res = JSON.parse(xhr.responseText);
+              if (res.message) {
+                msg = res.message;
+              }
+            } catch (e) { }
+            Swal.fire({
+              icon: "error",
+              title: "خطا",
+              text: msg,
+            });
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "خطا",
+              text: "خطا در پردازش تصویر",
+            });
+          }
+        },
+        complete: function () {
+          $submitBtn.prop("disabled", false);
+          $loading.hide();
+        },
+      });
+    });
+  });
+</script>
+{% endif %}
+
+{% if ai_model.type.value == "analyst" %}
+<script>
+  $(document).ready(function () {
+    const ai_id = $("#ai-form").data("model-id");
+    const $form = $("#ai-form");
+    const $submitBtn = $form.find('button[type="submit"]');
+
+    const $loading = $(
+      '<span id="loading-spinner" style="display:none;"></span>'
+    );
+    $submitBtn.after($loading);
+
+    $form.on("submit", function (e) {
+      e.preventDefault();
+      $submitBtn.prop("disabled", true);
+      $loading.show();
+
+      const formData = new FormData(this);
+
+      $.ajax({
+        url: `/admin/ais/${ai_id}/vision-image-analyst`,
         type: "POST",
         data: formData,
         processData: false,

@@ -12,6 +12,7 @@ class AiModelType(enum.Enum):
     audio = "audio"
     vision = "vision"
     speech_audio = "speech_audio"
+    analyst = "analyst"
 
 class AiModel(Base):
     __tablename__ = "ai_models"

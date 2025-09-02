@@ -114,8 +114,11 @@ def translate_to_english(text: str, model: str, provider: str, max_tokens: int) 
                 temperature=0,
                 max_tokens=max_tokens
             )
-            return response.choices[0].message.content.strip()
-
+            return {
+                'error': False,
+                'message' : response.choices[0].message.content.strip(),
+                'total_tokens' : response.usage.total_tokens
+            }
         elif provider == "deepseek":
             # نمونه ساختگی مشابه قبل، جایگزین با API واقعی DeepSeek
             import requests
@@ -133,11 +136,15 @@ def translate_to_english(text: str, model: str, provider: str, max_tokens: int) 
             return r.json()["choices"][0]["message"]["content"].strip()
 
         else:
-            return "سرویس ناشناخته انتخاب شده است."
-
+            return {
+                'error': True,
+                'message': "سرویس ناشناخته انتخاب شده است"
+            }
     except Exception as e:
-        return f"خطا در پاسخ‌دهی: {e}"
-
+        return {
+            'error': True,
+            'message': f"خطا در پاسخ‌دهی: {e}"
+        }
 
 def text_to_speech(
     input_text: str,
@@ -185,10 +192,17 @@ def analyze_image_with_openai_vision(image: Image.Image, max_tokens: int, prompt
             ],
             max_completion_tokens=max_tokens
         )
-        return response.choices[0].message.content.strip()
-
+        print(response.usage.prompt_tokens)
+        return {
+            'error': False,
+            'message' : response.choices[0].message.content.strip(),
+            'total_tokens' : response.usage.total_tokens
+        }
     except Exception as e:
-        return f"خطا در تحلیل تصویر: {e}"
+        return {
+            'error': True,
+            'message': f"خطا در تحلیل تصویر: {e}"
+        }
 
 
 async def realtime_audio_relay(websocket: WebSocket, deployment: str):

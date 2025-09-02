@@ -164,12 +164,15 @@
 
                                 {% if ai.type.value == 'image' %}
                                 <i class="fa fa-image badge-icon badge-icon-blue"></i>
-                                {% elif ai.type.value == 'text' %}
+                                {% elif ai.type.value == 'text' or ai.type.value == 'analyst' or ai.type.value == 'vision' %}
                                 <i class="fa fa-file-text badge-icon badge-icon-red"></i>
                                 {% elif ai.type.value == 'video' %}
                                 <i class="fa fa-film badge-icon badge-icon-orange"></i>
                                 {% elif ai.type.value == 'audio' %}
                                 <i class="fas fa-headphones badge-icon badge-icon-green"></i>
+                                {% elif ai.type.value == 'text_image' %}
+                                <i class="fa fa-file-text badge-icon badge-icon-red"></i>
+                                <i class="fa fa-image badge-icon badge-icon-blue"></i>
                                 {% else %}
                                 <span class="badge badge-secondary">نامشخص</span>
                                 {% endif %}

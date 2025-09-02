@@ -1065,8 +1065,8 @@ async def generate_image(ai_id: int, request: Request, db: Session = Depends(get
 
     # بررسی مقدار توکن
     messages = [
-        {"role": "system", "content": ""},
-        {"role": "user", "content": image_prompt}
+        {"role": "system", "content": "You are an English translator.Just translate, do not add any extra explanation."},
+        {"role": "user", "content": f"Translate the text '{image_prompt}' into English."}
     ]
     input_token = num_tokens_from_messages(messages, ai_model.model) + 40000
     if(input_token > tokens_used_global(request)):
@@ -1077,7 +1077,12 @@ async def generate_image(ai_id: int, request: Request, db: Session = Depends(get
         max_tokens = tokens_used_global(request)
 
     translated_prompt = await run_in_threadpool(translate_to_english, image_prompt, model, provider, max_tokens)
-    image_url = await run_in_threadpool(generate_image_by_prompt, translated_prompt)
+    if not translated_prompt['error']:
+        total_tokens = db.query(UserToken).filter(UserToken.user_id == user.id).first()
+        total_tokens.tokens_used = tokens_used_global(request) - translated_prompt['total_tokens']
+        db.commit()
+
+    image_url = await run_in_threadpool(generate_image_by_prompt, translated_prompt['message'])
 
     if not image_url:
         return JSONResponse(status_code=500, content={"message": "خطا در تولید تصویر"})
@@ -1096,7 +1101,7 @@ async def generate_image(ai_id: int, request: Request, db: Session = Depends(get
                     "message": "فضای ذخیره‌سازی شما کافی نیست و ما نمی توانیم تصویر تولید شده را در سیستم خود ذخیره کنیم. لطفا بعد از تولید تصویر آن را در دستگاه خود ذخیره کنید",
                     "image_url": image_url,
                     "prompt": image_prompt,
-                    "translated_prompt": translated_prompt,
+                    "translated_prompt": translated_prompt['message'],
                     "model_id": ai_id
                 }
             )
@@ -1116,7 +1121,7 @@ async def generate_image(ai_id: int, request: Request, db: Session = Depends(get
     except Exception as e:
         return JSONResponse(status_code=500, content={"message": f"خطا در ذخیره فایل: {str(e)}"})
 
-    if not image_url:
+    if image_url:
         archive = AiArchive(
             user_id=user.id,
             ai_model_id=ai_id,
@@ -1130,6 +1135,7 @@ async def generate_image(ai_id: int, request: Request, db: Session = Depends(get
         db.add(archive)
         db.commit()
 
+        print(input_token)
         total_tokens = db.query(UserToken).filter(UserToken.user_id == user.id).first()
         total_tokens.tokens_used = tokens_used_global(request) - input_token
         db.commit()
@@ -1137,7 +1143,7 @@ async def generate_image(ai_id: int, request: Request, db: Session = Depends(get
     return JSONResponse({
         "image_url": image_url,
         "prompt": image_prompt,
-        "translated_prompt": translated_prompt,
+        "translated_prompt": translated_prompt['message'],
         "model_id": ai_id
     })
 
@@ -1236,7 +1242,6 @@ async def generate_text_audio(ai_id: int, request: Request, db: Session = Depend
         "audio_url": f"/{saved_path}"
     })
 
-
 @router.post("/ais/{ai_id}/vision-image", name="admin_ai_vision_image")
 async def generate_vision_image(ai_id: int, request: Request, db: Session = Depends(get_db)):
     form = await request.form()
@@ -1254,7 +1259,7 @@ async def generate_vision_image(ai_id: int, request: Request, db: Session = Depe
     vision_title = form_data.get("vision_title", "").strip()
 
     if not image_file or not vision_title:
-        return JSONResponse(status_code=400, content={"message": "فایل یا عنوان تصویر ارسال نشده است"})
+        return JSONResponse(status_code=400, content={"message": "فایل یا پرامپت تصویر ارسال نشده است"})
 
     # آپلود فایل و ذخیره در دیتابیس
     try:
@@ -1271,14 +1276,12 @@ async def generate_vision_image(ai_id: int, request: Request, db: Session = Depe
     with open(saved_file_path, "rb") as f:
         image_bytes = f.read()
     image = Image.open(BytesIO(image_bytes))
-
     # اجرای مدل بینایی
-    prompt_text = vision_title
     result_text = await run_in_threadpool(
         analyze_image_with_openai_vision,
         image=image,
         max_tokens=ai_model.max_tokens,
-        prompt=prompt_text,
+        prompt=vision_title,
         model=ai_model.model,
     )
 
@@ -1288,7 +1291,7 @@ async def generate_vision_image(ai_id: int, request: Request, db: Session = Depe
         ai_model_id=ai_id,
         title=vision_title,
         type="vision",
-        prompt=prompt_text,
+        prompt=vision_title,
         url=saved_file_path,
         response=result_text,
         created_at=datetime.now(TEHRAN_TZ),
@@ -1302,7 +1305,86 @@ async def generate_vision_image(ai_id: int, request: Request, db: Session = Depe
 
     return JSONResponse({
         "result": result_text,
-        "prompt": prompt_text,
+        "prompt": vision_title,
+        "model_id": ai_id,
+        "image_url": image_data_url,
+    })
+
+@router.post("/ais/{ai_id}/vision-image-analyst", name="admin_ai_vision_image_analyst")
+async def generate_vision_image_analyst(ai_id: int, request: Request, db: Session = Depends(get_db)):
+    form = await request.form()
+    form_data = dict(form)
+
+    # مدل را از دیتابیس بگیر
+    ai_model = db.query(AiModel).filter(AiModel.id == ai_id).first()
+    if not ai_model:
+        return JSONResponse(status_code=404, content={"message": "مدل یافت نشد"})
+
+    user = auth(request, db)
+
+    # دریافت فایل و عنوان
+    image_file: UploadFile = form.get("file")
+
+    # آپلود فایل و ذخیره در دیتابیس
+    try:
+        saved_file_path = await upload_file(
+            file=image_file,
+            user_id=user.id,
+            db=db,
+            save_to_db=True,
+        )
+    except Exception as e:
+        return JSONResponse(status_code=400, content={"message": f"خطا در آپلود فایل: {str(e)}"})
+
+    # خواندن فایل برای ارسال به GPT-4 Vision
+    with open(saved_file_path, "rb") as f:
+        image_bytes = f.read()
+    image = Image.open(BytesIO(image_bytes))
+    
+        # بررسی مقدار توکن
+    messages = [
+        {"role": "system", "content": ""},
+        {"role": "user", "content": ai_model.prompt}
+    ]
+    input_token = num_tokens_from_messages(messages, ai_model.model) + 765
+    if(input_token > tokens_used_global(request)):
+        return JSONResponse(status_code=403, content={"message": "توکن شما کافی نیست"})
+    if(tokens_used_global(request) >= ai_model.max_tokens):
+        max_tokens = ai_model.max_tokens
+    else:
+        max_tokens = tokens_used_global(request)
+
+    print(input_token)
+    # اجرای مدل بینایی
+    result_text = await run_in_threadpool(
+        analyze_image_with_openai_vision,
+        image=image,
+        max_tokens=max_tokens,
+        prompt= ai_model.prompt,
+        model=ai_model.model,
+    )
+
+    # ذخیره در آرشیو
+    archive = AiArchive(
+        user_id=user.id,
+        ai_model_id=ai_id,
+        title="تحلیلگر",
+        type="vision",
+        prompt=ai_model.prompt,
+        url=saved_file_path,
+        response=result_text,
+        created_at=datetime.now(TEHRAN_TZ),
+    )
+    db.add(archive)
+    db.commit()
+
+    # آماده‌سازی Base64 برای نمایش در مرورگر
+    image_base64 = base64.b64encode(image_bytes).decode("utf-8")
+    image_data_url = f"data:{image_file.content_type};base64,{image_base64}"
+
+    return JSONResponse({
+        "result": result_text,
+        "prompt": ai_model.prompt,
         "model_id": ai_id,
         "image_url": image_data_url,
     })
@@ -1320,7 +1402,6 @@ async def generate_text_image(
     ai_model = db.query(AiModel).filter(AiModel.id == ai_id).first()
     if not ai_model:
         return JSONResponse(status_code=404, content={"message": "مدل یافت نشد"})
-
 
    
     # ---- تولید متن ----
@@ -1350,10 +1431,10 @@ async def generate_text_image(
         max_tokens, ai_model.model, ai_model.provider
     )
 
-
-    total_tokens = db.query(UserToken).filter(UserToken.user_id == user.id).first()
-    total_tokens.tokens_used = tokens_used_global(request)
-    db.commit()
+    if not text_response['error']:
+        total_tokens = db.query(UserToken).filter(UserToken.user_id == user.id).first()
+        total_tokens.tokens_used = tokens_used_global(request) - text_response['total_tokens']
+        db.commit()
 
 
     # ---- تولید تصویر ----
@@ -1381,8 +1462,14 @@ async def generate_text_image(
     translated_prompt = await run_in_threadpool(
         translate_to_english, image_prompt, ai_model.model, ai_model.provider,max_tokens
     )
-    
-    image_url = await run_in_threadpool(generate_image_by_prompt, translated_prompt)
+
+    if not translated_prompt['error']:
+        total_tokens = db.query(UserToken).filter(UserToken.user_id == user.id).first()
+        total_tokens.tokens_used = tokens_used_global(request) - translated_prompt['total_tokens']
+        db.commit()
+
+    image_url = await run_in_threadpool(generate_image_by_prompt, translated_prompt['message'])
+
     if not image_url:
         return JSONResponse(status_code=500, content={"message": "خطا در تولید تصویر"})
 
@@ -1394,7 +1481,7 @@ async def generate_text_image(
         type="text",
         prompt=prompt_filled,
         url="",
-        response=text_response,
+        response=text_response['message'],
         created_at=datetime.now(TEHRAN_TZ)
     )
     archive_image = AiArchive(
@@ -1412,14 +1499,14 @@ async def generate_text_image(
     db.commit()
 
     total_tokens = db.query(UserToken).filter(UserToken.user_id == user.id).first()
-    total_tokens.tokens_used = tokens_used_global(request) - input_token
+    total_tokens.tokens_used = tokens_used_global(request) - 40000
     db.commit()
 
     return JSONResponse({
-        "text_response": text_response,
+        "text_response": text_response['message'],
         "image_url": image_url,
         "prompt": prompt_filled,
-        "translated_prompt": translated_prompt,
+        "translated_prompt": translated_prompt["message"],
         "model_id": ai_id
     })
 
