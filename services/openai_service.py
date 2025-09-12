@@ -11,6 +11,7 @@ from fastapi.websockets import WebSocketState
 import time
 import io
 import wave
+import json
 
 # Configure detailed logging
 logging.basicConfig(
@@ -204,151 +205,151 @@ def analyze_image_with_openai_vision(image: Image.Image, max_tokens: int, prompt
         }
 
 
-async def realtime_audio_relay(websocket: WebSocket, deployment: str):
-    session = AudioSession()
-    session.websocket_connected = True
+# async def realtime_audio_relay(websocket: WebSocket, deployment: str):
+#     session = AudioSession()
+#     session.websocket_connected = True
 
-    try:
-        logger.info(f"Connecting to OpenAI realtime API with model: {deployment}")
+#     try:
+#         logger.info(f"Connecting to OpenAI realtime API with model: {deployment}")
 
-        async with clientb.beta.realtime.connect(model=deployment) as conn:
-            session.openai_connected = True
-            logger.info("✅ Connected to OpenAI realtime API")
+#         async with clientb.beta.realtime.connect(model=deployment) as conn:
+#             session.openai_connected = True
+#             logger.info("✅ Connected to OpenAI realtime API")
 
-            session_config = {
-                "modalities": ["text", "audio"],
-                "instructions": "You are a helpful assistant. Respond naturally and conversationally.",
-                "voice": "alloy",
-                "input_audio_format": "pcm16",
-                "output_audio_format": "pcm16",
-                "input_audio_transcription": {
-                    "model": "whisper-1"
-                },
-                "turn_detection": {
-                    "type": "server_vad",
-                    "threshold": 0.5,
-                    "prefix_padding_ms": 300,
-                    "silence_duration_ms": 500
-                },
-                "tool_choice": "auto",
-                "temperature": 0.8,
-                "max_response_output_tokens": 4096
-            }
+#             session_config = {
+#                 "modalities": ["text", "audio"],
+#                 "instructions": "You are a helpful assistant. Respond naturally and conversationally.",
+#                 "voice": "alloy",
+#                 "input_audio_format": "webm/opus",
+#                 "output_audio_format": "pcm16",
+#                 "input_audio_transcription": {
+#                     "model": "whisper-1"
+#                 },
+#                 "turn_detection": {
+#                     "type": "server_vad",
+#                     "threshold": 0.5,
+#                     "prefix_padding_ms": 300,
+#                     "silence_duration_ms": 500
+#                 },
+#                 "tool_choice": "auto",
+#                 "temperature": 0.8,
+#                 "max_response_output_tokens": 4096
+#             }
 
-            logger.info("Updating session configuration...")
-            await conn.session.update(session=session_config)
-            logger.info("✅ Session configuration updated")
+#             logger.info("Updating session configuration...")
+#             await conn.session.update(session=session_config)
+#             logger.info("✅ Session configuration updated")
 
-            async def send_to_openai():
-                logger.info("🎤 Audio receiver task started")
+#             async def send_to_openai():
+#                 logger.info("🎤 Audio receiver task started")
 
-                while session.websocket_connected:
-                    try:
-                        msg = await websocket.receive_bytes()
-                        session.last_audio_time = time.time()
-                        session.total_audio_received += len(msg)
-                        logger.info(f"📥 Received audio: {len(msg)} bytes (total: {session.total_audio_received})")
+#                 while session.websocket_connected:
+#                     try:
+#                         msg = await websocket.receive_bytes()
+#                         session.last_audio_time = time.time()
+#                         session.total_audio_received += len(msg)
+#                         logger.info(f"📥 Received audio: {len(msg)} bytes (total: {session.total_audio_received})")
 
-                        # بررسی حداقل طول داده
-                        if len(msg) < 480:  # کمتر از 20ms در 24kHz*2byte
-                            logger.warning("⚠️ Audio chunk too short - skipping")
-                            continue
+#                         # بررسی حداقل طول داده
+#                         if len(msg) < 480:  # کمتر از 20ms در 24kHz*2byte
+#                             logger.warning("⚠️ Audio chunk too short - skipping")
+#                             continue
 
-                        audio64 = base64.b64encode(msg).decode()
-                        await conn.send({"type": "input_audio_buffer.append", "audio": audio64})
+#                         audio64 = base64.b64encode(msg).decode()
+#                         await conn.send({"type": "input_audio_buffer.append", "audio": audio64})
 
-                        session.audio_buffer_has_data = True
-                        session.total_audio_sent += len(msg)
-                        logger.info(f"✅ Audio sent to OpenAI (total sent: {session.total_audio_sent} bytes)")
+#                         session.audio_buffer_has_data = True
+#                         session.total_audio_sent += len(msg)
+#                         logger.info(f"✅ Audio sent to OpenAI (total sent: {session.total_audio_sent} bytes)")
 
-                    except WebSocketDisconnect:
-                        logger.info("🔌 Client disconnected")
-                        session.websocket_connected = False
-                        break
-                    except Exception as e:
-                        logger.error(f"❌ Error in audio receiver: {e}")
-                        break
+#                     except WebSocketDisconnect:
+#                         logger.info("🔌 Client disconnected")
+#                         session.websocket_connected = False
+#                         break
+#                     except Exception as e:
+#                         logger.error(f"❌ Error in audio receiver: {e}")
+#                         break
 
-                if session.audio_buffer_has_data:
-                    logger.info("💾 Committing audio buffer to OpenAI...")
-                    try:
-                        await conn.send({"type": "input_audio_buffer.commit"})
-                        logger.info("✅ Audio buffer committed successfully")
-                    except Exception as e:
-                        logger.error(f"❌ Error committing audio buffer: {e}")
-                else:
-                    logger.info("ℹ️ No audio data to commit")
+#                 if session.audio_buffer_has_data:
+#                     logger.info("💾 Committing audio buffer to OpenAI...")
+#                     try:
+#                         await conn.send({"type": "input_audio_buffer.commit"})
+#                         logger.info("✅ Audio buffer committed successfully")
+#                     except Exception as e:
+#                         logger.error(f"❌ Error committing audio buffer: {e}")
+#                 else:
+#                     logger.info("ℹ️ No audio data to commit")
 
-                logger.info("🏁 Audio sender task finished")
+#                 logger.info("🏁 Audio sender task finished")
 
-            async def recv_from_openai():
-                logger.info("🎧 OpenAI receiver task started")
+#             async def recv_from_openai():
+#                 logger.info("🎧 OpenAI receiver task started")
 
-                async for ev in conn:
-                    if not session.websocket_connected:
-                        logger.info("🔌 WebSocket disconnected, stopping OpenAI receiver")
-                        break
-                    if websocket.client_state == WebSocketState.DISCONNECTED:
-                        logger.info("🔌 WebSocket client disconnected, stopping OpenAI receiver")
-                        break
+#                 async for ev in conn:
+#                     if not session.websocket_connected:
+#                         logger.info("🔌 WebSocket disconnected, stopping OpenAI receiver")
+#                         break
+#                     if websocket.client_state == WebSocketState.DISCONNECTED:
+#                         logger.info("🔌 WebSocket client disconnected, stopping OpenAI receiver")
+#                         break
 
-                    try:
-                        logger.debug(f"📨 Received OpenAI event: {ev.type}")
+#                     try:
+#                         logger.debug(f"📨 Received OpenAI event: {ev.type}")
 
-                        if ev.type == 'error':
-                            logger.error(f"❌ OpenAI error: {ev.error}")
-                            await websocket.send_json({"type": "error", "error": str(ev.error)})
+#                         if ev.type == 'error':
+#                             logger.error(f"❌ OpenAI error: {ev.error}")
+#                             await websocket.send_json({"type": "error", "error": str(ev.error)})
 
-                        elif ev.type == "response.audio.delta":
-                            if hasattr(ev, 'delta') and ev.delta:
-                                audio_data = base64.b64decode(ev.delta)
-                                await websocket.send_bytes(audio_data)
+#                         elif ev.type == "response.audio.delta":
+#                             if hasattr(ev, 'delta') and ev.delta:
+#                                 audio_data = base64.b64decode(ev.delta)
+#                                 await websocket.send_bytes(audio_data)
 
-                        elif ev.type == "response.audio.done":
-                            await websocket.send_json({"type": "audio_done"})
+#                         elif ev.type == "response.audio.done":
+#                             await websocket.send_json({"type": "audio_done"})
 
-                        elif ev.type == "input_audio_buffer.speech_started":
-                            await websocket.send_json({"type": "status", "status": "listening"})
+#                         elif ev.type == "input_audio_buffer.speech_started":
+#                             await websocket.send_json({"type": "status", "status": "listening"})
 
-                        elif ev.type == "input_audio_buffer.speech_stopped":
-                            await websocket.send_json({"type": "status", "status": "processing"})
+#                         elif ev.type == "input_audio_buffer.speech_stopped":
+#                             await websocket.send_json({"type": "status", "status": "processing"})
 
-                        elif ev.type == "conversation.item.input_audio_transcription.completed":
-                            transcript = getattr(ev, "transcript", "")
-                            if transcript:
-                                await websocket.send_json({"type": "transcript", "transcript": transcript})
+#                         elif ev.type == "conversation.item.input_audio_transcription.completed":
+#                             transcript = getattr(ev, "transcript", "")
+#                             if transcript:
+#                                 await websocket.send_json({"type": "transcript", "transcript": transcript})
 
-                        elif ev.type == "response.text.delta":
-                            if hasattr(ev, 'delta') and ev.delta:
-                                await websocket.send_json({"type": "text", "text": ev.delta})
+#                         elif ev.type == "response.text.delta":
+#                             if hasattr(ev, 'delta') and ev.delta:
+#                                 await websocket.send_json({"type": "text", "text": ev.delta})
 
-                        elif ev.type == "session.created":
-                            await websocket.send_json({"type": "session_ready", "message": "Ready to receive audio"})
+#                         elif ev.type == "session.created":
+#                             await websocket.send_json({"type": "session_ready", "message": "Ready to receive audio"})
 
-                        elif ev.type == "session.updated":
-                            pass
+#                         elif ev.type == "session.updated":
+#                             pass
 
-                    except Exception as e:
-                        if session.websocket_connected:
-                            logger.error(f"❌ Error processing OpenAI event: {e}")
-                        break
+#                     except Exception as e:
+#                         if session.websocket_connected:
+#                             logger.error(f"❌ Error processing OpenAI event: {e}")
+#                         break
 
-                logger.info("🏁 OpenAI receiver task finished")
+#                 logger.info("🏁 OpenAI receiver task finished")
 
-            logger.info("🚀 Starting audio relay tasks...")
-            await asyncio.gather(send_to_openai(), recv_from_openai())
+#             logger.info("🚀 Starting audio relay tasks...")
+#             await asyncio.gather(send_to_openai(), recv_from_openai())
 
-    except Exception as e:
-        logger.error(f"❌ Fatal error in realtime_audio_relay: {e}")
-        if session.websocket_connected:
-            try:
-                await websocket.send_json({"type": "error", "error": "Server connection error"})
-            except: pass
-    finally:
-        session.websocket_connected = False
-        session.openai_connected = False
-        session.log_stats()
-        logger.info("🏁 Audio relay finished")
+#     except Exception as e:
+#         logger.error(f"❌ Fatal error in realtime_audio_relay: {e}")
+#         if session.websocket_connected:
+#             try:
+#                 await websocket.send_json({"type": "error", "error": "Server connection error"})
+#             except: pass
+#     finally:
+#         session.websocket_connected = False
+#         session.openai_connected = False
+#         session.log_stats()
+#         logger.info("🏁 Audio relay finished")
 
 
 def convert_audio_to_pcm16_detailed(raw_bytes: bytes) -> bytes:
@@ -373,3 +374,79 @@ def convert_audio_to_pcm16_detailed(raw_bytes: bytes) -> bytes:
     except Exception as e:
         logger.error(f"❌ Error decoding WAV/PCM audio: {e}")
         return b''
+
+
+# ===============================================================================================================================
+
+async def realtime_audio_relay(websocket: WebSocket, deployment: str = "whisper-1"):
+    try:
+        await websocket.send_json({
+            "type": "session_ready",
+            "message": "Ready to receive audio"
+        })
+
+        while True:
+            message = await websocket.receive()
+
+            if message["type"] == "websocket.disconnect":
+                break
+
+            if message["type"] == "websocket.receive":
+                if "text" in message:
+                    data = json.loads(message["text"])
+                    if data.get("type") == "audio_end":
+                        # می‌تونی بعداً کاری مثل پایان سشن انجام بدی
+                        continue
+
+                elif "bytes" in message:
+                    audio_bytes = message["bytes"]
+
+                    # صدا رو به Whisper بده
+                    audio_file = io.BytesIO(audio_bytes)
+                    audio_file.name = "chunk.webm"  # خیلی مهمه که پسوند webm باشه
+
+                    try:
+                        transcript = await client.audio.transcriptions.create(
+                            model=deployment,
+                            file=audio_file,
+                            language="fa"
+                        )
+                        await websocket.send_json({
+                            "type": "transcript",
+                            "transcript": transcript.text
+                        })
+
+                    except Exception as e:
+                        await websocket.send_json({
+                            "type": "error",
+                            "error": f"Whisper error: {str(e)}"
+                        })
+
+    except WebSocketDisconnect:
+        pass
+    except Exception as e:
+        await websocket.send_json({"type": "error", "error": str(e)})
+    finally:
+        await websocket.close()
+
+
+
+def text_to_speech_stream(
+    input_text: str,
+    model: str,
+    voice: str,
+    format: str,
+    instructions: str = "Speak in a calm and very clear, measured tone"
+) -> bytes:
+    try:
+        response = client.audio.speech.create(
+            model=model,
+            input=input_text,
+            voice=voice,
+            response_format=format,
+            instructions=instructions,
+        )
+        return response.content
+
+    except Exception as e:
+        raise Exception(f"خطا در تولید صدا: {e}")

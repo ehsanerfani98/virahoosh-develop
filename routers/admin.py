@@ -44,6 +44,8 @@ import uuid
 from models.user_token import UserToken
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from models.AssistantUserInfo import AssistantUserInfo
+import aiohttp
+import tempfile
 
 
 # Configure logging
@@ -60,8 +62,6 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
     return templates.TemplateResponse("admin/dashboard/index.html", {"request": request, "user": user})
 
 # روت نقش ها
-
-
 @router.get("/roles", response_class=HTMLResponse, name="admin_roles")
 def roles_list(
     request: Request,
@@ -85,7 +85,6 @@ def roles_list(
         "total_pages": total_pages,
     })
 
-
 @router.get("/roles/{role_id}/edit", response_class=HTMLResponse, name="admin_roles_edit")
 def edit_role(role_id: int, request: Request, db: Session = Depends(get_db), _=Depends(has_permission("edit_role"))):
     role = db.query(Role).filter(Role.id == role_id).first()
@@ -96,7 +95,6 @@ def edit_role(role_id: int, request: Request, db: Session = Depends(get_db), _=D
         "admin/roles/edit.html",
         {"request": request, "role": role, "permissions": permissions}
     )
-
 
 @router.post("/roles/{role_id}/edit", name="admin_roles_update")
 def update_role(
@@ -121,7 +119,6 @@ def update_role(
 
     return RedirectResponse(url=request.url_for("admin_roles"), status_code=HTTP_302_FOUND)
 
-
 @router.get("/roles/create", response_class=HTMLResponse, name="admin_roles_create")
 def create_role_page(request: Request, db: Session = Depends(get_db), _=Depends(has_permission("create_role"))):
     permissions = db.query(Permission).all()
@@ -129,7 +126,6 @@ def create_role_page(request: Request, db: Session = Depends(get_db), _=Depends(
         "admin/roles/create.html",
         {"request": request, "permissions": permissions}
     )
-
 
 @router.post("/roles/create", name="admin_roles_store")
 def store_role(
@@ -146,7 +142,6 @@ def store_role(
     db.add(role)
     db.commit()
     return RedirectResponse(url=request.url_for("admin_roles"), status_code=HTTP_302_FOUND)
-
 
 @router.post("/roles/{role_id}/delete", name="admin_roles_delete")
 def delete_role(request: Request, role_id: int, db: Session = Depends(get_db), _=Depends(has_permission("delete_role"))):
@@ -173,8 +168,6 @@ def delete_role(request: Request, role_id: int, db: Session = Depends(get_db), _
     )
 
 # روت مجوزها
-
-
 @router.get("/permissions", response_class=HTMLResponse, name="admin_permissions")
 def list_permissions(
     request: Request,
@@ -198,11 +191,9 @@ def list_permissions(
         "total_pages": total_pages,
     })
 
-
 @router.get("/permissions/create", response_class=HTMLResponse, name="admin_permissions_create")
 def create_permission_page(request: Request, db: Session = Depends(get_db), _=Depends(has_permission("create_permission"))):
     return templates.TemplateResponse("admin/permissions/create.html", {"request": request})
-
 
 @router.post("/permissions/create", name="admin_permissions_store")
 def store_permission(
@@ -227,7 +218,6 @@ def store_permission(
     # ریدایرکت به لیست مجوزها
     return RedirectResponse(url=request.url_for("admin_permissions"), status_code=HTTP_302_FOUND)
 
-
 @router.get("/permissions/{permission_id}/edit", response_class=HTMLResponse, name="admin_permissions_edit")
 def edit_permission_page(permission_id: int, request: Request, db: Session = Depends(get_db), _=Depends(has_permission("edit_permission"))):
     permission = db.query(Permission).filter(
@@ -238,7 +228,6 @@ def edit_permission_page(permission_id: int, request: Request, db: Session = Dep
         "admin/permissions/edit.html",
         {"request": request, "permission": permission}
     )
-
 
 @router.post("/permissions/{permission_id}/edit", name="admin_permissions_update")
 def update_permission(
@@ -268,7 +257,6 @@ def update_permission(
     db.refresh(permission)
 
     return RedirectResponse(url=request.url_for("admin_permissions"), status_code=302)
-
 
 @router.post("/permissions/{permission_id}/delete", name="admin_permissions_delete")
 def delete_permission(request: Request, permission_id: int, db: Session = Depends(get_db), _=Depends(has_permission("delete_permission"))):
@@ -319,12 +307,10 @@ def list_users(
         "total_pages": total_pages,
     })
 
-
 @router.get("/users/create", response_class=HTMLResponse, name="admin_users_create")
 def create_user_page(request: Request, db: Session = Depends(get_db), _=Depends(has_permission("create_user"))):
     roles = db.query(Role).all()
     return templates.TemplateResponse("admin/users/create.html", {"request": request, "roles": roles})
-
 
 @router.post("/users/create", name="admin_users_store")
 def store_user(
@@ -350,7 +336,6 @@ def store_user(
 
     return RedirectResponse(url=request.url_for("admin_users"), status_code=302)
 
-
 @router.get("/users/{user_id}/edit", response_class=HTMLResponse, name="admin_users_edit")
 def edit_user_page(user_id: str, request: Request, db: Session = Depends(get_db), _=Depends(has_permission("edit_user"))):
     target_user = db.query(User).filter(User.id == user_id).first()
@@ -358,7 +343,6 @@ def edit_user_page(user_id: str, request: Request, db: Session = Depends(get_db)
     return templates.TemplateResponse("admin/users/edit.html", {
         "request": request, "target_user": target_user, "roles": roles
     })
-
 
 @router.post("/users/{user_id}/edit", name="admin_users_update")
 def update_user(
@@ -377,7 +361,6 @@ def update_user(
     db.commit()
     return RedirectResponse(url=request.url_for("admin_users"), status_code=302)
 
-
 @router.post("/users/{user_id}/delete", name="admin_users_delete")
 def delete_user(request: Request, user_id: str, db: Session = Depends(get_db), _=Depends(has_permission("delete_user")),):
     target_user = db.query(User).filter(User.id == user_id).first()
@@ -387,7 +370,6 @@ def delete_user(request: Request, user_id: str, db: Session = Depends(get_db), _
     db.delete(target_user)
     db.commit()
     return JSONResponse(status_code=200, content={"message": "کاربر با موفقیت حذف شد."})
-
 
 # لیست بسته‌ها
 @router.get("/subscription_plans", response_class=HTMLResponse, name="admin_subscription_plans")
@@ -413,7 +395,6 @@ def list_subscription_plans(
         "total_pages": total_pages,
     })
 
-
 # صفحه ایجاد بسته جدید
 @router.get("/subscription_plans/create", response_class=HTMLResponse, name="admin_subscription_plan_create")
 def create_subscription_plan_page(
@@ -424,7 +405,6 @@ def create_subscription_plan_page(
     return templates.TemplateResponse("admin/subscription_plans/create.html", {
         "request": request
     })
-
 
 # ذخیره بسته جدید
 @router.post("/subscription_plans/create", name="admin_subscription_plan_store")
@@ -450,7 +430,6 @@ def store_subscription_plan(
     db.refresh(new_plan)
     return RedirectResponse(url=request.url_for("admin_subscription_plans"), status_code=302)
 
-
 # صفحه ویرایش بسته
 @router.get("/subscription_plans/{plan_id}/edit", response_class=HTMLResponse, name="admin_subscription_plan_edit")
 def edit_subscription_plan_page(
@@ -466,7 +445,6 @@ def edit_subscription_plan_page(
         "request": request,
         "plan": plan
     })
-
 
 # ذخیره تغییرات بسته
 @router.post("/subscription_plans/{plan_id}/edit", name="admin_subscription_plan_update")
@@ -492,7 +470,6 @@ def update_subscription_plan(
     plan.amount = amount
     db.commit()
     return RedirectResponse(request.url_for("admin_subscription_plans"), status_code=302)
-
 
 # حذف بسته
 @router.post("/subscription_plans/{plan_id}/delete", name="admin_subscription_plan_delete")
@@ -534,7 +511,6 @@ def buy_subscription_plan(
         "total_pages": total_pages,
     })
 
-
 @router.get("/subscription_buy/{plan_id}", name="subscription_buy")
 async def buy_subscription(
     request: Request,
@@ -565,7 +541,6 @@ async def buy_subscription(
 
     callback_url = f"http://127.0.0.1:8000/admin/verify/subscription_buy?plan_id={plan_id}&pid={payment.id}"
     return initiate_payment(plan.amount, callback_url, 'خرید بسته هوشمند')
-
 
 @router.get("/verify/subscription_buy", name="verify_subscription_buy")
 async def verify_buy_subscription(
@@ -675,8 +650,6 @@ def user_subscription_detail(
         "user": user,
     })
 
-
-
 # لیست بسته‌ کاربر جاری
 @router.get("/user_subscriptions/current/user", response_class=HTMLResponse, name="admin_current_user_subscription_detail")
 def user_subscription_detail(
@@ -713,10 +686,6 @@ def user_subscription_detail(
         "user": user,
     })
 
-
-
-
-
 # منقضی بسته
 @router.post("/user_subscriptions/{subscription_id}/delete", name="admin_user_subscription_delete")
 def delete_user_subscription(
@@ -732,8 +701,6 @@ def delete_user_subscription(
     subscription.active = 0
     db.commit()
     return JSONResponse(status_code=200, content={"message": "بسته با موفقیت منقضی شد."})
-
-
 
 # لیست مدل‌ها
 @router.get("/ais", response_class=HTMLResponse, name="admin_ais")
@@ -751,7 +718,6 @@ def index(request: Request, db: Session = Depends(get_db), _: bool = Depends(has
         "total_pages": total_pages
     })
 
-
 @router.get("/ais/carts", response_class=HTMLResponse, name="admin_ais_carts")
 def list_ai_carts(request: Request, db: Session = Depends(get_db), _: bool = Depends(has_permission("list_ai_users")), page: int = 1, per_page: int = 10):
     total = db.query(AiModel).count()
@@ -766,7 +732,6 @@ def list_ai_carts(request: Request, db: Session = Depends(get_db), _: bool = Dep
         "per_page": per_page,
         "total_pages": total_pages
     })
-
 
 @router.get("/ais/archives", response_class=HTMLResponse, name="admin_ai_archives")
 def list_ai_archives(
@@ -798,11 +763,9 @@ def list_ai_archives(
         "total_pages": total_pages
     })
 
-
 @router.get("/ais/create", response_class=HTMLResponse, name="admin_ai_create")
 def create_page(request: Request, _: bool = Depends(has_permission("create_ai"))):
     return templates.TemplateResponse("admin/ai/create.html", {"request": request})
-
 
 @router.post("/ais/create", name="admin_ai_store")
 def create(
@@ -872,7 +835,6 @@ def create(
 
     return RedirectResponse(url=request.url_for("admin_ais"), status_code=302)
 
-
 @router.get("/ais/{ai_id}/edit", response_class=HTMLResponse, name="admin_ai_edit")
 def edit_page(ai_id: int, request: Request, db: Session = Depends(get_db), _: bool = Depends(has_permission("edit_ai"))):
     ai_model = db.query(AiModel).filter(AiModel.id == ai_id).first()
@@ -883,7 +845,6 @@ def edit_page(ai_id: int, request: Request, db: Session = Depends(get_db), _: bo
         "request": request,
         "ai_model": ai_model
     })
-
 
 @router.post("/ais/{ai_id}/edit", name="admin_ai_update")
 def update(
@@ -949,7 +910,6 @@ def update(
     db.commit()
     return RedirectResponse(url=request.url_for("admin_ais"), status_code=302)
 
-
 @router.post("/ais/{ai_id}/delete", name="admin_ai_delete")
 def delete(ai_id: int, db: Session = Depends(get_db), _: bool = Depends(has_permission("delete_ai"))):
     ai_model = db.query(AiModel).filter(AiModel.id == ai_id).first()
@@ -959,7 +919,6 @@ def delete(ai_id: int, db: Session = Depends(get_db), _: bool = Depends(has_perm
     db.delete(ai_model)
     db.commit()
     return JSONResponse(status_code=200, content={"message": "مدل با موفقیت حذف شد."})
-
 
 @router.get("/ais/{ai_id}", response_class=HTMLResponse, name="admin_ai_model")
 def ai_form(ai_id: int, request: Request, db: Session = Depends(get_db), _: bool = Depends(has_permission("list_ai_users"))):
@@ -972,7 +931,6 @@ def ai_form(ai_id: int, request: Request, db: Session = Depends(get_db), _: bool
         "token": get_token(request),
         "result": None
     })
-
 
 @router.post("/ais/{ai_id}/generate-text", name="admin_ai_generate_text")
 async def generate_text(ai_id: int, request: Request, db: Session = Depends(get_db)):
@@ -1036,7 +994,6 @@ async def generate_text(ai_id: int, request: Request, db: Session = Depends(get_
         })
     
     return JSONResponse(status_code=500, content={"message": response['message']})
-
 
 @router.post("/ais/{ai_id}/generate-image", name="admin_ai_generate_image")
 async def generate_image(ai_id: int, request: Request, db: Session = Depends(get_db)):
@@ -1183,7 +1140,7 @@ async def generate_text_audio(ai_id: int, request: Request, db: Session = Depend
     if(input_token > tokens_used_global(request)):
         return JSONResponse(status_code=403, content={"message": "توکن شما کافی نیست"})
 
-    audio_path_or_error = text_to_speech(
+    audio = text_to_speech(
         input_text=title,
         model=model,
         voice=voice,
@@ -1192,8 +1149,8 @@ async def generate_text_audio(ai_id: int, request: Request, db: Session = Depend
         instructions=instructions
     )
 
-    if audio_path_or_error.startswith("خطا"):
-        return JSONResponse(status_code=500, content={"message": audio_path_or_error})
+    if audio.startswith("خطا"):
+        return JSONResponse(status_code=500, content={"message": audio})
 
     with open(temp_audio_path, "rb") as f:
         audio_bytes = f.read()
@@ -1212,7 +1169,7 @@ async def generate_text_audio(ai_id: int, request: Request, db: Session = Depend
         return JSONResponse(status_code=e.status_code, content={"message": e.detail})
 
 
-    if not audio_path_or_error.startswith("خطا"):
+    if not audio.startswith("خطا"):
         # ذخیره در آرشیو AiArchive
         archive = AiArchive(
             user_id=user.id,
@@ -1242,7 +1199,7 @@ async def generate_text_audio(ai_id: int, request: Request, db: Session = Depend
             "audio_url": f"/{saved_path}"
         })
     
-    return JSONResponse(status_code=500, content={"message": audio_path_or_error})
+    return JSONResponse(status_code=500, content={"message": audio})
 
 @router.post("/ais/{ai_id}/vision-image", name="admin_ai_vision_image")
 async def generate_vision_image(ai_id: int, request: Request, db: Session = Depends(get_db)):
@@ -1421,7 +1378,6 @@ async def generate_vision_image_analyst(ai_id: int, request: Request, db: Sessio
 
     return JSONResponse(status_code=500, content={"message": result_text['message']})
 
-
 @router.post("/ais/{ai_id}/generate-text-image", name="admin_ai_generate_text_image")
 async def generate_text_image(
     ai_id: int,
@@ -1543,25 +1499,6 @@ async def generate_text_image(
         "model_id": ai_id
     })
 
-
-# @router.post("/ais/archive/save", name="admin_ai_archive_save")
-# def save_to_archive(
-#     request: Request,
-#     ai_model_id: int = Form(...),
-#     prompt: str = Form(...),
-#     title: str = Form(...),
-#     response: str = Form(...),
-#     db: Session = Depends(get_db),
-# ):
-
-#     user = auth(request, db)
-#     archive = AiArchive(ai_model_id=ai_model_id, user_id=user.id,
-#                         title=title, prompt=prompt, response=response)
-#     db.add(archive)
-#     db.commit()
-#     return RedirectResponse(url=f"/admin/ais/{ai_model_id}", status_code=302)
-
-
 @router.post("/ais/archive/{archive_id}/delete", name="admin_ais_archive_delete")
 def delete_archive(
     request: Request,
@@ -1601,39 +1538,38 @@ def delete_archive(
 
     return JSONResponse(status_code=200, content={"message": "آرشیو و فایل مربوطه با موفقیت حذف شدند."})
 
+# @router.websocket("/ws/ais/{ai_id}/audio-chat")
+# async def audio_chat_ws(
+#     websocket: WebSocket,
+#     ai_id: int,
+#     token: str = Depends(websocket_auth),
+#     db: Session = Depends(get_db)
+# ):
+#     await websocket.accept()
+#     logger.info(
+#         f"🎤 Audio chat WebSocket connected for AI {ai_id} from {websocket.client.host}:{websocket.client.port}")
 
-@router.websocket("/ws/ais/{ai_id}/audio-chat")
-async def audio_chat_ws(
-    websocket: WebSocket,
-    ai_id: int,
-    token: str = Depends(websocket_auth),
-    db: Session = Depends(get_db)
-):
-    await websocket.accept()
-    logger.info(
-        f"🎤 Audio chat WebSocket connected for AI {ai_id} from {websocket.client.host}:{websocket.client.port}")
+#     deployment = get_deployment_for_ai(ai_id, db)
+#     logger.info(f"🤖 Using deployment: {deployment}")
 
-    deployment = get_deployment_for_ai(ai_id, db)
-    logger.info(f"🤖 Using deployment: {deployment}")
-
-    try:
-        await realtime_audio_relay(websocket, deployment)
-    except WebSocketDisconnect:
-        logger.info("🔌 WebSocket disconnected normally")
-    except Exception as e:
-        logger.error(f"❌ WebSocket error: {e}")
-        if websocket.client_state != WebSocketState.DISCONNECTED:
-            try:
-                await websocket.send_json({"type": "error", "error": "Server error"})
-            except:
-                pass
-    finally:
-        if websocket.client_state != WebSocketState.DISCONNECTED:
-            try:
-                await websocket.close()
-                logger.info("🔌 WebSocket closed")
-            except:
-                pass
+#     try:
+#         await realtime_audio_relay(websocket, deployment)
+#     except WebSocketDisconnect:
+#         logger.info("🔌 WebSocket disconnected normally")
+#     except Exception as e:
+#         logger.error(f"❌ WebSocket error: {e}")
+#         if websocket.client_state != WebSocketState.DISCONNECTED:
+#             try:
+#                 await websocket.send_json({"type": "error", "error": "Server error"})
+#             except:
+#                 pass
+#     finally:
+#         if websocket.client_state != WebSocketState.DISCONNECTED:
+#             try:
+#                 await websocket.close()
+#                 logger.info("🔌 WebSocket closed")
+#             except:
+#                 pass
 
 @router.get("/assistants", response_class=HTMLResponse, name="admin_assistants")
 def list_assistants(request: Request, db: Session = Depends(get_db), _: bool = Depends(has_permission("list_assistants"))):
@@ -1655,7 +1591,6 @@ def list_assistants(request: Request, user_id: str, db: Session = Depends(get_db
 @router.get("/assistants/create", response_class=HTMLResponse, name="admin_assistant_create")
 def create_page(request: Request, _: bool = Depends(has_permission("create_assistants"))):
     return templates.TemplateResponse("admin/assistant/create.html", {"request": request})
-
 
 @router.post("/assistants/create", name="admin_assistant_store")
 async def create_assistant(
@@ -1698,10 +1633,9 @@ async def create_assistant(
     db.refresh(assistant)
 
     # ارسال تسک به صف
-    process_excel_file.delay(assistant.id, saved_file_path, user.id)
+    # process_excel_file.delay(assistant.id, saved_file_path, user.id)
 
     return RedirectResponse(url=request.url_for("admin_assistants"), status_code=302)
-
 
 @router.get("/assistants/{assistant_id}/edit", response_class=HTMLResponse, name="admin_assistant_edit")
 def edit_assistant_page(assistant_id: int, request: Request, db: Session = Depends(get_db), _: bool = Depends(has_permission("edit_assistants"))):
@@ -1714,7 +1648,6 @@ def edit_assistant_page(assistant_id: int, request: Request, db: Session = Depen
         "request": request,
         "assistant": assistant
     })
-
 
 @router.post("/assistants/{assistant_id}/edit", name="admin_assistant_update")
 def update_assistant(
@@ -1738,7 +1671,6 @@ def update_assistant(
     db.commit()
     return RedirectResponse(url=request.url_for("admin_assistants"), status_code=302)
 
-
 @router.post("/assistants/{assistant_id}/delete", name="admin_assistant_delete")
 def delete_assistant(request: Request, assistant_id: int, db: Session = Depends(get_db), _: bool = Depends(has_permission("delete_assistants"))):
     assistant = db.query(Assistant).filter(
@@ -1760,7 +1692,6 @@ def delete_assistant(request: Request, assistant_id: int, db: Session = Depends(
     db.delete(assistant)
     db.commit()
     return JSONResponse(status_code=200, content={"message": "دستیار با موفقیت حذف شد."})
-
 
 @router.get(
     "/assistants/userinfo/{assistant_id}",
@@ -1813,7 +1744,6 @@ def delete_user_info(
     db.commit()
     return JSONResponse(status_code=200, content={"message": "اطلاعات با موفقیت حذف شد"})
 
-
 def get_deployment_for_ai(ai_id: int, db: Session) -> str:
     """
     Get the deployment model for the AI with validation
@@ -1838,3 +1768,144 @@ async def parse_form_as_dict(request: Request):
     return dict(form)
 
 
+# ========================================================================================================================
+
+@router.websocket("/ws/speech-to-text")
+async def speech_to_text_websocket(
+    websocket: WebSocket, 
+    ):
+    await websocket.accept()
+    print("🎤 WebSocket connected")
+
+    try:
+        audio_data = b""
+        while True:
+            msg = await websocket.receive()
+            
+            if msg["type"] == "websocket.disconnect":
+                print("🔌 Client disconnected")
+                break
+
+            if "bytes" in msg:  # فایل کامل webm
+                audio_data += msg["bytes"]
+
+            if "text" in msg:
+                data = json.loads(msg["text"])
+                if data.get("type") == "audio_end":
+                    # فایل رو ذخیره کنیم
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
+                        tmp.write(audio_data)
+                        tmp_path = tmp.name
+
+                    # بفرستیم به Whisper
+                    async with aiohttp.ClientSession() as session:
+                        with open(tmp_path, "rb") as f:
+                            form = aiohttp.FormData()
+                            form.add_field("file", f, filename="audio.webm", content_type="audio/webm")
+                            form.add_field("model", "whisper-1")
+                            form.add_field("language", "fa")
+
+                            async with session.post(
+                                "https://api.openai.com/v1/audio/transcriptions",
+                                headers={"Authorization": f"Bearer {os.getenv("OPENAI_API_KEY")}"},
+                                data=form
+                            ) as resp:
+                                result = await resp.json()
+                                # print("Whisper result:", result)
+
+                                transcript = result.get("text", "")
+                                await websocket.send_json({"type": "transcript", "text": transcript})
+
+                    os.unlink(tmp_path)  # پاک کردن فایل موقت
+                    audio_data = b""  # ریست
+    except WebSocketDisconnect:
+        print("❌ Disconnected")
+    except Exception as e:
+        print("⚠️ Error:", e)
+        await websocket.send_json({"type": "error", "error": str(e)})
+
+
+@router.get("/test/speech-to-text", response_class=HTMLResponse, name="admin_speech_to_text")
+def speech_to_text_page(request: Request, db: Session = Depends(get_db)):
+    """
+    Render the speech-to-text test page
+    """
+    user = auth(request, db)
+    if not user:
+        return RedirectResponse(url=request.url_for("login"))
+    
+    return templates.TemplateResponse(
+        "admin/speech_to_text/index.html", 
+        {
+            "request": request, 
+            "user": user,
+            "token": get_token(request),
+            "page_title": "Speech to Text Test"
+        }
+    )
+
+@router.get("/{assistant_id}/upload", response_class=HTMLResponse, name="admin_assistant_upload")
+def upload_files_page(
+    request: Request,
+    assistant_id: int,
+    db: Session = Depends(get_db),
+     _: bool = Depends(has_permission("upload_storage"))
+):
+    return templates.TemplateResponse(
+        "admin/assistant/upload.html",
+        {"request": request, "assistant_id": assistant_id}
+    )
+
+
+@router.post("/{assistant_id}/upload", name="admin_assistant_store_files")
+async def upload_files(
+    request: Request,
+    assistant_id: int,
+    faiss_file: UploadFile = Form(...),
+    pkl_file: UploadFile = Form(...),
+    db: Session = Depends(get_db),
+    _: bool = Depends(has_permission("upload_storage"))
+):
+    user = auth(request, db)
+
+    try:
+        faiss_path = await upload_file(
+            file=faiss_file,
+            user_id=user.id,
+            db=db,
+            save_to_db=False,
+            custom_path_status=True,
+            custom_path='vectorstores',
+            change_file_name=False
+        )
+
+        pkl_path = await upload_file(
+            file=pkl_file,
+            user_id=user.id,
+            db=db,
+            save_to_db=False,
+            custom_path_status=True,
+            custom_path='vectorstores',
+            change_file_name=False
+        )
+
+        assistant = db.query(Assistant).filter(Assistant.id == assistant_id).first()
+        if not assistant:
+            raise HTTPException(status_code=404, detail="Assistant not found")
+        assistant.status = True
+        assistant.faiss_url = faiss_path
+        assistant.pkl_url = pkl_path
+        db.commit()
+
+        return RedirectResponse(
+            url=request.url_for("admin_assistants"),
+            status_code=HTTP_302_FOUND
+        )
+
+    except Exception as e:
+        logger.error(f"[upload_files] failed: {e}")
+        return JSONResponse(status_code=400, content={"message": f"خطا در آپلود فایل: {str(e)}"})
+
+
+def get_user_path(user_id: str) -> str:
+    return os.path.join("static", "uploads", f"user_{user_id}")

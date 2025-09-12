@@ -14,8 +14,10 @@ BASE_UPLOAD_DIR = "static/uploads"
 
 
 def get_user_storage_path(user_id: str) -> str:
-    """برگرداندن مسیر پوشه مخصوص کاربر"""
     return os.path.join(BASE_UPLOAD_DIR, f"user_{user_id}")
+
+def get_user_storage_custom_path(user_id: str, path: str) -> str:
+    return os.path.join(BASE_UPLOAD_DIR, f"user_{user_id}", path)
 
 
 def get_folder_size(folder_path: str) -> int:
@@ -57,10 +59,17 @@ async def upload_file(
     user_id: str,
     db: Session,
     save_to_db: bool = True,
+    custom_path_status: bool = False,
+    custom_path: str = None,
     content_type: str = None,
     change_file_name: bool = True,
 ) -> str:
-    user_folder = get_user_storage_path(user_id)
+    
+    if custom_path_status:
+        user_folder = get_user_storage_custom_path(user_id, custom_path)
+    else:
+        user_folder = get_user_storage_path(user_id)
+
     os.makedirs(user_folder, exist_ok=True)
     os.chmod(user_folder, 0o775)
 

@@ -14,3 +14,22 @@ async def websocket_auth(websocket: WebSocket) -> dict:
         return payload
     except JWTError:
         raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION, reason="Invalid token")
+
+
+    try:
+        # Get token from WebSocket headers
+        token = websocket.headers.get("Authorization")
+        if not token or not token.startswith("Bearer "):
+            return None
+            
+        token = token.split(" ")[1]
+        
+        # Verify token
+        user = get_token(db, token)
+        if not user:
+            return None
+            
+        return user
+    except Exception as e:
+        logger.error(f"WebSocket authentication error: {e}")
+        return None

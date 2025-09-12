@@ -2,15 +2,17 @@
 
 from fastapi import APIRouter, Depends, Request, Form, HTTPException
 from core.templates import templates
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from database.session import get_db
 from starlette.concurrency import run_in_threadpool
 from services.assistant import load_vectorstore_for_assistant
+from services.openai_service import text_to_speech_stream, run_openai_prompt
 from sqlalchemy.orm import Session
 from models.assistant import Assistant
 import uuid
 from models.AssistantUserInfo import AssistantUserInfo
 from typing import Annotated
+from io import BytesIO
 
 
 router_site = APIRouter(prefix="")
@@ -89,10 +91,9 @@ async def ask_for_assistant(
     try:
         qa_chain, retriever = await load_vectorstore_for_assistant(db, assistant_id)
     except FileNotFoundError as e:
-        return JSONResponse({"error": str(e)}, status_code=404)
+        return JSONResponse({"error": str(e)}, status_code=500)
 
     normalized_q = normalize_text(question)
-   
     answer = await run_in_threadpool(qa_chain.run, normalized_q)
     related = await run_in_threadpool(retriever.get_relevant_documents, normalized_q)
     related_texts = [doc.page_content for doc in related]
@@ -104,6 +105,30 @@ async def ask_for_assistant(
     }
 
     return JSONResponse(result)
+
+@router_site.post("/assistants/{assistant_id}/ask_audio")
+async def ask_audio_for_assistant(
+    assistant_id: int,
+    question: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    try:
+        qa_chain, retriever = await load_vectorstore_for_assistant(db, assistant_id)
+    except FileNotFoundError as e:
+        return JSONResponse({"error": str(e)}, status_code=404)
+
+    normalized_q = normalize_text(question)
+
+    text_response = await run_in_threadpool(
+        run_openai_prompt, normalized_q, "فقط غلط املایی متن را درست کن هیچ حرف اضافه ای نزن! فقط متن را صحیح ، و ارسال کن",
+        5000, "gpt-4o", "openai"
+    )
+    print("text_response")
+    print(text_response['message'])
+    answer = await run_in_threadpool(qa_chain.run, text_response['message'])
+
+    audio_bytes = text_to_speech_stream(answer, model="gpt-4o-mini-tts", voice="shimmer", format="mp3")
+    return StreamingResponse(BytesIO(audio_bytes), media_type="audio/mpeg")
 
 
 

@@ -1,10 +1,6 @@
 {% extends "admin/layout.html" %} {% block title %}لیست دستیارها{% endblock %}
 {% block page_title %}لیست دستیارها{% endblock %} {% block action_button %}
-<a
-  href="{{ url_for('admin_assistant_create') }}"
-  class="btn btn-sm btn-primary px-4"
-  >+ دستیار جدید</a
->
+<a href="{{ url_for('admin_assistant_create') }}" class="btn btn-sm btn-primary px-4">+ دستیار جدید</a>
 {% endblock %} {% block css %}
 <style>
   #image-loading-spinner {
@@ -59,19 +55,10 @@
                   {% if a.status %}
                   <!-- وضعیت آماده -->
                   <div id="image-loading-spinner">
-                    <svg
-                      width="20px"
-                      height="20px"
-                      viewBox="0 0 60 60"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="#000000"
-                    >
+                    <svg width="20px" height="20px" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"
+                      fill="#000000">
                       <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                      <g
-                        id="SVGRepo_tracerCarrier"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      ></g>
+                      <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
                       <g id="SVGRepo_iconCarrier">
                         <defs>
                           <style>
@@ -81,18 +68,12 @@
                             }
                           </style>
                         </defs>
-                        <path
-                          class="cls-1"
+                        <path class="cls-1"
                           d="M800,510a30,30,0,1,1,30-30A30,30,0,0,1,800,510Zm-16.986-23.235a3.484,3.484,0,0,1,0-4.9l1.766-1.756a3.185,3.185,0,0,1,4.574.051l3.12,3.237a1.592,1.592,0,0,0,2.311,0l15.9-16.39a3.187,3.187,0,0,1,4.6-.027L817,468.714a3.482,3.482,0,0,1,0,4.846l-21.109,21.451a3.185,3.185,0,0,1-4.552.03Z"
-                          id="check"
-                          transform="translate(-770 -450)"
-                        ></path>
+                          id="check" transform="translate(-770 -450)"></path>
                       </g>
                     </svg>
-                    <div
-                      class="small text-primary"
-                      style="font-size: 13px; margin-right: 10px"
-                    >
+                    <div class="small text-primary" style="font-size: 13px; margin-right: 10px">
                       آماده استفاده
                     </div>
                   </div>
@@ -106,47 +87,31 @@
                   {% endif %}
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    style="font-family: math"
-                    readonly
-                    class="form-control form-control-sm"
-                    value="{{ request.base_url }}assistant/{{ a.slug }}"
-                    onclick="this.select()"
-                  />
+                  <input type="text" style="font-family: math" readonly class="form-control form-control-sm"
+                    value="{{ request.base_url }}assistant/{{ a.slug }}" onclick="this.select()" />
                 </td>
                 <td>
-                  <textarea
-                    onclick="this.select()"
-                    class="form-control"
-                    style="
+                  <textarea onclick="this.select()" class="form-control" style="
                       font-family: math;
                       font-size: 9px;
                       width: 240px;
                       height: 68px;
                       text-align: left;
-                    "
-                  >
-<script src="{{ request.base_url }}static/js/assistant.js?assistant_id={{ a.slug }}" defer></script></textarea
-                  >
+                    ">
+<script src="{{ request.base_url }}static/js/assistant.js?assistant_id={{ a.slug }}" defer></script></textarea>
                 </td>
                 <td>
-                  <a
-                    href="{{ url_for('assistant_user_info_list', assistant_id=a.id) }}"
-                    class="btn btn-sm btn-primary rounded-pill px-3"
-                    >مشاهده</a
-                  >
+                  <a href="{{ url_for('assistant_user_info_list', assistant_id=a.id) }}"
+                    class="btn btn-sm btn-primary rounded-pill px-3">مشاهده</a>
                 </td>
                 <td class="text-center">
-                  <a
-                    href="{{ url_for('admin_assistant_edit', assistant_id=a.id) }}"
-                    class="btn btn-sm btn-primary rounded-pill px-3"
-                    >ویرایش</a
-                  >
-                  <button
-                    class="btn btn-sm btn-danger rounded-pill px-3 delete-assistant-btn"
-                    data-id="{{ a.id }}"
-                  >
+                  <a href="{{ url_for('admin_assistant_edit', assistant_id=a.id) }}"
+                    class="btn btn-sm btn-primary rounded-pill px-3">ویرایش</a>
+                    {% if can('upload_storage') %}
+                    <a href="{{ url_for('admin_assistant_store_files', assistant_id=a.id) }}"
+                    class="btn btn-sm btn-primary rounded-pill px-3">بارگذاری استوریج</a>
+                    {% endif %}
+                    <button class="btn btn-sm btn-danger rounded-pill px-3 delete-assistant-btn" data-id="{{ a.id }}">
                     حذف
                   </button>
                 </td>
