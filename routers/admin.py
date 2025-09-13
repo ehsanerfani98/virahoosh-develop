@@ -1826,10 +1826,7 @@ async def speech_to_text_websocket(
 
 
 @router.get("/test/speech-to-text", response_class=HTMLResponse, name="admin_speech_to_text")
-def speech_to_text_page(
-    request: Request, 
-    assistant_id: int = Query(..., description="ID of the assistant"),
-    db: Session = Depends(get_db)):
+def speech_to_text_page(request: Request, db: Session = Depends(get_db)):
     """
     Render the speech-to-text test page
     """
@@ -1842,7 +1839,6 @@ def speech_to_text_page(
         {
             "request": request, 
             "user": user,
-            "assistant_id": assistant_id,
             "token": get_token(request),
             "page_title": "Speech to Text Test"
         }
