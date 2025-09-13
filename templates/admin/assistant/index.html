@@ -109,6 +109,8 @@
                 <td class="text-center">
                   <a href="{{ url_for('admin_assistant_edit', assistant_id=a.id) }}"
                     class="btn btn-sm btn-primary rounded-pill px-3">ویرایش</a>
+                  <a href="{{ url_for('admin_speech_to_text') }}/?assistant_id={{a.id}}"
+                    class="btn btn-sm btn-primary rounded-pill px-3">تست صوتی</a>
                     {% if can('upload_storage') %}
                     <a href="{{ url_for('admin_assistant_store_files', assistant_id=a.id) }}"
                     class="btn btn-sm btn-primary rounded-pill px-3">بارگذاری استوریج</a>
