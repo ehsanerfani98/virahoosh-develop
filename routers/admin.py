@@ -1875,7 +1875,7 @@ async def upload_files(
             db=db,
             save_to_db=False,
             custom_path_status=True,
-            custom_path='vectorstores',
+            custom_path='vectorstores/' + str(assistant_id),
             change_file_name=False
         )
 
@@ -1885,7 +1885,7 @@ async def upload_files(
             db=db,
             save_to_db=False,
             custom_path_status=True,
-            custom_path='vectorstores',
+            custom_path='vectorstores/' + str(assistant_id),
             change_file_name=False
         )
 
