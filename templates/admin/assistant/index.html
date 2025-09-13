@@ -37,6 +37,7 @@
           <table class="table table-hover align-middle mb-0">
             <thead class="table-blue">
               <tr>
+                <th>شناسه</th>
                 <th>عنوان</th>
                 <th>توضیحات</th>
                 <th>وضعیت</th>
@@ -49,6 +50,7 @@
             <tbody>
               {% for a in assistants %}
               <tr>
+                <td>{{ a.id }}</td>
                 <td>{{ a.title }}</td>
                 <td>{{ a.description or "-" }}</td>
                 <td>
