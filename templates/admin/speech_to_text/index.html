@@ -135,7 +135,7 @@
 {% block js %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const assistant_id = 24;
+        const assistant_id = {{ assistant_id }};
         const connectBtn = document.getElementById('connectBtn');
         const disconnectBtn = document.getElementById('disconnectBtn');
         const startRecordBtn = document.getElementById('startRecordBtn');
