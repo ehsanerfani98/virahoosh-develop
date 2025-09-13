@@ -333,7 +333,6 @@
         async function sendAssistant(question) {
             const formData = new FormData();
             formData.append('question', question);
-            const assistant_id = assistant_id;
 
             try {
                 const response = await fetch(`/assistants/${assistant_id}/ask_audio`, {
