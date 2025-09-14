@@ -106,6 +106,28 @@ async def ask_for_assistant(
 
     return JSONResponse(result)
 
+# @router_site.post("/assistants/{assistant_id}/ask_audio")
+# async def ask_audio_for_assistant(
+#     assistant_id: int,
+#     question: str = Form(...),
+#     db: Session = Depends(get_db)
+# ):
+#     try:
+#         qa_chain, retriever = await load_vectorstore_for_assistant(db, assistant_id)
+#     except FileNotFoundError as e:
+#         return JSONResponse({"error": str(e)}, status_code=404)
+
+#     normalized_q = normalize_text(question)
+
+#     text_response = await run_in_threadpool(
+#         run_openai_prompt, normalized_q, "فقط غلط املایی متن را درست کن هیچ حرف اضافه ای نزن! فقط متن را صحیح ، و ارسال کن",
+#         5000, "gpt-4o", "openai"
+#     )
+#     answer = await run_in_threadpool(qa_chain.run, text_response['message'])
+
+#     audio_bytes = text_to_speech_stream(answer, model="gpt-4o-mini-tts", voice="shimmer", format="mp3")
+#     return StreamingResponse(BytesIO(audio_bytes), media_type="audio/mpeg")
+
 @router_site.post("/assistants/{assistant_id}/ask_audio")
 async def ask_audio_for_assistant(
     assistant_id: int,
@@ -117,20 +139,16 @@ async def ask_audio_for_assistant(
     except FileNotFoundError as e:
         return JSONResponse({"error": str(e)}, status_code=404)
 
-    normalized_q = normalize_text(question)
+    answer = await run_in_threadpool(qa_chain.run, question)
 
-    text_response = await run_in_threadpool(
-        run_openai_prompt, normalized_q, "فقط غلط املایی متن را درست کن هیچ حرف اضافه ای نزن! فقط متن را صحیح ، و ارسال کن",
-        5000, "gpt-4o", "openai"
+    audio_bytes = text_to_speech_stream(
+        answer, 
+        model="gpt-4o-mini-tts", 
+        voice="shimmer", 
+        format="mp3"
     )
-    print("text_response")
-    print(text_response['message'])
-    answer = await run_in_threadpool(qa_chain.run, text_response['message'])
-
-    audio_bytes = text_to_speech_stream(answer, model="gpt-4o-mini-tts", voice="shimmer", format="mp3")
+    
     return StreamingResponse(BytesIO(audio_bytes), media_type="audio/mpeg")
-
-
 
 def normalize_text(text: str) -> str:
     mapping = str.maketrans("۰۱۲۳۴۵۶۷۸۹", "0123456789")

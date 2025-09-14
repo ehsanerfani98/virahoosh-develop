@@ -25,7 +25,7 @@ from services.openai_service import run_openai_prompt, generate_image_by_prompt,
 from models.ai_archive import AiArchive
 from starlette.concurrency import run_in_threadpool
 from datetime import datetime
-from core.config import TEHRAN_TZ
+from core.config import TEHRAN_TZ, MODEL_PATH, SAMPLE_RATE
 import os
 from io import BytesIO
 from PIL import Image
@@ -44,9 +44,13 @@ import uuid
 from models.user_token import UserToken
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from models.AssistantUserInfo import AssistantUserInfo
-import aiohttp
 import tempfile
-
+from vosk import Model, KaldiRecognizer
+import numpy as np
+from pydub import AudioSegment
+import asyncio
+import subprocess
+import wave
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -1770,10 +1774,172 @@ async def parse_form_as_dict(request: Request):
 
 # ========================================================================================================================
 
+# @router.websocket("/ws/speech-to-text")
+# async def speech_to_text_websocket(
+#     websocket: WebSocket, 
+#     ):
+#     await websocket.accept()
+#     print("🎤 WebSocket connected")
+
+#     try:
+#         audio_data = b""
+#         while True:
+#             msg = await websocket.receive()
+            
+#             if msg["type"] == "websocket.disconnect":
+#                 print("🔌 Client disconnected")
+#                 break
+
+#             if "bytes" in msg:  # فایل کامل webm
+#                 audio_data += msg["bytes"]
+
+#             if "text" in msg:
+#                 data = json.loads(msg["text"])
+#                 if data.get("type") == "audio_end":
+#                     # فایل رو ذخیره کنیم
+#                     with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
+#                         tmp.write(audio_data)
+#                         tmp_path = tmp.name
+
+#                     # بفرستیم به Whisper
+#                     async with aiohttp.ClientSession() as session:
+#                         with open(tmp_path, "rb") as f:
+#                             form = aiohttp.FormData()
+#                             form.add_field("file", f, filename="audio.webm", content_type="audio/webm")
+#                             form.add_field("model", "whisper-1")
+#                             form.add_field("language", "fa")
+
+#                             async with session.post(
+#                                 "https://api.openai.com/v1/audio/transcriptions",
+#                                 headers={"Authorization": f"Bearer {os.getenv("OPENAI_API_KEY")}"},
+#                                 data=form
+#                             ) as resp:
+#                                 result = await resp.json()
+#                                 # print("Whisper result:", result)
+
+#                                 transcript = result.get("text", "")
+#                                 await websocket.send_json({"type": "transcript", "text": transcript})
+
+#                     os.unlink(tmp_path)  # پاک کردن فایل موقت
+#                     audio_data = b""  # ریست
+#     except WebSocketDisconnect:
+#         print("❌ Disconnected")
+#     except Exception as e:
+#         print("⚠️ Error:", e)
+#         await websocket.send_json({"type": "error", "error": str(e)})
+
+
+
+# بارگذاری مدل Vosk (باید یکبار در startup اپلیکیشن انجام شود)
+try:
+    vosk_model = Model(MODEL_PATH)
+    print(f"✅ Vosk model loaded from {MODEL_PATH}")
+except Exception as e:
+    print(f"❌ Error loading Vosk model: {e}")
+    vosk_model = None
+
+def is_ffmpeg_installed():
+    try:
+        # اجرای دستور ffmpeg -version
+        subprocess.run(["ffmpeg", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        return True
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return False
+
+if is_ffmpeg_installed():
+    print("✅ ffmpeg is installed")
+else:
+    print("❌ ffmpeg نصب نشده است")
+
+
+def convert_webm_to_wav_simple(webm_data: bytes) -> str:
+    """تبدیل ساده webm به wav و برگرداندن مسیر فایل"""
+    try:        
+        # فایل‌های موقت
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp_webm:
+            tmp_webm.write(webm_data)
+            tmp_webm_path = tmp_webm.name
+
+        wav_path = tmp_webm_path.replace(".webm", ".wav")
+        
+        # تبدیل با ffmpeg مستقیماً (بدون pydub)
+        cmd = [
+            "ffmpeg", "-y", "-i", tmp_webm_path,
+            "-ar", str(SAMPLE_RATE),  # sample rate
+            "-ac", "1",  # mono
+            "-f", "wav",  # format
+            wav_path
+        ]
+        
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        if result.returncode != 0:
+            raise Exception(f"FFmpeg error: {result.stderr}")
+        
+        # پاک کردن فایل webm
+        os.unlink(tmp_webm_path)
+        
+        if not os.path.exists(wav_path):
+            raise Exception("WAV file was not created")
+        
+        return wav_path
+        
+    except Exception as e:
+        print(f"Error converting webm to wav: {e}")
+        raise
+
+def transcribe_with_vosk_simple(wav_file_path: str) -> str:
+    """تشخیص گفتار ساده با Vosk"""
+    if vosk_model is None:
+        raise Exception("Vosk model not loaded")
+    
+    try:
+        # ایجاد recognizer با مقدار صریح sample rate
+        rec = KaldiRecognizer(vosk_model, 16000)  # مقدار صریح به جای متغیر
+        
+        transcript = ""
+        
+        # خواندن فایل wav
+        with wave.open(wav_file_path, 'rb') as wf:
+            # بررسی پارامترهای فایل
+            print(f"WAV file info: channels={wf.getnchannels()}, sample_rate={wf.getframerate()}, frames={wf.getnframes()}")
+            
+            # خواندن داده‌ها در chunks
+            while True:
+                data = wf.readframes(4000)
+                if len(data) == 0:
+                    break
+                    
+                if rec.AcceptWaveform(data):
+                    result = json.loads(rec.Result())
+                    text = result.get("text", "").strip()
+                    if text:
+                        transcript += text + " "
+            
+            # دریافت نتیجه نهایی
+            final_result = json.loads(rec.FinalResult())
+            final_text = final_result.get("text", "").strip()
+            if final_text:
+                transcript += final_text
+        
+        # پاک کردن فایل موقت
+        os.unlink(wav_file_path)
+        
+        return transcript.strip()
+        
+    except Exception as e:
+        print(f"Error in Vosk transcription: {e}")
+        import traceback
+        traceback.print_exc()
+        # پاک کردن فایل موقت در صورت خطا
+        try:
+            os.unlink(wav_file_path)
+        except:
+            pass
+        raise
+
 @router.websocket("/ws/speech-to-text")
-async def speech_to_text_websocket(
-    websocket: WebSocket, 
-    ):
+async def speech_to_text_websocket(websocket: WebSocket):
     await websocket.accept()
     print("🎤 WebSocket connected")
 
@@ -1786,43 +1952,50 @@ async def speech_to_text_websocket(
                 print("🔌 Client disconnected")
                 break
 
-            if "bytes" in msg:  # فایل کامل webm
+            if "bytes" in msg:
                 audio_data += msg["bytes"]
 
             if "text" in msg:
                 data = json.loads(msg["text"])
                 if data.get("type") == "audio_end":
-                    # فایل رو ذخیره کنیم
-                    with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
-                        tmp.write(audio_data)
-                        tmp_path = tmp.name
-
-                    # بفرستیم به Whisper
-                    async with aiohttp.ClientSession() as session:
-                        with open(tmp_path, "rb") as f:
-                            form = aiohttp.FormData()
-                            form.add_field("file", f, filename="audio.webm", content_type="audio/webm")
-                            form.add_field("model", "whisper-1")
-                            form.add_field("language", "fa")
-
-                            async with session.post(
-                                "https://api.openai.com/v1/audio/transcriptions",
-                                headers={"Authorization": f"Bearer {os.getenv("OPENAI_API_KEY")}"},
-                                data=form
-                            ) as resp:
-                                result = await resp.json()
-                                # print("Whisper result:", result)
-
-                                transcript = result.get("text", "")
-                                await websocket.send_json({"type": "transcript", "text": transcript})
-
-                    os.unlink(tmp_path)  # پاک کردن فایل موقت
+                    try:
+                        # تبدیل webm به wav
+                        wav_file_path = convert_webm_to_wav_simple(audio_data)
+                        
+                        # تشخیص گفتار
+                        transcript = await asyncio.get_event_loop().run_in_executor(
+                            None, transcribe_with_vosk_simple, wav_file_path
+                        )
+                        
+                        # ارسال نتیجه
+                        if transcript and transcript.strip():
+                            await websocket.send_json({
+                                "type": "transcript", 
+                                "text": transcript
+                            })
+                        else:
+                            await websocket.send_json({
+                                "type": "transcript", 
+                                "text": "متنی تشخیص داده نشد"
+                            })
+                            
+                    except Exception as e:
+                        print(f"Error in transcription: {e}")
+                        await websocket.send_json({
+                            "type": "error", 
+                            "error": f"خطا در تشخیص گفتار: {str(e)}"
+                        })
+                    
                     audio_data = b""  # ریست
+
     except WebSocketDisconnect:
-        print("❌ Disconnected")
+        print("❌ Client disconnected")
     except Exception as e:
-        print("⚠️ Error:", e)
-        await websocket.send_json({"type": "error", "error": str(e)})
+        print(f"⚠️ WebSocket Error: {e}")
+        try:
+            await websocket.send_json({"type": "error", "error": str(e)})
+        except:
+            pass
 
 
 @router.get("/test/speech-to-text", response_class=HTMLResponse, name="admin_speech_to_text")
@@ -1913,3 +2086,7 @@ async def upload_files(
 
 def get_user_path(user_id: str) -> str:
     return os.path.join("static", "uploads", f"user_{user_id}")
+
+
+
+

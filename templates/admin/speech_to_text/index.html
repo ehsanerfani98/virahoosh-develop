@@ -265,7 +265,6 @@
                 case 'connection': addMessage(`Connection status: ${data.status}`, 'info'); break;
                 case 'transcript':
                     addMessage(`شما گفتید : ${data.text}`, 'user');
-                    console.log(data.text);
                     sendAssistant(data.text)
                     break;
                 case 'text': addMessage(`AI: ${data.text}`, 'ai'); break;
